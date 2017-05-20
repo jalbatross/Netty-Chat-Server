@@ -9,6 +9,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
     
 /**
  * A simple chat server meant to be used between people who have a chat client.
@@ -26,13 +28,15 @@ public class ChatServer {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
+            //Set max number of connections to 1024. Probably going to change this later.
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class) 
+             .handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
                 	 //need ENCODER for updated messages and DECODER to receive messages from clients
-                	 
+                	 ch.pipeline().addLast(new HTTPInitializer());
                 	 //ch.pipeline().addLast(new MessageDecoder());
                 	 //ch.pipeline().addLast(new MessageEncoder());
 
