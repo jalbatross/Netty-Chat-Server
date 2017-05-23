@@ -66,7 +66,7 @@ public class ChatServer {
                 	 //need ENCODER for updated messages and DECODER to receive messages from clients
                 	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                 	 ch.pipeline().addLast(new ChatServerHandler());
-                	 //ch.pipeline().addLast(new ChatServerMessageEncoder());
+                	 ch.pipeline().addLast(new ChatServerMessageEncoder());
                 
                  }
              })

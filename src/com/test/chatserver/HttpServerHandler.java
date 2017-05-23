@@ -65,7 +65,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-        } else {
+        } 
+        else {
             handshaker.handshake(ctx.channel(), req);
         }
     }

@@ -8,7 +8,7 @@ public class ChatServerMessageEncoder extends ChannelOutboundHandlerAdapter {
 	@Override
 	public void read(ChannelHandlerContext ctx)
 	{
-		System.out.println("OutboundHandler channelRead called!");
+		System.out.println("OutboundHandler read called!");
 		
 		/*
 		if ((msg instanceof TextWebSocketFrame)) {
@@ -19,7 +19,7 @@ public class ChatServerMessageEncoder extends ChannelOutboundHandlerAdapter {
 		else {
 			System.out.println("ChatServerHandler received unknown type of frame!");
 		}*/
-		
+		ctx.read();
 		
 	}
 }
