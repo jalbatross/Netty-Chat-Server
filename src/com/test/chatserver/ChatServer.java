@@ -1,5 +1,11 @@
 package com.test.chatserver;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
+
 import io.netty.bootstrap.ServerBootstrap;
 
 import io.netty.channel.ChannelFuture;
@@ -15,22 +21,49 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import sun.misc.IOUtils;
     
 /**
  * A simple chat server meant to be used between people who have a chat client.
  */
 public class ChatServer {
-    
+ 
 	static final boolean SSL = System.getProperty("ssl") != null;
+	
     static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
-    
+   
     private int port;
     
     public ChatServer(int port) {
         this.port = port;
     }
     
+    private static byte[] loadFile(File file) throws IOException {
+	    InputStream is = new FileInputStream(file);
+
+	    long length = file.length();
+	    if (length > Integer.MAX_VALUE) {
+	        // File is too large
+	    }
+	    byte[] bytes = new byte[(int)length];
+	    
+	    int offset = 0;
+	    int numRead = 0;
+	    while (offset < bytes.length
+	           && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+	        offset += numRead;
+	    }
+
+	    if (offset < bytes.length) {
+	        throw new IOException("Could not completely read file "+file.getName());
+	    }
+
+	    is.close();
+	    return bytes;
+	}
+    
     public void run() throws Exception {
+    	
     	//configure SSL
     	final SslContext sslCtx;
         if (SSL) {
@@ -76,6 +109,11 @@ public class ChatServer {
     public static void main(String[] args) throws Exception {
     	int port = DEFAULT_PORT;
     	
+    	System.setProperty("javax.net.ssl.keyStore", "src/keystore.jks");
+        System.setProperty("javax.net.ssl.trustStrore", "src/X509_certificate.cer");
+        System.setProperty("javax.net.ssl.keyStorePassword", "");
+        
+        System.out.println(System.getProperty("ssl") + " is the SSL property");
     	if (SSL) {
     		System.out.println("Server is WSS");
     	}
