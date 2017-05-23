@@ -40,7 +40,7 @@ import java.net.URI;
  */
 
 public class ChatServerClient {
-	static final String URL = System.getProperty("url", "wss://127.0.0.1:8080/websocket");
+	static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
 	
 	public static void main(String[] args) throws Exception {
 		URI uri = new URI(URL);
@@ -70,6 +70,7 @@ public class ChatServerClient {
 		final boolean ssl = "wss".equalsIgnoreCase(scheme);
 		final SslContext sslCtx;
 		if (ssl) {
+			System.out.println("Connecting to server with wss");
 			sslCtx = SslContextBuilder.forClient()
                      .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
           } 

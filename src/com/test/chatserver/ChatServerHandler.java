@@ -19,6 +19,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 	{
+		System.out.println("ChatServerHandler channelRead called");
+		/*
 		//receive the message as a bytebuf
 		ByteBuf in = (ByteBuf) msg;
 		
@@ -29,7 +31,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		ctx.flush();
 		if (!cf.isSuccess()) {
 			System.out.println(cf.cause());
-		}
+		}*/
 		
 	}
     @Override

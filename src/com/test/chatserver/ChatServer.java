@@ -67,14 +67,15 @@ public class ChatServer {
     	//configure SSL
     	final SslContext sslCtx;
         if (SSL) {
-        	System.out.println("Running SSL");
+        	System.out.print("Running SSL");
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
         } 
         else {
+        	System.out.println("Running Websockets insecure");
         	sslCtx = null;
         }
-    	
+    	System.out.println(" on port " + this.port);
         EventLoopGroup bossGroup = new NioEventLoopGroup(); 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -117,14 +118,7 @@ public class ChatServer {
         System.setProperty("javax.net.ssl.keyStorePassword", "joseph");
         
         System.out.println(System.getProperty("javax.net.ssl.trustStore") + " is the SSL property");
-        
-    	if (SSL) {
-    		System.out.println("Server is WSS");
-    	}
-    	else {
-    		System.out.println("Server is WS");
-    	}
-    		
+        	
     	port = SSL ? 8443: 8080;
         if (args.length > 0) {
         	try {
