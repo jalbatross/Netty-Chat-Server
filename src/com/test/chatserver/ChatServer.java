@@ -28,9 +28,9 @@ import sun.misc.IOUtils;
  */
 public class ChatServer {
  
-	static final boolean SSL = System.getProperty("ssl") != null;
+	static boolean SSL = false;
 	
-    static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
+    //static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
    
     private int port;
     
@@ -67,6 +67,7 @@ public class ChatServer {
     	//configure SSL
     	final SslContext sslCtx;
         if (SSL) {
+        	System.out.println("Running SSL");
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
         } 
@@ -107,13 +108,16 @@ public class ChatServer {
     }
     
     public static void main(String[] args) throws Exception {
-    	int port = DEFAULT_PORT;
+    	int port = 8080;
     	
-    	System.setProperty("javax.net.ssl.keyStore", "src/keystore.jks");
-        System.setProperty("javax.net.ssl.trustStrore", "src/X509_certificate.cer");
-        System.setProperty("javax.net.ssl.keyStorePassword", "");
+    	System.setProperty("javax.net.ssl.trustStore", "src/keystore.jks");
+    	SSL = System.getProperty("java.net.ssl.trustStore") != "";
+    	
+        //System.setProperty("javax.net.ssl.trustStore", "src/X509_certificate.cer");
+        System.setProperty("javax.net.ssl.keyStorePassword", "joseph");
         
-        System.out.println(System.getProperty("ssl") + " is the SSL property");
+        System.out.println(System.getProperty("javax.net.ssl.trustStore") + " is the SSL property");
+        
     	if (SSL) {
     		System.out.println("Server is WSS");
     	}
@@ -121,13 +125,13 @@ public class ChatServer {
     		System.out.println("Server is WS");
     	}
     		
+    	port = SSL ? 8443: 8080;
         if (args.length > 0) {
         	try {
         		port = Integer.parseInt(args[0]);
         	}
         	catch (Exception e) {
         		System.out.println("WARNING: Bad argument passed to MAIN. Assigning default port.");
-        		port = DEFAULT_PORT;
         	}
         } 
 
