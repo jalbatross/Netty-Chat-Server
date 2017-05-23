@@ -53,6 +53,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
             }
         } else {
             System.out.println("Incoming request is unknown");
+            //send something to client to let them know they aren't using WS
         }
 
     }

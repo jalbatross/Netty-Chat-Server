@@ -11,12 +11,18 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
     
 /**
  * A simple chat server meant to be used between people who have a chat client.
  */
 public class ChatServer {
+    
+	static final boolean SSL = System.getProperty("ssl") != null;
+    static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
     
     private int port;
     
@@ -25,6 +31,16 @@ public class ChatServer {
     }
     
     public void run() throws Exception {
+    	//configure SSL
+    	final SslContext sslCtx;
+        if (SSL) {
+            SelfSignedCertificate ssc = new SelfSignedCertificate();
+            sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
+        } 
+        else {
+        	sslCtx = null;
+        }
+    	
         EventLoopGroup bossGroup = new NioEventLoopGroup(); 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -36,7 +52,7 @@ public class ChatServer {
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
                 	 //need ENCODER for updated messages and DECODER to receive messages from clients
-                	 ch.pipeline().addLast(new HTTPInitializer());
+                	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                 	 ch.pipeline().addLast(new ChatServerHandler());
                 
                  }
@@ -58,19 +74,25 @@ public class ChatServer {
     }
     
     public static void main(String[] args) throws Exception {
-        int port;
+    	int port = DEFAULT_PORT;
+    	
+    	if (SSL) {
+    		System.out.println("Server is WSS");
+    	}
+    	else {
+    		System.out.println("Server is WS");
+    	}
+    		
         if (args.length > 0) {
         	try {
         		port = Integer.parseInt(args[0]);
         	}
         	catch (Exception e) {
-        		System.out.println("WARNING: Bad argument passed to MAIN. Assigning default port 8080");
-        		port = 8080;
+        		System.out.println("WARNING: Bad argument passed to MAIN. Assigning default port.");
+        		port = DEFAULT_PORT;
         	}
         } 
-        else {
-            port = 8080;
-        }
+
         new ChatServer(port).run();
     }
 }
