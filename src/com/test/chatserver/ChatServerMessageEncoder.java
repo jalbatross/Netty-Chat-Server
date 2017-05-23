@@ -1,15 +1,25 @@
 package com.test.chatserver;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-public class ChatServerMessageEncoder extends MessageToByteEncoder <String> {
-
+public class ChatServerMessageEncoder extends ChannelOutboundHandlerAdapter {
 	@Override
-	protected void encode(ChannelHandlerContext ctx, String msg, ByteBuf out) throws Exception {
-		out.write((int)msg.value());
+	public void read(ChannelHandlerContext ctx)
+	{
+		System.out.println("OutboundHandler channelRead called!");
+		
+		/*
+		if ((msg instanceof TextWebSocketFrame)) {
+			System.out.println("ChatServerHandler received TextWebSocketFrame!");
+			//send the frame downstream to client
+			
+		}
+		else {
+			System.out.println("ChatServerHandler received unknown type of frame!");
+		}*/
+		
 		
 	}
-
 }

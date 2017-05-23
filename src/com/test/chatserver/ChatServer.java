@@ -37,30 +37,7 @@ public class ChatServer {
     public ChatServer(int port) {
         this.port = port;
     }
-    
-    private static byte[] loadFile(File file) throws IOException {
-	    InputStream is = new FileInputStream(file);
 
-	    long length = file.length();
-	    if (length > Integer.MAX_VALUE) {
-	        // File is too large
-	    }
-	    byte[] bytes = new byte[(int)length];
-	    
-	    int offset = 0;
-	    int numRead = 0;
-	    while (offset < bytes.length
-	           && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
-	        offset += numRead;
-	    }
-
-	    if (offset < bytes.length) {
-	        throw new IOException("Could not completely read file "+file.getName());
-	    }
-
-	    is.close();
-	    return bytes;
-	}
     
     public void run() throws Exception {
     	
@@ -89,6 +66,7 @@ public class ChatServer {
                 	 //need ENCODER for updated messages and DECODER to receive messages from clients
                 	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                 	 ch.pipeline().addLast(new ChatServerHandler());
+                	 //ch.pipeline().addLast(new ChatServerMessageEncoder());
                 
                  }
              })
