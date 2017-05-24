@@ -29,6 +29,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			//send message back to client (all clients?)
 			ChannelFuture cf = ctx.write(msg);
 			
+			//this is failing; how does the program still manage to flush the msg back along the pipeline?
+			//TODO: Test flushing with channel future if possible; can flush anything but ONLY write bytebuf?
+			//TODO: Figure out why msg is null; it should be a TextWebSocketFrame?
+			//Another hypothesis is that the msg doesn't actually get here - it's earlier along the pipeline
+			//and simply flushed back!!
+			//TODO: Check that the TextWebSocketFrame is actually getting here by outputting to console
+			//      the TextWebSocketFrame WHEN the channelRead function is called.
 			if (!cf.isSuccess()){ 
 				System.out.println("ChatServerHandler write failed because" + cf.cause());
 			}
