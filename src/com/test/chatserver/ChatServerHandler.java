@@ -25,7 +25,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("ChatServerHandler received TextWebSocketFrame!");
+			
 			//send message back to client (all clients?)
+			ChannelFuture cf = ctx.write(msg);
+			
+			if (!cf.isSuccess()){ 
+				System.out.println("ChatServerHandler write failed because" + cf.cause());
+			}
 			ctx.writeAndFlush(msg);
 			
 		}
