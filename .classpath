@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/home/joey/Documents/Libraries/netty-4.1.12.Final/jar/all-in-one/netty-all-4.1.12.Final.jar"/>
+	<classpathentry kind="lib" path="/home/joey/Downloads/gson-2.8.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
