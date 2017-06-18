@@ -23,12 +23,10 @@ public class WebSocketHandler extends ChannelInboundHandlerAdapter {
                 System.out.println( ((BinaryWebSocketFrame) msg).content() );
             } else if (msg instanceof TextWebSocketFrame) {
                 System.out.println("TextWebSocketFrame Received : ");
-                ctx.channel().write(new TextWebSocketFrame("Message recieved : " + ((TextWebSocketFrame) msg).text()));
+                //ctx.channel().write(new TextWebSocketFrame("kkkMessage recieved : " + ((TextWebSocketFrame) msg).text()));
                 System.out.println( ((TextWebSocketFrame) msg).text() );
                 
-                //send TextWebSocketFrame back to client
-                //1. Send textwebsocketframe downstream to ChatServerHandler
-                //this.channelRead(ctx,  msg);
+                //Send textwebsocketframe downstream to ChatServerHandler
                 ctx.fireChannelRead(msg);
                 
             } else if (msg instanceof PingWebSocketFrame) {

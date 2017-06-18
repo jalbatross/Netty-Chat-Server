@@ -10,10 +10,10 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 public class ChatServerMessageEncoder extends ChannelOutboundHandlerAdapter implements ChannelOutboundHandler {
 	@Override
 	public void read(ChannelHandlerContext ctx) {
-		System.out.println("OutboundHandler read called!");
-		
+		System.out.println("[ChatServerMessageEncoder] OutboundHandler read called!");
+		ctx.read();
 		/*
-		if ((msg instanceof TextWebSocketFrame)) {
+		if ((ctx. instanceof TextWebSocketFrame)) {
 			System.out.println("ChatServerHandler received TextWebSocketFrame!");
 			//send the frame downstream to client
 			
@@ -21,25 +21,7 @@ public class ChatServerMessageEncoder extends ChannelOutboundHandlerAdapter impl
 		else {
 			System.out.println("ChatServerHandler received unknown type of frame!");
 		}*/
-		ctx.read();
-		ChannelFuture cf = ctx.write("Hello!");
-		
-		if (!cf.isSuccess()) {
-			System.out.println("failed to alter outgoing message because " + cf.cause());
-		}
-		else {
-			ctx.flush();
-		}
-			
-		
 	}
 	
-	/*
-	@Override
-	 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-		System.out.println("calling write");
-		ctx.write(msg, promise);
-		ctx.flush();
-	}*/
 
 }
