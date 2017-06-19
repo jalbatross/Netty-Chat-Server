@@ -26,6 +26,9 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Scanner;
+
+import com.google.gson.Gson;
  
 /**
  * 
@@ -41,8 +44,15 @@ import java.net.URI;
 
 public class ChatServerClient {
 	static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
+	static private String name = new String();
 	
 	public static void main(String[] args) throws Exception {
+	    
+	    //get username
+	    System.out.println("Hello! Before we begin, what's your name?");
+	    Scanner reader = new Scanner(System.in);  // Reading from System.in
+	    name = reader.next();
+	    
 		URI uri = new URI(URL);
 		String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
 		final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
@@ -125,7 +135,9 @@ public class ChatServerClient {
 					ch.writeAndFlush(frame);
                 } 
 				else {
-					WebSocketFrame frame = new TextWebSocketFrame(msg);
+				    ChatMessage message = new ChatMessage(name, msg);
+				    String sendMessage = new Gson().toJson(message);
+					WebSocketFrame frame = new TextWebSocketFrame(sendMessage);
 					ch.writeAndFlush(frame);
                 }
             }

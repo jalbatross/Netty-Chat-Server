@@ -1,5 +1,8 @@
 package com.test.chatserver;
 
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -62,9 +65,17 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             System.out.println("WebSocket Client received message: " + textFrame.text());
-        } else if (frame instanceof PongWebSocketFrame) {
+            try {
+                new JsonParser().parse(textFrame.text());
+                System.out.println("[WebSocketClientHandler] Client received JSON from server!");
+            } catch (JsonParseException e) {
+                System.out.println("[WebSocketClientHandler] Client received non JSON message from server?");
+            }
+        } 
+        else if (frame instanceof PongWebSocketFrame) {
             System.out.println("WebSocket Client received pong");
-        } else if (frame instanceof CloseWebSocketFrame) {
+        } 
+        else if (frame instanceof CloseWebSocketFrame) {
             System.out.println("WebSocket Client received closing");
             ch.close();
         }

@@ -3,6 +3,8 @@ package com.test.chatserver;
 
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -30,29 +32,35 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		System.out.println("\n[ChatServerHandler] channelRead called!");
 		
 		if ((msg instanceof TextWebSocketFrame)) {
-			System.out.println("[ChatServerHandler] received TextWebSocketFrame!");
+			System.out.println("[ChatServerHandler] received TextWebSocketFrame!");	
+			TextWebSocketFrame frameMsg = (TextWebSocketFrame) msg;
 			
-			System.out.println("[ChatServerHandler] TextWebSocketFrame was: " + ((TextWebSocketFrame)msg).text());
+			try {
+			    new JsonParser().parse(frameMsg.text());
+			    
+			    //Encapsulate message into Json
+	            String timeStamp = new Timestamp(System.currentTimeMillis()).toString();
+	            
+	            Gson gson = new Gson();
+
+	            ChatMessage message = gson.fromJson(frameMsg.text(), ChatMessage.class);
+	            message.setStamp(timeStamp);
+	            
+	            //Send it back as a Json
+	            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(message));
+	            ctx.writeAndFlush(JsonMessage);}
 			
+	        catch (JsonParseException e) {
+                System.out.println("[ChatServerHandler] Received nonJSON from client.");
+            }
 			
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
 		}
 			
-		//Encapsulate message into Json
-		String timeStamp = new Timestamp(System.currentTimeMillis()).toString();
-		String author = "User";
-		String messageText = ( (TextWebSocketFrame) msg).text();
-		ChatMessage message = new ChatMessage(timeStamp, author, messageText);
 		
-		Gson gson = new Gson();
-		String json = gson.toJson(message);
-		System.out.println("Json:" + json);
 		
-		//Send it back as a Json
-		TextWebSocketFrame JsonMessage = new TextWebSocketFrame(json);
-		ctx.writeAndFlush(JsonMessage);
 		
 	}
     @Override
