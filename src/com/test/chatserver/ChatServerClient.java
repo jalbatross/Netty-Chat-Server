@@ -51,7 +51,7 @@ public class ChatServerClient {
 	    //get username
 	    System.out.println("Hello! Before we begin, what's your name?");
 	    Scanner reader = new Scanner(System.in);  // Reading from System.in
-	    name = reader.next();
+	    name = reader.nextLine();
 	    
 		URI uri = new URI(URL);
 		String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
