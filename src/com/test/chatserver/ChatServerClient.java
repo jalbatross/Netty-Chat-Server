@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -12,6 +13,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -26,6 +28,8 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
@@ -43,8 +47,8 @@ import com.google.gson.Gson;
  */
 
 public class ChatServerClient {
-	//static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
-    static final String URL = System.getProperty("url", "wss://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8443/websocket");
+	static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
+    //static final String URL = System.getProperty("url", "wss://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8443/websocket");
     static private String name = new String();
 	
 	public static void main(String[] args) throws Exception {
@@ -56,8 +60,8 @@ public class ChatServerClient {
 	    
 		URI uri = new URI(URL);
 		String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
-		final String host = uri.getHost() == null? "ec2-54-67-84-244.us-west-1.compute.amazonaws.com" : uri.getHost();
-		//final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
+		//final String host = uri.getHost() == null? "ec2-54-67-84-244.us-west-1.compute.amazonaws.com" : uri.getHost();
+		final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
 		final int port;
 		if (uri.getPort() == -1) {   	  
 			if ("ws".equalsIgnoreCase(scheme)) {
@@ -136,6 +140,26 @@ public class ChatServerClient {
 					WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
 					ch.writeAndFlush(frame);
                 } 
+				else if ("buf".equals(msg.toLowerCase())) {
+				    System.out.println("buff");
+				    //TODO: Create a bytebuf and send to server
+				    //Make an imaginary byte array:
+				    //[ short, int, int, int] = 14 bytes
+				    //[69, 0, 4, 1050]
+				    short lobbyID = 69;
+				    int senderID = 0;
+				    int receiverID = 4;
+				    int value = 1050;
+				    
+				    byte[] bytes = ByteBuffer.allocate(14)
+				            .putShort(lobbyID)
+				            .putInt(senderID)
+				            .putInt(receiverID)
+				            .putInt(value).array();
+				    ByteBuf myBuf = Unpooled.copiedBuffer(bytes);
+				    WebSocketFrame frame = new BinaryWebSocketFrame(myBuf);
+				    ch.writeAndFlush(frame);
+				}
 				else {
 				    ChatMessage message = new ChatMessage(name, msg);
 				    String sendMessage = new Gson().toJson(message);

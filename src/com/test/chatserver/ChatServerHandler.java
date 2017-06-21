@@ -30,8 +30,6 @@ import java.util.Date;
  */
 public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
-    
-    
     static final ChannelGroup channels = 
             new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     
@@ -74,6 +72,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 System.out.println("[ChatServerHandler] Received nonJSON from client.");
             }
 			
+		}
+		else if (msg instanceof ByteBuf) {
+		    System.out.println("[ChatServerHandler] Received a ByteBuf!");
+		    ((ByteBuf) msg).release();
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
