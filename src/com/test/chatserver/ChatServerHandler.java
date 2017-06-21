@@ -52,7 +52,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		System.out.println("\n[ChatServerHandler] channelRead called!");
 		
 		if ((msg instanceof TextWebSocketFrame)) {
-			System.out.println("[ChatServerHandler] received TextWebSocketFrame!");	
+			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
 			TextWebSocketFrame frameMsg = (TextWebSocketFrame) msg;
 			
 			try {
@@ -77,18 +77,25 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             }
 			
 		}
-		else if (msg instanceof BinaryWebSocketFrame) {
-		    System.out.println("[ChatServerHandler] Received BinaryWebSocketFrame");
-		    BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
+		else if (msg instanceof ByteBuf) {
+		    ByteBuf buf = (ByteBuf) msg;
 		    
-		    byte[] bytes = new byte[14];
-		    ((BinaryWebSocketFrame) msg).content().readBytes(bytes);
+		    //Get the lobby id
+		    short lobbyID = buf.getShort(0);
+		    
 		    //Get the last 12 bytes and put it into a byte array
 		    //First two bytes are used for lobby identification only
-		    //TODO: Make channel group for each lobby later
-		    byte[] slice = Arrays.copyOfRange(bytes, 2, 14);
-		    System.out.println("slice : " + Arrays.toString(slice));
-		    //Broadcast the byte array to everyone with same channel
+		    byte[] slice = new byte[12];
+		    buf.slice(2, 12).readBytes(slice);
+		    System.out.println("Slice: " + Arrays.toString(slice));
+		    
+		    System.out.println("[Chat Server Handler] Received ByteBuf: " +
+		    "Lobby ID: " + lobbyID + "\n" +
+		    "Sender: " + buf.getInt(2) + "\n" +
+		    "Receiver: " + buf.getInt(6) + "\n" +
+		    "Val: " + buf.getInt(10));
+		    
+		    //Broadcast the byte array to everyone with same channel (lobby id)
 		    //For now this is just broadcast to all users
 		    ByteBuf myBuf = Unpooled.copiedBuffer(slice);
             WebSocketFrame deltaArr = new BinaryWebSocketFrame(myBuf);

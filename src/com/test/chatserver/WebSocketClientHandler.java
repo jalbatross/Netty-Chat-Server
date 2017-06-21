@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -87,6 +88,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             byte[] bytes = new byte[12];
             ((BinaryWebSocketFrame) msg).content().readBytes(bytes);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
+            bb.order(ByteOrder.BIG_ENDIAN);
             int firstInt = bb.getInt(0);
             int secondInt = bb.getInt(4);
             int thirdInt = bb.getInt(8);

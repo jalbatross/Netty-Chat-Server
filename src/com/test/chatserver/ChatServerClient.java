@@ -48,7 +48,7 @@ import com.google.gson.Gson;
 
 public class ChatServerClient {
 	static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
-    //static final String URL = System.getProperty("url", "wss://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8443/websocket");
+   // static final String URL = System.getProperty("url", "wss://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8443/websocket");
     static private String name = new String();
 	
 	public static void main(String[] args) throws Exception {

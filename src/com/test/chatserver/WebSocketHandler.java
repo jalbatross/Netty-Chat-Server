@@ -17,14 +17,17 @@ public class WebSocketHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("[WebSocketHandler] Received a WS frame");
+        
         if (msg instanceof WebSocketFrame) {
             System.out.println("This is a WebSocket frame");
             System.out.println("Client Channel : " + ctx.channel());
+            
             if (msg instanceof BinaryWebSocketFrame) {
                 System.out.println("BinaryWebSocketFrame Received : ");
-                //System.out.println( ((BinaryWebSocketFrame) msg).content().array().toString() );
                 ctx.fireChannelRead(msg);
             } 
+            
             else if (msg instanceof TextWebSocketFrame) {
                 System.out.println("TextWebSocketFrame Received");
                 //Send textwebsocketframe downstream to ChatServerHandler
