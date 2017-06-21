@@ -12,6 +12,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -21,6 +23,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import sun.misc.IOUtils;
     
 /**
@@ -37,10 +40,8 @@ public class ChatServer {
     public ChatServer(int port) {
         this.port = port;
     }
-
     
     public void run() throws Exception {
-    	
     	//configure SSL
     	final SslContext sslCtx;
         if (SSL) {
@@ -75,11 +76,12 @@ public class ChatServer {
     
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); // (7)
-    
+            
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.
             f.channel().closeFuture().sync();
+
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
