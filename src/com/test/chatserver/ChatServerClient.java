@@ -145,10 +145,10 @@ public class ChatServerClient {
 				    //Make an imaginary byte array:
 				    //[ short, int, int, int] = 14 bytes
 				    //[69, 0, 4, 1050]
-				    short lobbyID = 69;
-				    int senderID = 0;
-				    int receiverID = 4;
-				    int value = 1050;
+				    short lobbyID = 31;
+				    int senderID = 2;
+				    int receiverID = 3;
+				    int value = 985;
 				    
 				    byte[] bytes = ByteBuffer.allocate(14)
 				            .putShort(lobbyID)
@@ -157,7 +157,7 @@ public class ChatServerClient {
 				            .putInt(value).array();
 				    ByteBuf myBuf = Unpooled.copiedBuffer(bytes);
 				    WebSocketFrame frame = new BinaryWebSocketFrame(myBuf);
-				    System.out.println("Sending 69, 0, 4, 1050");
+				    System.out.println("Sending 31, 2, 3, 985");
 				    ch.writeAndFlush(frame);
 				}
 				else {

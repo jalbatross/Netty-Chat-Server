@@ -1,5 +1,7 @@
 package com.test.chatserver;
 
+import java.nio.ByteBuffer;
+
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
@@ -9,6 +11,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -67,9 +70,8 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             System.out.println("WebSocket Client received message: " + textFrame.text());
             try {
                 new JsonParser().parse(textFrame.text());
-                System.out.println("[WebSocketClientHandler] Client received JSON from server!");
             } catch (JsonParseException e) {
-                System.out.println("[WebSocketClientHandler] Client received non JSON message from server?");
+                System.out.println("[WebSocketClientHandler] Client received text that was not JSON.");
             }
         } 
         else if (frame instanceof PongWebSocketFrame) {
@@ -78,6 +80,22 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         else if (frame instanceof CloseWebSocketFrame) {
             System.out.println("WebSocket Client received closing");
             ch.close();
+        }
+        else if (frame instanceof BinaryWebSocketFrame) {
+            System.out.println("[WebSocketClientHandler] Client received BinaryWebSocketFrame from server");
+            //Read the 12 bytes, each 4 should be int
+            byte[] bytes = new byte[12];
+            ((BinaryWebSocketFrame) msg).content().readBytes(bytes);
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+            int firstInt = bb.getInt(0);
+            int secondInt = bb.getInt(4);
+            int thirdInt = bb.getInt(8);
+            
+            System.out.println("Received ints from server: " +
+            firstInt + " " + 
+            secondInt + " " +
+            thirdInt);
+            
         }
     }
 

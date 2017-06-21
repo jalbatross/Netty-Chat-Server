@@ -16,12 +16,16 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -73,9 +77,22 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             }
 			
 		}
-		else if (msg instanceof ByteBuf) {
-		    System.out.println("[ChatServerHandler] Received a ByteBuf!");
-		    ((ByteBuf) msg).release();
+		else if (msg instanceof BinaryWebSocketFrame) {
+		    System.out.println("[ChatServerHandler] Received BinaryWebSocketFrame");
+		    BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
+		    
+		    byte[] bytes = new byte[14];
+		    ((BinaryWebSocketFrame) msg).content().readBytes(bytes);
+		    //Get the last 12 bytes and put it into a byte array
+		    //First two bytes are used for lobby identification only
+		    //TODO: Make channel group for each lobby later
+		    byte[] slice = Arrays.copyOfRange(bytes, 2, 14);
+		    System.out.println("slice : " + Arrays.toString(slice));
+		    //Broadcast the byte array to everyone with same channel
+		    //For now this is just broadcast to all users
+		    ByteBuf myBuf = Unpooled.copiedBuffer(slice);
+            WebSocketFrame deltaArr = new BinaryWebSocketFrame(myBuf);
+            channels.writeAndFlush(deltaArr);
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
