@@ -1,11 +1,19 @@
 package com.test.chatserver;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders.Values;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 
@@ -17,7 +25,6 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-
         if (msg instanceof FullHttpMessage) {
             System.out.println("Full HTTP Message Received");
         }
@@ -32,9 +39,27 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
             System.out.println("Http Request Received");
 
             HttpHeaders headers = httpRequest.headers();
+            
+            //Non Websockets
+            if (headers.get("Upgrade") == null) {
+                byte[] CONTENT = { 'N','i','k','F','u','r','g','s'};
+                System.out.println("No upgrade in headers. Skipping.");
+                
+                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+                        Unpooled.wrappedBuffer(CONTENT));
+                response.headers().set("CONTENT_TYPE", "text/plain");
+                response.headers().set("CONTENT_LENGTH", response.content().readableBytes());
+
+                response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
+                ctx.writeAndFlush(response);
+                ctx.close();
+                return;
+            }
+            
+            System.out.println("Headers: " + headers.names().toString());
             System.out.println("Connection : " +headers.get("Connection"));
             System.out.println("Upgrade : " + headers.get("Upgrade"));
-
+            
             if (headers.get("Connection").equalsIgnoreCase("Upgrade") ||
                     headers.get("Upgrade").equalsIgnoreCase("WebSocket")) {
 
@@ -51,7 +76,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 System.out.println("Handshake is done");
 
             }
-        } else {
+        } 
+        else {
             System.out.println("Incoming request is unknown");
             //send something to client to let them know they aren't using WS
         }
