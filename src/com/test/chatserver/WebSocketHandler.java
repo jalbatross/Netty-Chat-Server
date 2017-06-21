@@ -3,6 +3,8 @@ package com.test.chatserver;
 import java.util.Arrays;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpMessage;
@@ -46,6 +48,7 @@ public class WebSocketHandler extends ChannelInboundHandlerAdapter {
                 System.out.println("CloseWebSocketFrame Received : ");
                 System.out.println("ReasonText :" + ((CloseWebSocketFrame) msg).reasonText() );
                 System.out.println("StatusCode : " + ((CloseWebSocketFrame) msg).statusCode() );
+                ctx.fireChannelRead(msg);
             } 
             else {
                 System.out.println("Unsupported WebSocketFrame");

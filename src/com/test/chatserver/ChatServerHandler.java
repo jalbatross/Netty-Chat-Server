@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -17,6 +18,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
@@ -89,7 +91,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    buf.slice(2, 12).readBytes(slice);
 		    System.out.println("Slice: " + Arrays.toString(slice));
 		    
-		    System.out.println("[Chat Server Handler] Received ByteBuf: " +
+		    System.out.println("[ChatServerHandler] Received ByteBuf: " +
 		    "Lobby ID: " + lobbyID + "\n" +
 		    "Sender: " + buf.getInt(2) + "\n" +
 		    "Receiver: " + buf.getInt(6) + "\n" +
@@ -100,6 +102,23 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    ByteBuf myBuf = Unpooled.copiedBuffer(slice);
             WebSocketFrame deltaArr = new BinaryWebSocketFrame(myBuf);
             channels.writeAndFlush(deltaArr);
+		}
+		else if (msg instanceof CloseWebSocketFrame) {
+		    System.out.println("[ChatServerHandler] Received request to close connection");
+		    System.out.println("[ChatServerHandler] Channel grp before removal: " + channels.toString());
+		    
+		    String dcMsg = ctx.channel().toString() + " disconnected";
+		    //try to close connection
+            ChannelFuture cf = ctx.channel().close();
+            cf.addListener(new ChannelFutureListener() {
+                public void operationComplete(ChannelFuture future) {
+                    //Broadcast removal of user from channel group to all channels connected
+                    if (!channels.isEmpty()) {
+                        TextWebSocketFrame dcFrame = new TextWebSocketFrame(dcMsg);
+                        channels.writeAndFlush(dcFrame);
+                    }
+                }
+            });
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
