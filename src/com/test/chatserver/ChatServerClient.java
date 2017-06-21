@@ -140,8 +140,7 @@ public class ChatServerClient {
 					WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
 					ch.writeAndFlush(frame);
                 } 
-				else if ("buf".equals(msg.toLowerCase())) {
-				    System.out.println("buff");
+				else if ("buf".equals(msg.toLowerCase())){
 				    //TODO: Create a bytebuf and send to server
 				    //Make an imaginary byte array:
 				    //[ short, int, int, int] = 14 bytes
@@ -158,6 +157,7 @@ public class ChatServerClient {
 				            .putInt(value).array();
 				    ByteBuf myBuf = Unpooled.copiedBuffer(bytes);
 				    WebSocketFrame frame = new BinaryWebSocketFrame(myBuf);
+				    System.out.println("Sending 69, 0, 4, 1050");
 				    ch.writeAndFlush(frame);
 				}
 				else {

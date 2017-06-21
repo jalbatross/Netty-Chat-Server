@@ -25,7 +25,15 @@ public class WebSocketHandler extends ChannelInboundHandlerAdapter {
                 //System.out.println( ((BinaryWebSocketFrame) msg).content().array().toString() );
                 byte[] bytes = new byte[14];
                 ((BinaryWebSocketFrame) msg).content().readBytes(bytes);
-                System.out.println(Arrays.toString(bytes));
+                short sessionID = (short)( ((bytes[0]&0xFF)<<8) | (bytes[1]&0xFF) );
+                int sender = ((bytes[2] & 0xff) << 24) | ((bytes[3] & 0xff) << 16) |
+                        ((bytes[4] & 0xff) << 8)  | (bytes[5] & 0xff);
+                int receiver = ((bytes[6] & 0xff) << 24) | ((bytes[7] & 0xff) << 16) |
+                        ((bytes[8] & 0xff) << 8)  | (bytes[9] & 0xff);
+                int val = ((bytes[10] & 0xff) << 24) | ((bytes[11] & 0xff) << 16) |
+                        ((bytes[12] & 0xff) << 8)  | (bytes[13] & 0xff);
+                
+                System.out.println("Received: "+ sessionID + " " + sender +  " " + receiver +  " " + val);
             } 
             else if (msg instanceof TextWebSocketFrame) {
                 System.out.println("TextWebSocketFrame Received");
