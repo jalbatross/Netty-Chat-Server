@@ -8,41 +8,40 @@ window.onload = function() {
             console.log("WebSocket not supported");
             return;
         } 
+        
         else if (!connected) {
-            
             socket = new WebSocket("ws://localhost:8080/websocket");
             
-            socket.onerror = function() {connectionFailed = true;}
-            if (connectionFailed){
-                var errMsg = "ERROR: Couldn't connect to server."
-                document.getElementById("chatHistory").value += errMsg + "\n"
-                connectionFailed = false;
-                return;
-            }
-            
-            socket.binaryType = "arraybuffer";
-            connected = true;
-            document.getElementById("connectBtn").firstChild.data = 
-                "Disconnect from WS";
+            socket.onopen = function wsInit() {
+                socket.binaryType = "arraybuffer";
+                connected = true;
+                document.getElementById("connectBtn").firstChild.data = 
+                    "Disconnect from WS";
 
-            socket.onmessage = function(event) {
-                if (event.data instanceof ArrayBuffer) {
-                    var view = new DataView(event.data,0,12);
-                    var sender = view.getInt32(0);
-                    var receiver = view.getInt32(4);
-                    var txVal = view.getInt32(8);
+                socket.onmessage = function(event) {
+                    if (event.data instanceof ArrayBuffer) {
+                        var view = new DataView(event.data,0,12);
+                        var sender = view.getInt32(0);
+                        var receiver = view.getInt32(4);
+                        var txVal = view.getInt32(8);
 
-                    var bufMsg = [sender, receiver, txVal];
-                    document.getElementById("chatHistory").value += bufMsg + "\n";
+                        var bufMsg = [sender, receiver, txVal];
+                        document.getElementById("chatHistory").value += bufMsg + "\n";
+                    }
+                    // parse text data
+                    else {
+                        parseText(event.data);
+                    }
                 }
-
-                // parse text data
-                else {
-                    parseText(event.data);
-                }            
-
             };
+            
+            socket.onerror = function() {
+                var errMsg = "ERROR: Couldn't connect to server.";
+                document.getElementById("chatHistory").value += errMsg + "\n";
+            };
+            
         }
+
         else {
             socket.close();
             document.getElementById("connectBtn").firstChild.data = "Connect to WS";
@@ -83,5 +82,10 @@ function parseText(wsData) {
     }
 
     document.getElementById("chatHistory").value += chatMsg;
-
 }
+
+
+    
+
+    
+
