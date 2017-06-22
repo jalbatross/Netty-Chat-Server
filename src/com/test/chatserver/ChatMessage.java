@@ -22,5 +22,9 @@ public class ChatMessage {
        
     public String getAuthor() { return author;}
     public String getMsg() {return message;}
+    
+    public String toString() {
+        return author + ": " + message;
+    }
 
 }
