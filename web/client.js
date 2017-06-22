@@ -79,18 +79,12 @@ function parseText(wsData) {
     //parse if it is json
     try{
         var jsonMsg = JSON.parse(wsData);
-        var day = "[" + jsonMsg['time'].substring(0,10) + "] ";
-        var fixedHour = parseInt(jsonMsg['time'].substring(11,13)) - hourOffset;
-       
-        //pad hour with zeros if needed
-        var fixedHourStr = fixedHour.toString();
-        if (fixedHourStr.length < 2) {
-            fixedHourStr = "0" + fixedHourStr;
-        }
+        var date = new Date(parseInt(jsonMsg['time']));
+        var dateString = date.toLocaleString();
+        dateString = dateString.replace(',', '');
         
-        var time = fixedHourStr + jsonMsg['time'].substring(13,16) + " ";
-        chatMsg = day + time + jsonMsg['author'] + ": " + jsonMsg['message']+"\n"; 
-
+        chatMsg = dateString + " " + jsonMsg['author'] + ": " 
+                  + jsonMsg['message']+"\n";
     } 
     catch(err) {
         chatMsg = wsData +"\n";
