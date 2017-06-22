@@ -27,6 +27,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,16 +68,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			try {
 			    new JsonParser().parse(frameMsg.text());
 			    
-			    //Encapsulate message into Json
-	            String timeStamp = new Timestamp(System.currentTimeMillis()).toString();
-	            
 	            Gson gson = new Gson();
 
 	            ChatMessage message = gson.fromJson(frameMsg.text(), ChatMessage.class);
-	            message.setStamp(timeStamp);
+	            
+	            //Stamp message with current time
+	            TimeChatMessage timeMessage = new TimeChatMessage(message);
 	            
 	            //Send it back to every client as a Json
-	            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(message));
+	            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
 	            channels.writeAndFlush(JsonMessage);
 			}
 			

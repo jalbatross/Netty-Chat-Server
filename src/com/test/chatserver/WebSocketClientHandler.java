@@ -2,7 +2,13 @@ package com.test.chatserver;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
@@ -68,9 +74,12 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         WebSocketFrame frame = (WebSocketFrame) msg;
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
-            System.out.println("WebSocket Client received message: " + textFrame.text());
+            //System.out.println("WebSocket Client received message: " + textFrame.text());
             try {
                 new JsonParser().parse(textFrame.text());
+                Gson gson = new Gson();
+                TimeChatMessage receivedMsg = gson.fromJson(textFrame.text(), TimeChatMessage.class);
+                System.out.println(receivedMsg.toString());
             } catch (JsonParseException e) {
                 System.out.println("[WebSocketClientHandler] Client received text that was not JSON.");
             }
@@ -109,4 +118,5 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         }
         ctx.close();
     }
+    
 }
