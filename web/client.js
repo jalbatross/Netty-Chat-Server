@@ -3,6 +3,8 @@ var connected = false;
 var connectionFailed = true;
 
 window.onload = function() {
+    
+    //Functions for connection button
     document.getElementById("connectBtn").addEventListener("click", function() {
         if (!window.WebSocket) {
             console.log("WebSocket not supported");
@@ -10,7 +12,7 @@ window.onload = function() {
         } 
         
         else if (!connected) {
-            socket = new WebSocket("ws://localhost:8080/websocket");
+            socket = new WebSocket("ws://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8080/websocket");
             
             socket.onopen = function wsInit() {
                 socket.binaryType = "arraybuffer";
@@ -18,7 +20,7 @@ window.onload = function() {
                 document.getElementById("connectBtn").firstChild.data = 
                     "Disconnect from WS";
 
-                socket.onmessage = function(event) {
+                socket.onmessage = function wsMessageHandler(event) {
                     if (event.data instanceof ArrayBuffer) {
                         var view = new DataView(event.data,0,12);
                         var sender = view.getInt32(0);
@@ -35,7 +37,7 @@ window.onload = function() {
                 }
             };
             
-            socket.onerror = function() {
+            socket.onerror = function wsErrorHandler() {
                 var errMsg = "ERROR: Couldn't connect to server.";
                 document.getElementById("chatHistory").value += errMsg + "\n";
             };
@@ -43,6 +45,7 @@ window.onload = function() {
         }
 
         else {
+            socket.send("bye");
             socket.close();
             document.getElementById("connectBtn").firstChild.data = "Connect to WS";
             connected = false;
@@ -69,12 +72,24 @@ window.onload = function() {
 
 function parseText(wsData) {
     var chatMsg = "";
+    var hourOffset = new Date().getTimezoneOffset() / 60;
+    
+    console.log("time offset from GMT: " + hourOffset );
 
     //parse if it is json
     try{
         var jsonMsg = JSON.parse(wsData);
-        var date = "[" + jsonMsg['time'].substring(0,10) + "] ";
-        chatMsg = date + jsonMsg['author'] + ": " + jsonMsg['message']+"\n"; 
+        var day = "[" + jsonMsg['time'].substring(0,10) + "] ";
+        var fixedHour = parseInt(jsonMsg['time'].substring(11,13)) - hourOffset;
+       
+        //pad hour with zeros if needed
+        var fixedHourStr = fixedHour.toString();
+        if (fixedHourStr.length < 2) {
+            fixedHourStr = "0" + fixedHourStr;
+        }
+        
+        var time = fixedHourStr + jsonMsg['time'].substring(13,16) + " ";
+        chatMsg = day + time + jsonMsg['author'] + ": " + jsonMsg['message']+"\n"; 
 
     } 
     catch(err) {

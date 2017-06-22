@@ -49,8 +49,8 @@ import com.google.gson.Gson;
 public class ChatServerClient {
 	
     //Regular Websockets
-    static final String URL = System.getProperty("url", "ws://127.0.0.1:8080/websocket");
-    
+    //static final String URL = System.getProperty("url", "ws://127.0.0.1:8080/websocket");
+    static final String URL = System.getProperty("url", "ws://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8080/websocket");
     
     //Websocket Secure
     //static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
@@ -69,8 +69,8 @@ public class ChatServerClient {
 		String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
 		
 
-		//final String host = uri.getHost() == null? "ec2-54-67-84-244.us-west-1.compute.amazonaws.com" : uri.getHost();
-		final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
+		final String host = uri.getHost() == null? "ec2-54-67-84-244.us-west-1.compute.amazonaws.com" : uri.getHost();
+		//final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
 		
 		final int port;
 		if (uri.getPort() == -1) {   	  
