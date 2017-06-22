@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -51,8 +52,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 response.headers().set("CONTENT_LENGTH", response.content().readableBytes());
 
                 response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
-                ctx.writeAndFlush(response);
-                ctx.close();
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
             

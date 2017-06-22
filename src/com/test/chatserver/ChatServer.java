@@ -93,11 +93,11 @@ public class ChatServer {
     public static void main(String[] args) throws Exception {
     	int port = 8080;
     	
-    	System.setProperty("javax.net.ssl.trustStore", "src/keystore.jks");
-    	SSL = System.getProperty("java.net.ssl.trustStore") != "";
+    	//System.setProperty("javax.net.ssl.trustStore", "src/keystore.jks");
+    	//SSL = System.getProperty("java.net.ssl.trustStore") != "";
     	
         //System.setProperty("javax.net.ssl.trustStore", "src/X509_certificate.cer");
-        System.setProperty("javax.net.ssl.keyStorePassword", "joseph");
+        //System.setProperty("javax.net.ssl.keyStorePassword", "joseph");
         
         System.out.println(System.getProperty("javax.net.ssl.trustStore") + " is the SSL property");
         	

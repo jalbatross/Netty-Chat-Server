@@ -41,9 +41,14 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        channels.add(ctx.channel());
-        System.out.println("[ChatServerHandler] Added a new channel to group");
-        channels.writeAndFlush(new TextWebSocketFrame("NEW USER CONNECTED"));
+        if (channels.add(ctx.channel())) {
+            System.out.println("[ChatServerHandler] Added a new channel to group");
+            channels.writeAndFlush(new TextWebSocketFrame("NEW USER CONNECTED"));
+            System.out.println("[ChatServerHandler] grpSize: " + channels.size());
+        }
+        
+        
+        
         super.channelActive(ctx);
     }
     
