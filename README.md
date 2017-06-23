@@ -26,3 +26,14 @@ Simple netty chat server &amp; client
  - With all that being said, I think that this update brings on the next version of this project...**version 0.20!!**
  
  # Version 0.20
+
+### June 22, 2017
+ - Lots of stuff to mention. First and foremost, we've got a working browser client that can send and handle chat messages! 
+ - Browser and Java client both convert timestamps to local machine time in whatever format the machine uses.
+ - Server timestamps UTC time in milliseconds so that clients are responsible for how to display the time.
+ - Not shown on the commits, but a lot of work has been done on the EC2 side of things, namely:
+ 1. **Elastic IP Addresses**: The EC2 instance now has its own IP address, so clients don't have to keep being updated to point to new domains for connections.
+ 2. **Elastic File Systems & Apache Servers**: Had to learn how to host an Apache server on my local machine and on EC2 using Amazon EFS in order to do proper testing of the browser client. Browser client is now hosted on an Apache server.
+ - Last but not least, made it so that the EC2 instance auto mounts the EFS and runs the httpd service (Apache) on boot.
+ - Coming up next, I want to make it so that users authenticate themselves for login. They should also receive the last 10 sent chat messages in their chat box when they log in.
+ 
