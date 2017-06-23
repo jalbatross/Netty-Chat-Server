@@ -12,7 +12,7 @@ window.onload = function() {
         } 
         
         else if (!connected) {
-            socket = new WebSocket("ws://ec2-54-67-84-244.us-west-1.compute.amazonaws.com:8080/websocket");
+            socket = new WebSocket("ws://ec2-34-211-68-139.us-west-2.compute.amazonaws.com:8080/websocket");
             
             socket.onopen = function wsInit() {
                 socket.binaryType = "arraybuffer";
