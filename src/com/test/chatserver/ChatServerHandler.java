@@ -44,6 +44,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("[ChatServerHandler] Active");
+        
         if (channels.add(ctx.channel())) {
             System.out.println("[ChatServerHandler] Added a new channel to group");
             channels.writeAndFlush(new TextWebSocketFrame("NEW USER CONNECTED"));
@@ -59,7 +61,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	public void channelRead(ChannelHandlerContext ctx, Object msg) 
 	{
 		System.out.println("\n[ChatServerHandler] channelRead called!");
-		
+		if (ctx.channel().isActive()) {System.out.println("channel is active'");}
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
 			TextWebSocketFrame frameMsg = (TextWebSocketFrame) msg;

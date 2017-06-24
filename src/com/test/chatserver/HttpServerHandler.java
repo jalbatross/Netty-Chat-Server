@@ -26,6 +26,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("httpseverhandler caleld");
+        
         if (msg instanceof FullHttpMessage) {
             System.out.println("Full HTTP Message Received");
         }
@@ -65,6 +67,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
+                
 
                 System.out.println("WebSocketHandler added to the pipeline");
 
@@ -74,7 +77,13 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 //Do the Handshake to upgrade connection from HTTP to WebSocket protocol
                 handleHandshake(ctx, httpRequest);
                 System.out.println("Handshake is done");
-
+                
+                ctx.pipeline().addLast(new ServerAuthHandler());
+                ctx.pipeline().addLast(new ChatServerDecoder());
+                //ctx.pipeline().addLast(new ChatServerMessageEncoder());
+                ctx.pipeline().addLast(new ChatServerHandler());
+                
+                System.out.println("Rest added to pipeline");
             }
         } 
         else {
