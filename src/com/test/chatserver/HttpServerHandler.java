@@ -4,6 +4,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -19,11 +20,18 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
 
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
-	
+	ChannelGroup group;
+	HashSet<String> usernames;
 	WebSocketServerHandshaker handshaker;
 
+	public HttpServerHandler(ChannelGroup grp, HashSet<String> names) {
+	    this.group = grp;
+	    this.usernames = names;
+	}
+	
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("httpseverhandler caleld");
@@ -78,12 +86,9 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 handleHandshake(ctx, httpRequest);
                 System.out.println("Handshake is done");
                 
-                ctx.pipeline().addLast(new ServerAuthHandler());
-                ctx.pipeline().addLast(new ChatServerDecoder());
-                //ctx.pipeline().addLast(new ChatServerMessageEncoder());
-                ctx.pipeline().addLast(new ChatServerHandler());
+                ctx.pipeline().addLast(new ServerAuthHandler(group, usernames));
                 
-                System.out.println("Rest added to pipeline");
+                System.out.println("Added ServerAuthHandler to pipeline");
             }
         } 
         else {

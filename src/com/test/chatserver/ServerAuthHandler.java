@@ -1,7 +1,11 @@
 package com.test.chatserver;
 
+import java.util.HashSet;
+
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -20,6 +24,13 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     String username = new String();
+    ChannelGroup allUsers;
+    HashSet<String> names;
+    
+    public ServerAuthHandler(ChannelGroup grp, HashSet<String> usernames) {
+        allUsers = grp;
+        names = usernames;
+    }
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -29,9 +40,18 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.close();
             return;
         }
+       
+        String credential = ((TextWebSocketFrame) msg).text();
+        if (credential.length() > 12 || credential.isEmpty()) {
+            String errorMsg = "Username was longer than 12 chars or empty.";
+            ctx.writeAndFlush( new TextWebSocketFrame(errorMsg));
+            return;
+        }
         
-        TextWebSocketFrame credential = (TextWebSocketFrame) msg;
-        ctx.fireChannelRead(credential);
+        if (allUsers.add(ctx.channel()) && names.add(credential)) {
+            ctx.pipeline().addLast(new ChatServerDecoder());
+            ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));
+        }
         
     }
     

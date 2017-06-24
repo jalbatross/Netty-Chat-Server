@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.HashSet;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -33,6 +34,15 @@ public class ChatServer {
  
 	static boolean SSL = false;
 	
+	/**
+	 * the server should initialize with a channel group,allUsers,and pass this
+	 * channelGroup down to the appropriate pipelines so that they can reference and
+	 * alter it as they see fit. this should work because when a function in the pipeline
+	 * alters the set of allUsers all callers of allUsers should see the alteration i think.
+	 * 
+	 */
+	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+	private HashSet<String> usernames = new HashSet<String>();
     //static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
    
     private int port;
@@ -64,7 +74,8 @@ public class ChatServer {
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
-                	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
+                	 ch.pipeline().addLast
+                	 (new HTTPInitializer(sslCtx, allChannels,usernames));
                  }
              })
              .option(ChannelOption.SO_BACKLOG, 128)          // (5)

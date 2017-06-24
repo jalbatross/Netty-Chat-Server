@@ -39,8 +39,9 @@ import java.util.Date;
  */
 public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
-    static final ChannelGroup channels = 
-            new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    final ChannelGroup channels;
+    final String username;
+    
     
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -61,7 +62,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	public void channelRead(ChannelHandlerContext ctx, Object msg) 
 	{
 		System.out.println("\n[ChatServerHandler] channelRead called!");
-		if (ctx.channel().isActive()) {System.out.println("channel is active'");}
+		
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
 			TextWebSocketFrame frameMsg = (TextWebSocketFrame) msg;
