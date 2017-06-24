@@ -55,7 +55,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         super.channelActive(ctx);
     }
     
-    
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) 
 	{

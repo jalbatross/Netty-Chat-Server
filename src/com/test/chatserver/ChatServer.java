@@ -66,6 +66,7 @@ public class ChatServer {
                  public void initChannel(SocketChannel ch) throws Exception {
                 	 //need ENCODER for updated messages and DECODER to receive messages from clients
                 	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
+                	 ch.pipeline().addLast(new ServerAuthHandler());
                 	 ch.pipeline().addLast(new ChatServerDecoder());
                 	 //ch.pipeline().addLast(new ChatServerMessageEncoder());
                 	 ch.pipeline().addLast(new ChatServerHandler());
