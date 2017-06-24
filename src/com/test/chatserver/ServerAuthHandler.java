@@ -42,15 +42,25 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         }
        
         String credential = ((TextWebSocketFrame) msg).text();
+        System.out.println("[AuthHandler] Got credential " + credential);
         if (credential.length() > 12 || credential.isEmpty()) {
+            System.out.println("received bad credential");
             String errorMsg = "Username was longer than 12 chars or empty.";
             ctx.writeAndFlush( new TextWebSocketFrame(errorMsg));
             return;
         }
         
+        
         if (allUsers.add(ctx.channel()) && names.add(credential)) {
+            System.out.println("added user w/ name: " + credential);
+            
+            ctx.pipeline().remove(this);
             ctx.pipeline().addLast(new ChatServerDecoder());
             ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));
+        }
+        else {
+            System.out.println("either user already connected or duplicate username");
+            ctx.writeAndFlush(new TextWebSocketFrame("try a different username"));
         }
         
     }

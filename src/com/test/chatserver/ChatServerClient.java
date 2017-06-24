@@ -4,6 +4,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
@@ -132,7 +134,14 @@ public class ChatServerClient {
             });
 			
 			Channel ch = b.connect(uri.getHost(), port).sync().channel();
-			handler.handshakeFuture().sync();
+			handler.handshakeFuture().sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    ch.writeAndFlush(new TextWebSocketFrame(name));
+                }
+			});
+			
+			
 			
 			//User input
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));

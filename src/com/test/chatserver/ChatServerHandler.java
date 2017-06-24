@@ -42,20 +42,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     final ChannelGroup channels;
     final String username;
     
-    
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("[ChatServerHandler] Active");
-        
-        if (channels.add(ctx.channel())) {
-            System.out.println("[ChatServerHandler] Added a new channel to group");
-            channels.writeAndFlush(new TextWebSocketFrame("NEW USER CONNECTED"));
-            System.out.println("[ChatServerHandler] grpSize: " + channels.size());
-        }
-        
-        
-        
-        super.channelActive(ctx);
+    public ChatServerHandler(ChannelGroup group, String username) {
+        channels = group;
+        this.username = username;
     }
     
 	@Override
@@ -116,7 +105,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    System.out.println("[ChatServerHandler] Received request to close connection");
 		    System.out.println("[ChatServerHandler] Channel grp before removal: " + channels.toString());
 		    
-		    String dcMsg = ctx.channel().toString() + " disconnected";
+		    String dcMsg = username + " disconnected";
 		    //try to close connection
             ChannelFuture cf = ctx.channel().close();
             cf.addListener(new ChannelFutureListener() {
