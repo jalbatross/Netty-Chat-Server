@@ -37,3 +37,9 @@ Simple netty chat server &amp; client
  - Last but not least, made it so that the EC2 instance auto mounts the EFS and runs the httpd service (Apache) on boot.
  - Coming up next, I want to make it so that users authenticate themselves for login. They should also receive the last 10 sent chat messages in their chat box when they log in.
  
+ ###June 24, 2017
+ - Redid a lot of the code for server and both clients to accommodate new feature: user authentication!
+ - Users now submit their username to the server after the WS handshake is complete. Once they submit a valid username (one that is not already in the list of connected users and with correct characteristics), the channel pipeline is replaced with one that enables the expected chat server functionality.
+ - With the implementation of connected users/verification, the server and client side code for sending/receiving messages is a lot more simplified. JSON messages are only sent from the server and can be parsed by the clients specifically for the purpose of chat transmission, which relieves a lot of the worry that I had before of having to parse JSONs of different formats in different ways.
+ - Updates to browser interface because we no longer send a username with every message request. This also reduces the payload of chat transmission between server and client!
+ - Up next, I want to implement a username/password system server side. After that's working, let's try using a database!
