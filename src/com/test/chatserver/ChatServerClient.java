@@ -26,7 +26,8 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
- 
+import io.netty.util.AttributeKey;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -58,7 +59,8 @@ public class ChatServerClient {
     //static final String URL = System.getProperty("url", "wss://127.0.0.1:8443/websocket");
     //static final String URL = System.getProperty("url", "wss://34.212.146.20:8080/websocket");
     
-	static private String name = new String();
+	private static String name = new String();
+	final static AttributeKey<Boolean> AUTHKEY = AttributeKey.valueOf("authorized");
 	
 	public static void main(String[] args) throws Exception {
 	    
@@ -134,6 +136,8 @@ public class ChatServerClient {
             });
 			
 			Channel ch = b.connect(uri.getHost(), port).sync().channel();
+			ch.attr(AUTHKEY).set(false);
+			
 			handler.handshakeFuture().sync().addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
@@ -141,8 +145,20 @@ public class ChatServerClient {
                 }
 			});
 			
-			//User input
+			
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+			
+			
+			while (ch.attr(AUTHKEY).get() == false) {
+			    System.out.println("Please submit a valid username to the server");
+			    String msg = console.readLine();
+			    if (msg == null)
+			        return;
+			    WebSocketFrame frame = new TextWebSocketFrame(msg);
+			    ch.writeAndFlush(frame);
+			}
+			
+			//User input
 			while (true) {
 				String msg = console.readLine();
 				if (msg == null) {

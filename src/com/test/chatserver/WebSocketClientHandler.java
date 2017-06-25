@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 
 public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
@@ -74,13 +75,18 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         WebSocketFrame frame = (WebSocketFrame) msg;
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
+            String textReceived = textFrame.text();
             try {
-                new JsonParser().parse(textFrame.text());
+                new JsonParser().parse(textReceived);
                 Gson gson = new Gson();
-                TimeChatMessage receivedMsg = gson.fromJson(textFrame.text(), TimeChatMessage.class);
+                TimeChatMessage receivedMsg = gson.fromJson(textReceived, TimeChatMessage.class);
                 System.out.println(receivedMsg.toString());
             } catch (JsonParseException e) {
-                System.out.println("[Server]: " + textFrame.text());
+                System.out.println((new TimeChatMessage("Admin", textReceived)).toString());
+                if (textReceived.equals("User Authenticated")){
+                    ch.attr(AttributeKey.valueOf("authorized")).set(true);
+                }
+  
             }
         } 
         else if (frame instanceof PongWebSocketFrame) {
