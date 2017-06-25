@@ -150,7 +150,6 @@ public class ChatServerClient {
 			
 			
 			while (ch.attr(AUTHKEY).get() == false) {
-			    System.out.println("Please submit a valid username to the server");
 			    String msg = console.readLine();
 			    if (msg == null)
 			        return;

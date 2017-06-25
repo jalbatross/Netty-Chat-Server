@@ -50,6 +50,11 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         
+        if(allUsers.contains(ctx.channel()) || names.contains(credential)) {
+            System.out.println("either user already connected or duplicate username");
+            ctx.writeAndFlush(new TextWebSocketFrame("try a different username"));
+            return;
+        }
         
         if (allUsers.add(ctx.channel()) && names.add(credential)) {
             System.out.println("added user w/ name: " + credential);
@@ -59,8 +64,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));
         }
         else {
-            System.out.println("either user already connected or duplicate username");
-            ctx.writeAndFlush(new TextWebSocketFrame("try a different username"));
+            System.out.println("[ServerAuthHandler] ERROR while adding valid credential");
         }
         
     }
