@@ -43,3 +43,7 @@ Simple netty chat server &amp; client
  - With the implementation of connected users/verification, the server and client side code for sending/receiving messages is a lot more simplified. JSON messages are only sent from the server and can be parsed by the clients specifically for the purpose of chat transmission, which relieves a lot of the worry that I had before of having to parse JSONs of different formats in different ways.
  - Updates to browser interface because we no longer send a username with every message request. This also reduces the payload of chat transmission between server and client!
  - Up next, I want to implement a username/password system server side. After that's working, let's try using a database!
+ 
+ ### June 25, 2017: Mongo?
+ - Successfully set up a local Mongo server but I'm thinking relational might be better for storing usernames/passwords.
+ - Trying to figure out how to do lobbies - Mongo? Server side? Right now I want the user to query a lobby list before adding the actual ChatServeerandler to the pipeline, which makes sense because the ChatServerHandler references a ChatGroup. Lobbies should be static or instantiated on server start? Lots to think about here.
