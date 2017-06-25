@@ -141,9 +141,6 @@ public class ChatServerClient {
                 }
 			});
 			
-			
-			
-			
 			//User input
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
@@ -181,9 +178,7 @@ public class ChatServerClient {
 				    ch.writeAndFlush(frame);
 				}
 				else {
-				    ChatMessage message = new ChatMessage(name, msg);
-				    String sendMessage = new Gson().toJson(message);
-					WebSocketFrame frame = new TextWebSocketFrame(sendMessage);
+					WebSocketFrame frame = new TextWebSocketFrame(msg);
 					ch.writeAndFlush(frame);
                 }
             }

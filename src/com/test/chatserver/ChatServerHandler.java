@@ -48,7 +48,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     }
     
     @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        Gson gson = new Gson();
         TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
         TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
         channels.writeAndFlush(JsonMessage);
@@ -61,27 +60,14 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
-			TextWebSocketFrame frameMsg = (TextWebSocketFrame) msg;
-			
-			try {
-			    new JsonParser().parse(frameMsg.text());
-			    
-	            Gson gson = new Gson();
-
-	            ChatMessage message = gson.fromJson(frameMsg.text(), ChatMessage.class);
-	            
-	            //Stamp message with current time
-	            TimeChatMessage timeMessage = new TimeChatMessage(message);
-	            
-	            //Send it back to every client as a Json
-	            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
-	            channels.writeAndFlush(JsonMessage);
-			}
-			
-			
-	        catch (JsonParseException e) {
-                System.out.println("[ChatServerHandler] Received nonJSON from client.");
-            }
+			String strMsg = ((TextWebSocketFrame) msg).text();
+            
+            //Stamp message with current time
+            TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
+            
+            //Send it back to every client in the group as a Json
+            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
+            channels.writeAndFlush(JsonMessage);
 			
 		}
 		else if (msg instanceof ByteBuf) {
