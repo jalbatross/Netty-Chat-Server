@@ -30,9 +30,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Stack;
 
 /**
  * Handles a server-side chat channel. Tail of the pipeline for incoming data.
@@ -41,6 +43,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
     final ChannelGroup channels;
     final String username;
+    final Stack<TimeChatMessage> last10Msg = new Stack<TimeChatMessage>();
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;

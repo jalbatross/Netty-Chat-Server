@@ -40,8 +40,8 @@ import com.google.gson.Gson;
 /**
  * 
  * Websocket chat server client to be used with simple chat server.
- * Sends messages to the chat server as JSON objects and receives
- * updates to the client chatbox as JSON objects.
+ * Sends messages to the chat server and receives updates to the client
+ *  chatbox via JSON objects.
  * 
  * 
  * 

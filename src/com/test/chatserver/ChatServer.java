@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.util.Base64;
 import java.util.HashSet;
 
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+
 import io.netty.bootstrap.ServerBootstrap;
 
 import io.netty.channel.ChannelFuture;
@@ -53,6 +56,7 @@ public class ChatServer {
     }
     
     public void run() throws Exception {
+        
     	//configure SSL
         usernames.add("Admin");
     	final SslContext sslCtx;

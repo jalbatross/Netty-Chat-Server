@@ -52,7 +52,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         
         if(allUsers.contains(ctx.channel()) || names.contains(credential)) {
             System.out.println("either user already connected or duplicate username");
-            ctx.writeAndFlush(new TextWebSocketFrame("try a different username"));
+            ctx.writeAndFlush(new TextWebSocketFrame("That username is being used!"));
             return;
         }
         
@@ -65,6 +65,9 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         }
         else {
             System.out.println("[ServerAuthHandler] ERROR while adding valid credential");
+            ctx.writeAndFlush(new TextWebSocketFrame("Something weird happened! Sorry."));
+            names.remove(credential);
+            ctx.close();
         }
         
     }
