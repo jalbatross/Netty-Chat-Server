@@ -151,8 +151,9 @@ public class ChatServerClient {
 			
 			while (ch.attr(AUTHKEY).get() == false) {
 			    String msg = console.readLine();
-			    if (msg == null)
+			    if (msg == null) {
 			        return;
+			    }
 			    WebSocketFrame frame = new TextWebSocketFrame(msg);
 			    ch.writeAndFlush(frame);
 			}

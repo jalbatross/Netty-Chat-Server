@@ -83,7 +83,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                 System.out.println(receivedMsg.toString());
             } catch (JsonParseException e) {
                 System.out.println((new TimeChatMessage("Admin", textReceived)).toString());
-                if (textReceived.equals("User Authenticated")){
+                if (textReceived.equals("User Authorized")){
                     ch.attr(AttributeKey.valueOf("authorized")).set(true);
                 }
   

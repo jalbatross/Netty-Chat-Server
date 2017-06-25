@@ -58,7 +58,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         
         if (allUsers.add(ctx.channel()) && names.add(credential)) {
             System.out.println("added user w/ name: " + credential);
-            ctx.writeAndFlush(new TextWebSocketFrame("User Authenticated"));
+            ctx.writeAndFlush(new TextWebSocketFrame("User Authorized"));
             ctx.pipeline().remove(this);
             ctx.pipeline().addLast(new ChatServerDecoder());
             ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));

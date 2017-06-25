@@ -12,15 +12,18 @@ window.onload = function() {
         } 
         
         else if (!connected) {
-            socket = new WebSocket("ws://34.212.146.20:8080/websocket");
-            
+            //socket = new WebSocket("ws://34.212.146.20:8080/websocket");
+            socket= new WebSocket("ws://localhost:8080/websocket");
             socket.onopen = function wsInit() {
                 socket.binaryType = "arraybuffer";
                 connected = true;
                 document.getElementById("connectBtn").firstChild.data = 
                     "Disconnect from WS";
+                document.getElementById("chatHistory").value += "Connected to server!\n" +
+                		"Please send a username from 1-12 characters in length.\n";
 
                 socket.onmessage = function wsMessageHandler(event) {
+                                    
                     if (event.data instanceof ArrayBuffer) {
                         var view = new DataView(event.data,0,12);
                         var sender = view.getInt32(0);
@@ -49,6 +52,7 @@ window.onload = function() {
             socket.close();
             document.getElementById("connectBtn").firstChild.data = "Connect to WS";
             connected = false;
+            authorized = false;
         }
     });
     
@@ -56,12 +60,10 @@ window.onload = function() {
         if(connected) {
             //get the message
             var msg = new Object();
-            msg.author = document.getElementById("nameBox").value;
-            msg.message = document.getElementById("msgBox").value;
+            msg = document.getElementById("msgBox").value;
 
             //send msg to server
-            var jsonMsg = JSON.stringify(msg);
-            socket.send(jsonMsg);
+            socket.send(msg);
             document.getElementById("msgBox").value = "";
         }
 
