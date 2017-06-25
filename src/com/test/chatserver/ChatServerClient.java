@@ -143,6 +143,7 @@ public class ChatServerClient {
 			
 			
 			
+			
 			//User input
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {

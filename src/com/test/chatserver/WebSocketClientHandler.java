@@ -74,14 +74,13 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         WebSocketFrame frame = (WebSocketFrame) msg;
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
-            //System.out.println("WebSocket Client received message: " + textFrame.text());
             try {
                 new JsonParser().parse(textFrame.text());
                 Gson gson = new Gson();
                 TimeChatMessage receivedMsg = gson.fromJson(textFrame.text(), TimeChatMessage.class);
                 System.out.println(receivedMsg.toString());
             } catch (JsonParseException e) {
-                System.out.println("[WebSocketClientHandler] Client received text that was not JSON.");
+                System.out.println("[Server]: " + textFrame.text());
             }
         } 
         else if (frame instanceof PongWebSocketFrame) {

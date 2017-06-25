@@ -18,6 +18,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -53,6 +54,7 @@ public class ChatServer {
     
     public void run() throws Exception {
     	//configure SSL
+        usernames.add("Admin");
     	final SslContext sslCtx;
         if (SSL) {
         	System.out.print("Running SSL");
@@ -97,6 +99,7 @@ public class ChatServer {
     
     public static void main(String[] args) throws Exception {
     	int port = 8080;
+    	
     	
     	//System.setProperty("javax.net.ssl.trustStore", "src/keystore.jks");
     	//SSL = System.getProperty("java.net.ssl.trustStore") != "";

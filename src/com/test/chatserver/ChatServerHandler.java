@@ -47,6 +47,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         this.username = username;
     }
     
+    @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        Gson gson = new Gson();
+        TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
+        TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
+        channels.writeAndFlush(JsonMessage);
+    }
+    
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) 
 	{
