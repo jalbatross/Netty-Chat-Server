@@ -1,5 +1,7 @@
 package com.test.chatserver;
 
+
+
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -17,6 +19,14 @@ import org.bson.Document;
 
 import java.util.Arrays;
 import java.util.List;
+
+/**
+ * This is a tester class for a Mongo DB. Just want to make sure everything works.
+ * 
+ * 
+ * @author joey
+ *
+ */
 
 public class MongoConnectingTest {
     public static void main (String[] args) {

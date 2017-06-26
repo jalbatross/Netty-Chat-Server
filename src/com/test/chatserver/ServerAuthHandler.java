@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import io.netty.channel.Channel;
@@ -25,17 +26,22 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     String username = new String();
     ChannelGroup allUsers;
+    ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+    
+    //TODO: Replace HashSet names with database calls
     HashSet<String> names;
     
-    public ServerAuthHandler(ChannelGroup grp, HashSet<String> usernames) {
+    public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
         allUsers = grp;
-        names = usernames;
+        this.lobbies = lobbies;
     }
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
         
+        //User is trying to do something strange for authentication, close
+        //connection immediately.
         if (!(msg instanceof TextWebSocketFrame)) {
             ctx.close();
             return;
@@ -43,6 +49,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
        
         String credential = ((TextWebSocketFrame) msg).text();
         System.out.println("[AuthHandler] Got credential " + credential);
+        
+        //TODO: Add stricter username requirements
         if (credential.length() > 12 || credential.isEmpty()) {
             System.out.println("received bad credential");
             String errorMsg = "Username was longer than 12 chars or empty.";
@@ -50,16 +58,26 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         
+        //TODO: Instead of names.constains(credential), query database for
+        // USERNAME and PASSWORD that client will submit here
         if(allUsers.contains(ctx.channel()) || names.contains(credential)) {
             System.out.println("either user already connected or duplicate username");
             ctx.writeAndFlush(new TextWebSocketFrame("That username is being used!"));
             return;
         }
         
+        //TODO: Change names.add(credential) to database query I think
+        //TODO: Send user list of lobbies and have them choose one after
+        //      succsessful login
         if (allUsers.add(ctx.channel()) && names.add(credential)) {
             System.out.println("added user w/ name: " + credential);
-            ctx.writeAndFlush(new TextWebSocketFrame("User Authorized"));
+            ctx.writeAndFlush(new TextWebSocketFrame("Login Successful! There are "
+                    + allUsers.size() + " connected users."));
             ctx.pipeline().remove(this);
+            
+            //TODO: Make user choose lobby here or create new pipeline handler
+            // for lobby selector
+            ctx.pipeline().addLast(new ChatServerLobbySelector());
             ctx.pipeline().addLast(new ChatServerDecoder());
             ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));
         }

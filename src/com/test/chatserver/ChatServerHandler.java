@@ -43,7 +43,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
     final ChannelGroup channels;
     final String username;
-    final Stack<TimeChatMessage> last10Msg = new Stack<TimeChatMessage>();
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;

@@ -20,16 +20,17 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	ChannelGroup group;
-	HashSet<String> usernames;
+	ArrayList<ChannelGroup> lobbies;
 	WebSocketServerHandshaker handshaker;
 
-	public HttpServerHandler(ChannelGroup grp, HashSet<String> names) {
+	public HttpServerHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
 	    this.group = grp;
-	    this.usernames = names;
+	    this.lobbies = lobbies;
 	}
 	
     @Override
@@ -86,7 +87,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 handleHandshake(ctx, httpRequest);
                 System.out.println("Handshake is done");
                 
-                ctx.pipeline().addLast(new ServerAuthHandler(group, usernames));
+                ctx.pipeline().addLast(new ServerAuthHandler(group, lobbies));
                 
                 System.out.println("Added ServerAuthHandler to pipeline");
             }

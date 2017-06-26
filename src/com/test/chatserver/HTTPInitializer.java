@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import io.netty.channel.ChannelInitializer;
@@ -13,11 +14,12 @@ public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
 	
 	private final SslContext sslCtx;
 	private ChannelGroup allUsers;
-	private HashSet<String> usernames;
-	public HTTPInitializer (SslContext sslCtx, ChannelGroup group, HashSet<String> names) {
+	private ArrayList<ChannelGroup> lobbies;
+	public HTTPInitializer (SslContext sslCtx, ChannelGroup group, 
+	        ArrayList<ChannelGroup> lobbies) {
 		this.sslCtx = sslCtx;
 		allUsers = group;
-		usernames = names;
+		this.lobbies = lobbies;
 		
 	}
 	
@@ -28,7 +30,7 @@ public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
         }
         
         pipeline.addLast("httpServerCodec", new HttpServerCodec());
-        pipeline.addLast("httpHandler", new HttpServerHandler(allUsers, usernames));
+        pipeline.addLast("httpHandler", new HttpServerHandler(allUsers, lobbies));
 
     }
 }

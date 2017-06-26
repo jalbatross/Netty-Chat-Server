@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 
@@ -46,7 +47,7 @@ public class ChatServer {
 	 * 
 	 */
 	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	private HashSet<String> usernames = new HashSet<String>();
+	private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     //static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
    
     private int port;
@@ -58,7 +59,11 @@ public class ChatServer {
     public void run() throws Exception {
         
     	//configure SSL
-        usernames.add("Admin");
+        
+        //TODO: Make sure "Admin" is a reserved username in database
+        //usernames.add("Admin");
+        
+        
     	final SslContext sslCtx;
         if (SSL) {
         	System.out.print("Running SSL");
@@ -81,7 +86,7 @@ public class ChatServer {
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
                 	 ch.pipeline().addLast
-                	 (new HTTPInitializer(sslCtx, allChannels,usernames));
+                	 (new HTTPInitializer(sslCtx, allChannels, lobbies));
                  }
              })
              .option(ChannelOption.SO_BACKLOG, 128)          // (5)
