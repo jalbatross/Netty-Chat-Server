@@ -11,17 +11,27 @@ import java.sql.Statement;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 
+/**
+ * Responsible for communication with a Postgres database. Handles user 
+ * login and password verification as well as password hashing using 
+ * Argon2. 
+ * 
+ * @author joey
+ *
+ */
 
-
-public class PostgresTest {
-    private final String url = "jdbc:postgresql://localhost/mytestdb";
+public class LoginAuthorizer {
+    
+    private final String dbUrl = "jdbc:postgresql://localhost/mytestdb";
     private final String user = "postgres";
     private final String password = "postgres";
     
+    public LoginAuthorizer() { }
+    
     public static void main(String[] args) throws Exception {
         try {
-            PostgresTest test = new PostgresTest();
-            Connection conn = test.connect();
+            //PostgresTest test = new PostgresTest();
+            //Connection conn = test.connect();
             
             
             String sqlUser = "INSERT INTO AUTH(name, hash) "
@@ -34,7 +44,7 @@ public class PostgresTest {
             String pw = "abcde";
             byte[] salt = "lolol".getBytes();
             
-            Argon2 instance = Argon2Factory.create(20, 148);
+            Argon2 instance = Argon2Factory.create(32, 136);
             String hash = instance.hash(2, 65536, 1, pw);
             System.out.println(hash);
             System.out.println("len: " + hash.length());
@@ -74,13 +84,48 @@ public class PostgresTest {
     public Connection connect() {
         Connection conn = null;
         try {
-            conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(dbUrl, user, password);
             System.out.println("Connected to the PostgreSQL server successfully.");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
  
         return conn;
+    }
+    
+    /**
+     * Queries the postgres database for the username and password.
+     * 
+     * If the user is not in the DB, returns false.
+     * 
+     * Otherwise, queries the database for the Argon2 hash corresponding
+     * to the provided username and uses Argon2 to verify that the 
+     * password is correct for the hash.
+     * 
+     * If the password is correct, returns true. All other situations
+     * return false
+     * 
+     * @param name     username in psql database
+     * @param password password corresponding to username
+     * @return true if username and password are correct and in db, false
+     *         otherwise
+     */
+    public boolean verifyUser(String name, String password) {
+        if (!inDb(name)) {
+            return false;
+        }
+    }
+    
+
+    /**
+     * Helper function for verifyUser. Checks if username is a username
+     * in the psql database.
+     * 
+     * @param username   a username
+     * @return true if username is a username in the db, false otherwise
+     */
+    private boolean inDb(String username) {
+        
     }
     
     
