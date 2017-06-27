@@ -8,6 +8,5 @@
 	<classpathentry kind="lib" path="/home/joey/Downloads/postgresql-42.1.1.jar"/>
 	<classpathentry kind="lib" path="/home/joey/Downloads/argon2-jvm-2.2.jar"/>
 	<classpathentry kind="lib" path="/home/joey/Downloads/jna-4.2.1.jar"/>
-	<classpathentry kind="lib" path="/home/joey/Downloads/kalium-0.6.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

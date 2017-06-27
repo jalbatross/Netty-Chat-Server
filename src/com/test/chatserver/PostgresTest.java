@@ -3,12 +3,10 @@ package com.test.chatserver;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.abstractj.kalium.NaCl;
-import org.abstractj.kalium.crypto.Password;
-import org.abstractj.kalium.encoders.Encoder;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
@@ -24,25 +22,47 @@ public class PostgresTest {
         try {
             PostgresTest test = new PostgresTest();
             Connection conn = test.connect();
-        
-            String sql = "CREATE TABLE AUTH (" +
-                    " id serial NOT NULL ," +
-                    " name VARCHAR(12)," + 
-                    " hash CHAR(255)," + 
-                    " PRIMARY KEY (id))"; 
-            Statement stmt = conn.createStatement();
-            //stmt.executeUpdate(sql);
-        
-            //System.out.println("made sql table in db!");
             
+            
+            String sqlUser = "INSERT INTO AUTH(name, hash) "
+                    + "VALUES(?,?)";
+            
+            PreparedStatement pstmt = conn.prepareStatement(sqlUser,
+                    Statement.RETURN_GENERATED_KEYS);
+            
+            long id = 0;
             String pw = "abcde";
             byte[] salt = "lolol".getBytes();
-            long memlim = NaCl.Sodium.PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE;
             
-            Password pwd = new Password();
-            pwd.hash(255, pw.getBytes(), Encoder.UTF_8, salt, 
-                    NaCl.Sodium.CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE,
-                    memlim)
+            Argon2 instance = Argon2Factory.create(20, 148);
+            String hash = instance.hash(2, 65536, 1, pw);
+            System.out.println(hash);
+            System.out.println("len: " + hash.length());
+            
+            
+            pstmt.setString(1, "admin");
+            pstmt.setString(2,  hash);
+            
+            //int affectedRows = pstmt.executeUpdate();
+            
+            //Query DB and use Argon2 to verify correct pw
+            
+            String query = "SELECT hash FROM auth WHERE name = 'admin'";
+            Statement queryStatement = conn.createStatement();
+            ResultSet rs = queryStatement.executeQuery(query);
+            
+            rs.next();
+            
+            if(instance.verify(rs.getString(1), pw )) {
+                System.out.println("Correct password!");
+            }
+            else {
+                System.out.println("wrong password");
+            }
+            
+            
+            
+            
             
             conn.close();
         } 
@@ -62,4 +82,6 @@ public class PostgresTest {
  
         return conn;
     }
+    
+    
 }
