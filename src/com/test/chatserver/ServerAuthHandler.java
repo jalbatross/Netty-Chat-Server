@@ -39,7 +39,9 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
+        LoginAuthorizer login = new LoginAuthorizer();
         
+        login.verifyUser("poopie", "abcde");
         //User is trying to do something strange for authentication, close
         //connection immediately.
         if (!(msg instanceof TextWebSocketFrame)) {
@@ -50,6 +52,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         String credential = ((TextWebSocketFrame) msg).text();
         System.out.println("[AuthHandler] Got credential " + credential);
         
+        /*
         //TODO: Add stricter username requirements
         if (credential.length() > 12 || credential.isEmpty()) {
             System.out.println("received bad credential");
@@ -87,6 +90,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             names.remove(credential);
             ctx.close();
         }
+        */
+        ctx.close();
         
     }
     
