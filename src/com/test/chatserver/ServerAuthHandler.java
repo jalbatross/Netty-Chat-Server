@@ -77,7 +77,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             
             //TODO: Make user choose lobby here or create new pipeline handler
             // for lobby selector
-            ctx.pipeline().addLast(new ChatServerLobbySelector());
+            //ctx.pipeline().addLast(new ChatServerLobbySelector());
             ctx.pipeline().addLast(new ChatServerDecoder());
             ctx.pipeline().addLast(new ChatServerHandler(allUsers, credential));
         }

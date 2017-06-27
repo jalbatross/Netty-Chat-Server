@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-
 import io.netty.bootstrap.ServerBootstrap;
 
 import io.netty.channel.ChannelFuture;
