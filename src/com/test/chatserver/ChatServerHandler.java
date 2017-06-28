@@ -100,7 +100,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    System.out.println("[ChatServerHandler] Received request to close connection");
 		    System.out.println("[ChatServerHandler] Channel grp before removal: " + channels.toString());
 		    
-		    String dcMsg = username + " disconnected";
+		    final String dcMsg = username + " disconnected";
 		    //try to close connection
             ChannelFuture cf = ctx.channel().close();
             cf.addListener(new ChannelFutureListener() {
