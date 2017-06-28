@@ -155,15 +155,13 @@ public class ChatServerClient {
 			*/
 			
 			//Convert username/password into one bytebuf
-			int nameNumBytes = name.length() * 2;
-			int pwdNumBytes = pwd.length() * 2;
-			
+			byte[] nameBytes = name.getBytes("UTF-8");
+			byte[] pwdBytes = pwd.getBytes("UTF-8");
+		
 			//2 bytes for short
-            int size =  4 + nameNumBytes + pwdNumBytes;
-			int index = 5 + nameNumBytes;
+            int size =  4 + nameBytes.length + pwdBytes.length;
+			int index = 4 + nameBytes.length;
 			
-			byte[] nameBytes = name.getBytes();
-			byte[] pwdBytes = pwd.getBytes();
 			
 			byte[] wordBytes = ByteBuffer.allocate(size)
 			        .putShort((short) size)

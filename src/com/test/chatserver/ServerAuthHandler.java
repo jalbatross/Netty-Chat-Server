@@ -72,18 +72,28 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         System.out.println("Length of bytebuf:" + len);
         System.out.println("beginning index of pw: " + index);
         
-        char[] username = new char[index - 4];
-        char[] password = new char[len - index];
+        char[] username = new char[(index - 4)];
+        char[] password = new char[(len - index)];
         
-        for (int i = 0; i < username.length; i++){
-            username[i] = credential.getChar(i + 2);
+        System.out.println("name len: " + (index - 4) + " bytes");
+        System.out.println("pw len: "+ (len - index) + " bytes");
+        
+        for (int i = 0; i < username.length; i ++){
+            System.out.println("reading byte: " + (i + 4));
+            username[i] = (char) credential.getByte(i + 4);
+            credential.setByte(i+ 4, 0);
+            System.out.println("got character: " + username[i]);
+            
         }
         System.out.println("username receieved: " + username.toString());
         
         for (int i = 0; i < password.length; i++) {
-            password[i] = credential.getChar(i + index);
+            System.out.println("reading byte: " + (i + index));
+            password[i] = (char) credential.getByte(i + index );
+            credential.setByte(i + index, 0);
+            System.out.println("got character: " + password[i]);
         }
-        System.out.println("password received: " + password.toString());
+        
         
         
         ctx.close();
