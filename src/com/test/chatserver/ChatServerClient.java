@@ -158,10 +158,9 @@ public class ChatServerClient {
 			byte[] nameBytes = name.getBytes("UTF-8");
 			byte[] pwdBytes = pwd.getBytes("UTF-8");
 		
-			//2 bytes for short
+			//4 bytes for two shorts, one for len and one for pw index
             int size =  4 + nameBytes.length + pwdBytes.length;
-			int index = 4 + nameBytes.length;
-			
+			int index = 4 + nameBytes.length;			
 			
 			byte[] wordBytes = ByteBuffer.allocate(size)
 			        .putShort((short) size)
@@ -172,11 +171,7 @@ public class ChatServerClient {
 			
 			ByteBuf wordBuf = Unpooled.copiedBuffer(wordBytes);
 			
-			System.out.println("sending bytebuf with capacity: " + wordBuf.capacity());
-			System.out.println("Len: " + size +
-			        "\nIndex: " + index);
 			ch.writeAndFlush(wordBuf);
-			System.out.println("and off it goes");
 			ch.close();
 			
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
