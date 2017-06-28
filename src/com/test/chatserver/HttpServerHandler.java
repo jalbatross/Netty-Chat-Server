@@ -24,14 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
-	ChannelGroup group;
-	ArrayList<ChannelGroup> lobbies;
 	WebSocketServerHandshaker handshaker;
-
-	public HttpServerHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
-	    this.group = grp;
-	    this.lobbies = lobbies;
-	}
 	
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -87,9 +80,6 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 handleHandshake(ctx, httpRequest);
                 System.out.println("Handshake is done");
                 
-                ctx.pipeline().addLast(new ServerAuthHandler(group, lobbies));
-                
-                System.out.println("Added ServerAuthHandler to pipeline");
             }
         } 
         else {

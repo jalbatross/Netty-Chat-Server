@@ -3,6 +3,7 @@ package com.test.chatserver;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,13 +12,22 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 /**
- * Class used to authenticate users. Current implementation should receive
- * a TextWebSocketFrame from client and pass it along to the server so that
- * it can record that username to use for the connected client.
+ * Class used to authenticate users. Current implementation should handle 
+ * byte buffers with the following structure:
  * 
- * Upon successful registration of the username, the Handler removes itself 
- * from the pipeline. If the user does not supply correct credentials in this
- * version, the connection is closed immediately.
+ * [ short INDEX, char[] NAME, char[] PASSWORD ]
+ * 
+ * INDEX: A 2 byte short corresponding to the index of the first readable byte
+ * of PASSWORD.
+ * NAME: A char[] with 1-12 characters. Max size of 24 bytes.
+ * PASSWORD: A char[] with 1-51 characters. Max size of 102 bytes.
+ * 
+ * All char[] should be UTF-8 encoded and the ByteBuf is assumed to be
+ * Big Endian.
+ * 
+ * Upon successful registration or authentication of the provided username/password
+ * pair, ServerAuthHandler removes itself from the pipeline with handlers that 
+ * are useful for server functionality.
  * 
  * @author joey
  *
@@ -28,9 +38,6 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     ChannelGroup allUsers;
     ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     
-    //TODO: Replace HashSet names with database calls
-    HashSet<String> names;
-    
     public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
         allUsers = grp;
         this.lobbies = lobbies;
@@ -39,26 +46,43 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
+        
         LoginAuthorizer login = new LoginAuthorizer();
         
-        if (login.verifyUser("admin", "abcdef")) {
-            System.out.println("Good auth");
-            
-        }
-        else {
-            System.out.println("Bad auth");
-        }
-        
-        //User is trying to do something strange for authentication, close
-        //connection immediately.
-        if (!(msg instanceof TextWebSocketFrame)) {
+        //Close connection if receive invalid credential
+        if (!(msg instanceof ByteBuf)) {
+            System.out.println("Bad credential format received");
+            //TODO: send ERROR flatbuffer to user
             ctx.close();
             return;
         }
-       
-        String credential = ((TextWebSocketFrame) msg).text();
-        System.out.println("[AuthHandler] Got credential " + credential);
         
+        ByteBuf credential = (ByteBuf) msg;
+        
+        //Block until we receive the entire credential
+        if (credential.readableBytes() < credential.capacity()) {
+            return;
+        }
+        
+        int index = credential.getShort(0);
+        
+        char[] username = new char[index - 2];
+        char[] password = new char[credential.capacity() - index];
+        
+        for (int i = 0; i < username.length; i++){
+            username[i] = credential.getChar(i + 2);
+        }
+        System.out.println("username receieved: " + username.toString());
+        
+        for (int i = 0; i < password.length; i++) {
+            password[i] = credential.getChar(i + index);
+        }
+        System.out.println("password received: " + password.toString());
+        
+        
+        ctx.close();
+        return;
+
         /*
         //TODO: Add stricter username requirements
         if (credential.length() > 12 || credential.isEmpty()) {
@@ -98,9 +122,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.close();
         }
         */
-        ctx.close();
         
     }
-    
     
 }

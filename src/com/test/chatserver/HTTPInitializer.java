@@ -13,13 +13,8 @@ import io.netty.handler.ssl.SslContext;
 public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
 	
 	private final SslContext sslCtx;
-	private ChannelGroup allUsers;
-	private ArrayList<ChannelGroup> lobbies;
-	public HTTPInitializer (SslContext sslCtx, ChannelGroup group, 
-	        ArrayList<ChannelGroup> lobbies) {
+	public HTTPInitializer (SslContext sslCtx) {
 		this.sslCtx = sslCtx;
-		allUsers = group;
-		this.lobbies = lobbies;
 		
 	}
 	
@@ -30,7 +25,7 @@ public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
         }
         
         pipeline.addLast("httpServerCodec", new HttpServerCodec());
-        pipeline.addLast("httpHandler", new HttpServerHandler(allUsers, lobbies));
+        pipeline.addLast("httpHandler", new HttpServerHandler());
 
     }
 }
