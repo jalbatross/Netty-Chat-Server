@@ -15,8 +15,9 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
  * Class used to authenticate users. Current implementation should handle 
  * byte buffers with the following structure:
  * 
- * [ short INDEX, char[] NAME, char[] PASSWORD ]
+ * [ short LEN, short INDEX, char[] NAME, char[] PASSWORD ]
  * 
+ * LEN: 2 byte short, represents length of bytebuf
  * INDEX: A 2 byte short corresponding to the index of the first readable byte
  * of PASSWORD.
  * NAME: A char[] with 1-12 characters. Max size of 24 bytes.
@@ -56,18 +57,23 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.close();
             return;
         }
+        System.out.println("Received a bytebuf");
         
         ByteBuf credential = (ByteBuf) msg;
         
-        //Block until we receive the entire credential
-        if (credential.readableBytes() < credential.capacity()) {
+        //Block until we receive the length and index
+        if (credential.readableBytes() < 4) {
             return;
         }
         
-        int index = credential.getShort(0);
+        int len = credential.getShort(0);
+        int index = credential.getShort(2);
         
-        char[] username = new char[index - 2];
-        char[] password = new char[credential.capacity() - index];
+        System.out.println("Length of bytebuf:" + len);
+        System.out.println("beginning index of pw: " + index);
+        
+        char[] username = new char[index - 4];
+        char[] password = new char[len - index];
         
         for (int i = 0; i < username.length; i++){
             username[i] = credential.getChar(i + 2);

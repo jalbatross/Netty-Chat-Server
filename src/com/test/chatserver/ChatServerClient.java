@@ -60,6 +60,7 @@ public class ChatServerClient {
     //static final String URL = System.getProperty("url", "wss://34.212.146.20:8080/websocket");
     
 	private static String name = new String();
+	private static String pwd = new String();
 	final static AttributeKey<Boolean> AUTHKEY = AttributeKey.valueOf("authorized");
 	
 	public static void main(String[] args) throws Exception {
@@ -68,6 +69,9 @@ public class ChatServerClient {
 	    System.out.println("Hello! Before we begin, what's your name?");
 	    Scanner reader = new Scanner(System.in);  // Reading from System.in
 	    name = reader.nextLine();
+	    
+	    System.out.println("and your password?");
+	    pwd = reader.nextLine();
 	    
 		URI uri = new URI(URL);
 		String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
@@ -125,6 +129,7 @@ public class ChatServerClient {
             	@Override
             	protected void initChannel(SocketChannel ch) {
             		ChannelPipeline p = ch.pipeline();
+            		/*
             		if (sslCtx != null) {
             			p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
             		}
@@ -132,23 +137,54 @@ public class ChatServerClient {
                               new HttpClientCodec(),
                               new HttpObjectAggregator(8192),
                               handler);
+                    *
+                    */
                 }
             });
 			
 			Channel ch = b.connect(uri.getHost(), port).sync().channel();
 			ch.attr(AUTHKEY).set(false);
 			
+			/*
 			handler.handshakeFuture().sync().addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     ch.writeAndFlush(new TextWebSocketFrame(name));
                 }
 			});
+			*/
 			
+			//Convert username/password into one bytebuf
+			int nameNumBytes = name.length() * 2;
+			int pwdNumBytes = pwd.length() * 2;
+			
+			//2 bytes for short
+            int size =  4 + nameNumBytes + pwdNumBytes;
+			int index = 5 + nameNumBytes;
+			
+			byte[] nameBytes = name.getBytes();
+			byte[] pwdBytes = pwd.getBytes();
+			
+			byte[] wordBytes = ByteBuffer.allocate(size)
+			        .putShort((short) size)
+			        .putShort((short) index)
+			        .put(nameBytes)
+			        .put(pwdBytes)
+			        .array();
+			
+			ByteBuf wordBuf = Unpooled.copiedBuffer(wordBytes);
+			
+			System.out.println("sending bytebuf with capacity: " + wordBuf.capacity());
+			System.out.println("Len: " + size +
+			        "\nIndex: " + index);
+			ch.writeAndFlush(wordBuf);
+			System.out.println("and off it goes");
+			ch.close();
 			
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			
 			
+			/*
 			while (ch.attr(AUTHKEY).get() == false) {
 			    String msg = console.readLine();
 			    if (msg == null) {
@@ -156,7 +192,7 @@ public class ChatServerClient {
 			    }
 			    WebSocketFrame frame = new TextWebSocketFrame(msg);
 			    ch.writeAndFlush(frame);
-			}
+			}*/
 			
 			//User input
 			while (true) {

@@ -83,8 +83,7 @@ public class ChatServer {
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
                      ch.pipeline().addLast(new ServerAuthHandler(allChannels, lobbies));
-                	 ch.pipeline().addLast
-                	 (new HTTPInitializer(sslCtx));
+                	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                  }
              })
              .option(ChannelOption.SO_BACKLOG, 128)          // (5)
