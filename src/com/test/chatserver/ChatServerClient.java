@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
+
  
 /**
  * 
@@ -157,6 +158,8 @@ public class ChatServerClient {
 			//Convert username/password into one bytebuf
 			byte[] nameBytes = name.getBytes("UTF-8");
 			byte[] pwdBytes = pwd.getBytes("UTF-8");
+			
+
 		
 			//4 bytes for two shorts, one for len and one for pw index
             int size =  4 + nameBytes.length + pwdBytes.length;

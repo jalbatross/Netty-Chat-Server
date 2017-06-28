@@ -56,9 +56,9 @@
   		<version>42.1.1</version>
   	</dependency>
   	<dependency>
-  		<groupId>org.capnproto</groupId>
-  		<artifactId>runtime</artifactId>
-  		<version>0.1.2</version>
+  		<groupId>com.github.davidmoten</groupId>
+  		<artifactId>flatbuffers-java</artifactId>
+  		<version>1.7.0.1</version>
   	</dependency>
   </dependencies>
 </project>
