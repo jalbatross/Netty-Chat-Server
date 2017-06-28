@@ -41,7 +41,14 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
         LoginAuthorizer login = new LoginAuthorizer();
         
-        login.verifyUser("poopie", "abcde");
+        if (login.verifyUser("admin", "abcdef")) {
+            System.out.println("Good auth");
+            
+        }
+        else {
+            System.out.println("Bad auth");
+        }
+        
         //User is trying to do something strange for authentication, close
         //connection immediately.
         if (!(msg instanceof TextWebSocketFrame)) {

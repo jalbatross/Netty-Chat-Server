@@ -82,28 +82,25 @@ public class LoginAuthorizer {
      */
     public boolean verifyUser(String name, String password) throws Exception {
         Connection dbConn;
-        
+        Argon2 argon2 = Argon2Factory.create();
         try {
             dbConn = this.connect();
         
             //Check if username is in DB
-            
             String query = "SELECT hash FROM auth WHERE name = ?";
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
-            long uid = 0;
             preparedQuery.setString(1, name);
             
+            
             ResultSet rs = preparedQuery.executeQuery();
-            if (!rs.next()){
-                System.out.println("incorrect username/password combination");
+            
+            if (!rs.next() || !argon2.verify(rs.getString(1), password) ){
                 return false;
             }
-            rs.next();
-            
-            
-            System.out.println(rs.getString(1));
-            return true;
+            else{
+                return true;
+            }
             
             
         }
