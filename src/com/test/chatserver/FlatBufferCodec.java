@@ -6,6 +6,19 @@ import java.nio.ByteBuffer;
 
 import com.google.flatbuffers.FlatBufferBuilder;
 
+/**
+ * Class to convert between FlatBuffers and Credentials.
+ * 
+ * Intended to be used for user authentication for a simple chat server,
+ * or any other type of simple application.
+ * 
+ * Sending serialized data as opposed to plaintext acts as a reduction of
+ * vulnerability during transmission.
+ * 
+ * @author jalbatross (Joey Albano)
+ *
+ */
+
 public class FlatBufferCodec {
     
     /**
