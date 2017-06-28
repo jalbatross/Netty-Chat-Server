@@ -47,3 +47,9 @@ Simple netty chat server &amp; client
  ### June 25, 2017: Mongo?
  - Successfully set up a local Mongo server but I'm thinking relational might be better for storing usernames/passwords.
  - Trying to figure out how to do lobbies - Mongo? Server side? Right now I want the user to query a lobby list before adding the actual ChatServeerandler to the pipeline, which makes sense because the ChatServerHandler references a ChatGroup. Lobbies should be static or instantiated on server start? Lots to think about here.
+
+### June 27, 2017: Postgres, changing login approach
+ - Decided that Mongo would not be suitable for my needs here. We should definitely have a schema for usernames/passwords.
+ - Getting a little more familiar with Postgres and Argon2. I feel good about the ability to add and verify user logins with the database. 
+ - I want to perform a restructuring so that we perform the handshake AFTER successful authentication. This is going to involve moving around a lot of code all around everywhere, but it's necessary. Firstly, we don't want to have the overhead of performing a handshake every time someone wants to login - that should only happen if we actually have somebody who is in the system. Secondly, we can send credentials more securely if we don't use text websockets to send in user credentials.
+ - Looks really annoying to do, but let's get started! It's not gonna fix itself after all.
