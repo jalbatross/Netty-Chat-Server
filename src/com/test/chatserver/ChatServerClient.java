@@ -37,6 +37,8 @@ import java.util.Scanner;
 
 import com.google.gson.Gson;
 
+import Schema.Credentials;
+
  
 /**
  * 
@@ -154,6 +156,12 @@ public class ChatServerClient {
                 }
 			});
 			*/
+			
+			byte[] transport = FlatBufferCodec.credentialsToByteArr("Holy", "Cow");
+			Credentials cred = FlatBufferCodec.byteArrToCredentials(transport);
+			
+			System.out.println("user: " + cred.username());
+			System.out.println("pass: " + cred.password());
 			
 			//Convert username/password into one bytebuf
 			byte[] nameBytes = name.getBytes("UTF-8");
