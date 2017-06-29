@@ -157,31 +157,18 @@ public class ChatServerClient {
 			});
 			*/
 			
-			byte[] transport = FlatBufferCodec.credentialsToByteArr("Holy", "Cow");
-			Credentials cred = FlatBufferCodec.byteArrToCredentials(transport);
+			ByteBuffer flatbuf = FlatBufferCodec.credentialsToByteBuffer(name, pwd);
 			
-			System.out.println("user: " + cred.username());
-			System.out.println("pass: " + cred.password());
+			//Get size of Flatbuffer
+			byte[] len = new byte[4];
+			len = ByteBuffer.wrap(len).putInt(flatbuf.remaining()).array();
 			
-			//Convert username/password into one bytebuf
-			byte[] nameBytes = name.getBytes("UTF-8");
-			byte[] pwdBytes = pwd.getBytes("UTF-8");
+			//Prepend flatbuffer with length
+			ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
+			ByteBuf wordBuf = Unpooled.copiedBuffer(flatbuf);
 			
-
-		
-			//4 bytes for two shorts, one for len and one for pw index
-            int size =  4 + nameBytes.length + pwdBytes.length;
-			int index = 4 + nameBytes.length;			
-			
-			byte[] wordBytes = ByteBuffer.allocate(size)
-			        .putShort((short) size)
-			        .putShort((short) index)
-			        .put(nameBytes)
-			        .put(pwdBytes)
-			        .array();
-			
-			ByteBuf wordBuf = Unpooled.copiedBuffer(wordBytes);
-			
+			//Write to channel
+			ch.write(lenPrefix);
 			ch.writeAndFlush(wordBuf);
 			ch.close();
 			

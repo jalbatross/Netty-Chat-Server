@@ -3,6 +3,7 @@ package com.test.chatserver;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import Schema.Credentials;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,31 +14,25 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 /**
  * Class used to authenticate users. Current implementation should handle 
- * byte buffers with the following structure:
- * 
- * [ short LEN, short INDEX, char[] NAME, char[] PASSWORD ]
- * 
- * LEN: 2 byte short, represents length of bytebuf
- * INDEX: A 2 byte short corresponding to the index of the first readable byte
- * of PASSWORD.
- * NAME: A char[] with 1-12 characters. Max size of 24 bytes.
- * PASSWORD: A char[] with 1-51 characters. Max size of 102 bytes.
- * 
- * All char[] should be UTF-8 encoded and the ByteBuf is assumed to be
- * Big Endian.
+ * FlatBuffers Serialized credentials as ByteBufs. Each serialized Credentials
+ * should be prefixed by a 4 byte integer indicating the size in bytes of
+ * the serialized FlatBuffer.
  * 
  * Upon successful registration or authentication of the provided username/password
  * pair, ServerAuthHandler removes itself from the pipeline with handlers that 
  * are useful for server functionality.
  * 
- * @author joey
+ * @author jalbatross (Joey Albano)
  *
  */
 
 public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
-    String username = new String();
-    ChannelGroup allUsers;
-    ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+    private String username = new String();
+    private ChannelGroup allUsers;
+    private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+    private int msgLen = 0;
+    
+    private static int MAX_MSG_LEN = FlatBufferCodec.SERIALIZED_CRED_LEN;
     
     public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
         allUsers = grp;
@@ -57,45 +52,33 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.close();
             return;
         }
-        System.out.println("Received a bytebuf");
         
-        ByteBuf credential = (ByteBuf) msg;
+        ByteBuf buf = (ByteBuf) msg;
         
-        //Block until we receive the length and index
-        if (credential.readableBytes() < 4) {
+        //Block until we receive the length
+        if (buf.readableBytes() < 4) {
             return;
         }
         
-        int len = credential.getShort(0);
-        int index = credential.getShort(2);
+        buf.markReaderIndex();
+        msgLen = buf.readInt();
         
-        System.out.println("Length of bytebuf:" + len);
-        System.out.println("beginning index of pw: " + index);
-        
-        char[] username = new char[(index - 4)];
-        char[] password = new char[(len - index)];
-        
-        System.out.println("name len: " + (index - 4) + " bytes");
-        System.out.println("pw len: "+ (len - index) + " bytes");
-        
-        for (int i = 0; i < username.length; i ++){
-            System.out.println("reading byte: " + (i + 4));
-            username[i] = (char) credential.getByte(i + 4);
-            credential.setByte(i+ 4, 0);
-            System.out.println("got character: " + username[i]);
-            
+        if (msgLen > MAX_MSG_LEN) {
+            ctx.close();
+            return;
         }
-        System.out.println("username receieved: " + username.toString());
-        
-        for (int i = 0; i < password.length; i++) {
-            System.out.println("reading byte: " + (i + index));
-            password[i] = (char) credential.getByte(i + index );
-            credential.setByte(i + index, 0);
-            System.out.println("got character: " + password[i]);
+
+        if (buf.readableBytes() < msgLen) {
+           return;
         }
+
+        //Convert everything after len to credential
+        Credentials credentials = FlatBufferCodec.byteBufToCredentials
+                (buf.nioBuffer(4, msgLen + 4));
         
-        
-        
+        System.out.println("Got username: " + credentials.username());
+        System.out.println("Got pw: " + credentials.password());
+
         ctx.close();
         return;
 

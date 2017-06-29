@@ -20,7 +20,7 @@ import com.google.flatbuffers.FlatBufferBuilder;
  */
 
 public class FlatBufferCodec {
-    
+    public static final int SERIALIZED_CRED_LEN = 1024;
     /**
      * Creates a serialized Credentials Flatbuffer as a ByteBuffer of
      * length 128 bytes. Strings should be UTF-8 encoded to conform to
@@ -33,9 +33,9 @@ public class FlatBufferCodec {
      */
     static public ByteBuffer credentialsToByteBuffer(String name, String pw) {
         
-        FlatBufferBuilder builder = new FlatBufferBuilder(128);   
+        FlatBufferBuilder builder = new FlatBufferBuilder(SERIALIZED_CRED_LEN);   
         credentialToFlatBuff(builder, name, pw);
-    
+        
         return builder.dataBuffer();
     }
     
@@ -51,9 +51,9 @@ public class FlatBufferCodec {
      */
     static public byte[] credentialsToByteArr(String name, String pw) {
         
-        FlatBufferBuilder builder = new FlatBufferBuilder(128);
+        FlatBufferBuilder builder = new FlatBufferBuilder(SERIALIZED_CRED_LEN);
         credentialToFlatBuff(builder, name, pw);
-        
+        System.out.println("size: " + builder.sizedByteArray().length);
         return builder.sizedByteArray();
     }
     
