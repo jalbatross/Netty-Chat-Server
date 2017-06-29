@@ -11,7 +11,6 @@ import com.google.flatbuffers.*;
 public final class Credentials extends Table {
   public static Credentials getRootAsCredentials(ByteBuffer _bb) { return getRootAsCredentials(_bb, new Credentials()); }
   public static Credentials getRootAsCredentials(ByteBuffer _bb, Credentials obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public static boolean CredentialsBufferHasIdentifier(ByteBuffer _bb) { return __has_identifier(_bb, "CRED"); }
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
   public Credentials __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -38,6 +37,5 @@ public final class Credentials extends Table {
     builder.required(o, 6);  // password
     return o;
   }
-  public static void finishCredentialsBuffer(FlatBufferBuilder builder, int offset) { builder.finish(offset, "CRED"); }
 }
 

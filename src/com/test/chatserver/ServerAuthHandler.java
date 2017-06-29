@@ -68,8 +68,17 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         String user = credentials.username();
         char[] pass = credentials.password().toCharArray();
         
-        login.verifyUser(user, pass);
+        if (login.verifyUser(user, pass)) {
+            ctx.channel().pipeline().remove(this);
+            //ctx.channel().pipeline().addLast(new ChatServerHandler());
+            System.out.println("correct user and pass!");
+            
+        }
+        else {
+            System.out.println("Wrong user and pass");
+        }
         
+        ctx.close();
         return;
 
         /*

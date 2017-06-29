@@ -23,7 +23,7 @@ import de.mkammerer.argon2.Argon2Factory;
  */
 
 public class LoginAuthorizer {
-    
+
     public static final int MIN_PW_LEN = 1;
     public static final int MAX_PW_LEN = 42;
     
@@ -43,6 +43,7 @@ public class LoginAuthorizer {
             System.out.println("Connected to the PostgreSQL server successfully.");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            System.out.println("failed to connect");
         }
  
         return conn;
@@ -80,11 +81,6 @@ public class LoginAuthorizer {
         try {
             dbConn = this.connect();
         
-            //Check if username is in DB
-            if (!inDb(name)) {
-                return false;
-            }
-            
             //Query DB for password
             String query = "SELECT hash FROM auth WHERE name = ?";
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
@@ -94,14 +90,13 @@ public class LoginAuthorizer {
             
             ResultSet rs = preparedQuery.executeQuery();
             
+            //Either empty resultset (user not in DB) OR bad password
             if (!rs.next() || !argon2.verify(rs.getString(1), password) ){
                 return false;
             }
             else{
                 return true;
-            }
-            
-            
+            }   
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +112,7 @@ public class LoginAuthorizer {
      * @param username   a username
      * @return true if username is a username in the db, false otherwise
      */
-    private boolean inDb(String username) {
+    public boolean inDb(String username) {
      
         return false;
     }
