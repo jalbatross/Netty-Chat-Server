@@ -31,7 +31,13 @@ public class FlatBuffersTesting {
         lobbies[2] = builder.createString("Larc");
         lobbies[3] = builder.createString("Gevergreen");
         
-        int lobbyVec = Lobbies.createListVector(builder, lobbies);
+        //int lobbyVec = Lobbies.createListVector(builder, lobbies);
+        
+        int lobster = Lobbies.createListVector(builder, new int[] {
+                builder.createString("WOO"),
+                builder.createString("lalala")
+        });
+        int lobbyVec = Lobbies.createLobbies(builder, lobster);
         
         Message.startMessage(builder);
         Message.addDataType(builder, Data.Credentials);
