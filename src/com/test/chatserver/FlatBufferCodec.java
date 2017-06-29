@@ -53,7 +53,7 @@ public class FlatBufferCodec {
         
         FlatBufferBuilder builder = new FlatBufferBuilder(SERIALIZED_CRED_LEN);
         credentialToFlatBuff(builder, name, pw);
-        System.out.println("size: " + builder.sizedByteArray().length);
+        
         return builder.sizedByteArray();
     }
     
