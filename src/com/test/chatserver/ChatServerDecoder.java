@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,9 +15,11 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 
 /**
- * Used to decode received BinaryWebSocketFrames into byte buffers. 
- * For this application, we expect to receive 14 bytes from clients for processing.
- * 
+ *  Decodes ByteBufs by blocking until they are ready to be passed down
+ *  the channel pipeline.
+ *  
+ *  Each segment of data should be prefixed by a 4 byte integer indicating
+ *  its length.
  * 
  * @author joey
  *
@@ -24,32 +27,22 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 
 public class ChatServerDecoder extends SimpleChannelInboundHandler<Object> {
     
-    public static final int MESSAGE_SIZE = 14;
+    public static final int MAX_BYTES = 1024;
+    private List<Object> out = new ArrayList<Object>();
+    
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ChatServerDecoder] Sending upstream!");
-        Channel ch = ctx.channel();
         
-        //Only need to decode BinaryWebSocketFrames
-        //Send all other messages upstream as-is
-        if (!(msg instanceof BinaryWebSocketFrame)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
+        ByteBuf buf = (ByteBuf) msg;
         
-        System.out.println("[ChatServerDecoder] Decoder received binary frame");
-        BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
+        IntegerHeaderFrameDecoder decoder = new IntegerHeaderFrameDecoder();
         
+        decoder.decode(ctx, buf, out);
+       
+        ctx.fireChannelRead(out.get(0));
         
-        if (frame.content().readableBytes() < MESSAGE_SIZE) {
-            return;
-        }
-        
-        byte[] bytes = new byte[14];
-        frame.content().readBytes(bytes);
-        ByteBuf buf = Unpooled.copiedBuffer(bytes);
-        
-        ctx.fireChannelRead(buf);
+        return;
         
     }
     

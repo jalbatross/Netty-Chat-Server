@@ -55,26 +55,15 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         
         ByteBuf buf = (ByteBuf) msg;
         
-        //Block until we receive the length
-        if (buf.readableBytes() < 4) {
-            return;
-        }
-        
-        buf.markReaderIndex();
-        msgLen = buf.readInt();
-        
-        if (msgLen > MAX_MSG_LEN) {
+        if (buf.readableBytes() > MAX_MSG_LEN) {
+            System.out.println("too large msg");
             ctx.close();
             return;
         }
 
-        if (buf.readableBytes() < msgLen) {
-           return;
-        }
-
-        //Convert everything after len to credential
+        //Convert credential
         Credentials credentials = FlatBufferCodec.byteBufToCredentials
-                (buf.nioBuffer(4, msgLen + 4));
+                (buf.nioBuffer());
         
         System.out.println("Got username: " + credentials.username());
         System.out.println("Got pw: " + credentials.password());

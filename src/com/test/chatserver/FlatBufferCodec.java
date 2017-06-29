@@ -19,15 +19,17 @@ import com.google.flatbuffers.FlatBufferBuilder;
  *
  */
 
+//TODO: Enforce maximum size of flatbuffer credential for the codec,
+
 public class FlatBufferCodec {
-    public static final int SERIALIZED_CRED_LEN = 1024;
+    public static final int SERIALIZED_CRED_LEN = 128;
     /**
-     * Creates a serialized Credentials Flatbuffer as a ByteBuffer of
-     * length 128 bytes. Strings should be UTF-8 encoded to conform to
-     * Flatbuffer requirements. 
+     * Creates a serialized Credentials Flatbuffer as a ByteBuffer. 
+     * Strings should be UTF-8 encoded to conform to Flatbuffer requirements.
+     *  
      * @param name A username ranging from 1-12 UTF-8 characters
      * @param pw   A password ranging from 1-32 UTF-8 characters
-     * @return 128 byte serialized Flatbuffer as ByteBuffer
+     * @return  Serialized Flatbuffer as ByteBuffer
      * 
      * @see package Schema 
      */

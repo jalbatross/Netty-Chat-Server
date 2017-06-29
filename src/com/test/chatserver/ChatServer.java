@@ -82,6 +82,7 @@ public class ChatServer {
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
+                     ch.pipeline().addLast(new ChatServerDecoder());
                      ch.pipeline().addLast(new ServerAuthHandler(allChannels, lobbies));
                 	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                  }

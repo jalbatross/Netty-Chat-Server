@@ -167,6 +167,7 @@ public class ChatServerClient {
 			ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
 			ByteBuf wordBuf = Unpooled.copiedBuffer(flatbuf);
 			
+			System.out.println("Len: " + flatbuf.remaining());
 			//Write to channel
 			ch.write(lenPrefix);
 			ch.writeAndFlush(wordBuf);
