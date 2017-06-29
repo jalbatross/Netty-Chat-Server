@@ -60,5 +60,10 @@
   		<artifactId>flatbuffers-java</artifactId>
   		<version>1.7.0.1</version>
   	</dependency>
+  	<dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.6</version>
+    </dependency>
   </dependencies>
 </project>

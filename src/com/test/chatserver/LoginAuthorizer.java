@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 
@@ -16,40 +18,23 @@ import de.mkammerer.argon2.Argon2Factory;
  * login and password verification as well as password hashing using 
  * Argon2. 
  * 
- * @author joey
+ * @author jalbatross (Joey Albano)
  *
  */
 
 public class LoginAuthorizer {
     
+    public static final int MIN_PW_LEN = 1;
+    public static final int MAX_PW_LEN = 42;
+    
+    public static final int MIN_USER_LEN = 1;
+    public static final int MAX_USER_LEN = 16;
+   
     private final String dbUrl = "jdbc:postgresql://localhost/mytestdb";
     private final String user = "postgres";
     private final String password = "postgres";
     
     public LoginAuthorizer() { }
-    
-    public static void main(String[] args) throws Exception {
-        try {
-            
-            String sqlUser = "INSERT INTO AUTH(name, hash) "
-                    + "VALUES(?,?)";
-                        
-            long id = 0;
-            String pw = "abcde";
-            byte[] salt = "lolol".getBytes();
-            
-            Argon2 instance = Argon2Factory.create(32, 136);
-            String hash = instance.hash(2, 65536, 1, pw);
-            System.out.println(hash);
-            System.out.println("len: " + hash.length());
-            
-            //verifyUser("admin","abcde");
-            
-        } 
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
     public Connection connect() {
         Connection conn = null;
@@ -64,9 +49,13 @@ public class LoginAuthorizer {
     }
     
     /**
-     * Queries the postgres database for the username and password.
+     * Verifies a username and password.
      * 
-     * If the user is not in the DB, returns false.
+     * Checks valid formatting for username and password, then
+     * queries the postgres database for the username and password.
+     * 
+     * If the username/password are malformed or the username is not
+     * in the DB, returns false.
      * 
      * Otherwise, queries the database for the Argon2 hash corresponding
      * to the provided username and uses Argon2 to verify that the 
@@ -80,13 +69,23 @@ public class LoginAuthorizer {
      * @return true if username and password are correct and in db, false
      *         otherwise
      */
-    public boolean verifyUser(String name, String password) throws Exception {
+    public boolean verifyUser(String name, char[] password) throws Exception {
+        
+        if (!validUsername(name) || !validPassword(password)){
+            return false;
+        }
+        
         Connection dbConn;
         Argon2 argon2 = Argon2Factory.create();
         try {
             dbConn = this.connect();
         
             //Check if username is in DB
+            if (!inDb(name)) {
+                return false;
+            }
+            
+            //Query DB for password
             String query = "SELECT hash FROM auth WHERE name = ?";
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
@@ -121,6 +120,39 @@ public class LoginAuthorizer {
     private boolean inDb(String username) {
      
         return false;
+    }
+    
+    /**
+     * Checks formatting and structure of a username. A valid username
+     * has the following characteristics:
+     * 
+     * Between MIN_USER_LEN and MAX_USER_LEN UTF-8 characters long, 
+     * alphanumeric, not all whitespace
+     * 
+     * @param username  A username string
+     * @return          True if valid, false otherwise
+     */
+    private boolean validUsername(String username) {
+        if (username.length() > MAX_USER_LEN || 
+            username.length() < MIN_USER_LEN) {
+            return false;
+        }
+        else if (StringUtils.isBlank(username) || 
+                !StringUtils.isAlphanumericSpace(username)) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Checks for valid password length. A password should be between 
+     * the min and max password UTF-8 characters long.
+     * @param pwd    A char[] password
+     * @return       True if pwd is between class min/maxes
+     */
+    private boolean validPassword(char[] pwd) {
+        return pwd.length >=MIN_PW_LEN && pwd.length <= MAX_PW_LEN;
     }
     
     

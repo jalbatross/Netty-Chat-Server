@@ -64,11 +64,12 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         //Convert credential
         Credentials credentials = FlatBufferCodec.byteBufToCredentials
                 (buf.nioBuffer());
+       
+        String user = credentials.username();
+        char[] pass = credentials.password().toCharArray();
         
-        System.out.println("Got username: " + credentials.username());
-        System.out.println("Got pw: " + credentials.password());
-
-        ctx.close();
+        login.verifyUser(user, pass);
+        
         return;
 
         /*
