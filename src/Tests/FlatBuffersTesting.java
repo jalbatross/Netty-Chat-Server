@@ -3,6 +3,7 @@ package Tests;
 import java.nio.ByteBuffer;
 
 import com.google.flatbuffers.FlatBufferBuilder;
+import com.test.chatserver.FlatBuffersCodec;
 
 import Schema.*;
 public class FlatBuffersTesting {
@@ -116,6 +117,29 @@ public class FlatBuffersTesting {
             System.out.println("---------");
         }
         
+        //Testing FlatBuffersCodecs
+        String[] dudes = {"eli","ralph","sirak","ADJUSTMENTS"};
+        ByteBuffer theBUF = FlatBuffersCodec.lobbiesToByteBuffer(dudes);
+        
+        Message theMsg = Message.getRootAsMessage(theBUF);
+        if (theMsg.dataType() == Type.Lobbies) {
+            System.out.println("successs!");
+            
+            Lobbies lobster = (Lobbies)theMsg.data(new Lobbies());
+            
+            for (int j = 0; j < lobster.listLength(); j++) {
+                System.out.println("lobby: " + ": " + lobster.list(j));
+            }
+        }
+        System.out.println("\n");
+        String theName = "jones";
+        String thePass = "wowza";
+        
+        ByteBuffer credBuf = FlatBuffersCodec.credentialsToByteBuffer(theName, thePass);
+        Message credMsg = Message.getRootAsMessage(credBuf);
+        
+        Credentials myCred = (Credentials)credMsg.data(new Credentials());
+        System.out.println(myCred.username() +  "..." + myCred.password());
 
         
     }
