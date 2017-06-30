@@ -140,6 +140,15 @@ public class FlatBuffersTesting {
         
         Credentials myCred = (Credentials)credMsg.data(new Credentials());
         System.out.println(myCred.username() +  "..." + myCred.password());
+        
+        try {
+            Credentials myCred2 = FlatBuffersCodec.byteBufToData(credBuf, Credentials.class);
+            System.out.println(myCred2.username() +  "..." + myCred2.password());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
 
         
     }
