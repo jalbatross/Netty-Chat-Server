@@ -1,19 +1,18 @@
 package com.test.chatserver;
 
-import Schema.Credentials;
+import Schema.*;
 
 import java.nio.ByteBuffer;
 
 import com.google.flatbuffers.FlatBufferBuilder;
 
 /**
- * Class to convert between FlatBuffers and Credentials.
+ * Class to convert between FlatBuffers and Messages.
  * 
- * Intended to be used for user authentication for a simple chat server,
- * or any other type of simple application.
+ * Conforms to Schema provided in the Schema package.
  * 
- * Sending serialized data as opposed to plaintext acts as a reduction of
- * vulnerability during transmission.
+ * Takes ByteBufs or byte arrays and converts them to
+ * credentials,
  * 
  * @author jalbatross (Joey Albano)
  *
@@ -21,8 +20,75 @@ import com.google.flatbuffers.FlatBufferBuilder;
 
 //TODO: Enforce maximum size of flatbuffer credential for the codec,
 
-public class FlatBufferCodec {
+public class FlatBuffersCodec {
+    
     public static final int SERIALIZED_CRED_LEN = 128;
+    public static final int DEFAULT_SIZE = 1024;
+    
+    static public ByteBuffer credentialsToByteBuffer(String name, String pw) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.Credentials);
+        Message.addData(fbb, Credentials.createCredentials(fbb,
+                fbb.createString(name), fbb.createString(pw)));
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+    }
+    
+    static public ByteBuffer authToByteBuffer(boolean verified) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.Auth);
+        Message.addData(fbb, Auth.createAuth(fbb, verified));
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+    }
+    
+    static public ByteBuffer chatToByteBuffer(TimeChatMessage chatMsg){
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.Chat);
+        Message.addData(fbb, Chat.createChat(fbb, 
+                chatMsg.getTime(), 
+                fbb.createString(chatMsg.getAuthor()), 
+                fbb.createString(chatMsg.getMsg())));
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+        
+    }
+    
+    static public ByteBuffer lobbiesToByteBuffer(String[] lobbies) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.Lobbies);
+        
+        int[] lobs = new int[lobbies.length];
+        for (int i = 0; i < lobbies.length; i ++) {
+            lobs[i] = fbb.createString(lobbies[i]);
+        }
+        
+        int lobList = Lobbies.createListVector(fbb, lobs);
+        Message.addData(fbb, Lobbies.createLobbies(fbb, lobList));
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+    }
+    
     /**
      * Creates a serialized Credentials Flatbuffer as a ByteBuffer. 
      * Strings should be UTF-8 encoded to conform to Flatbuffer requirements.
@@ -33,13 +99,14 @@ public class FlatBufferCodec {
      * 
      * @see package Schema 
      */
-    static public ByteBuffer credentialsToByteBuffer(String name, String pw) {
+    /*
+    static private ByteBuffer credentialsToByteBuffer(String name, String pw) {
         
         FlatBufferBuilder builder = new FlatBufferBuilder(SERIALIZED_CRED_LEN);   
         credentialToFlatBuff(builder, name, pw);
         
         return builder.dataBuffer();
-    }
+    }*/
     
     /**
      * Creates a serialized Credentials Flatbuffer as a byte array of

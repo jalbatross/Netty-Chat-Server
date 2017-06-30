@@ -1,4 +1,4 @@
-package com.test.chatserver;
+package Tests;
 
 import java.nio.ByteBuffer;
 
@@ -30,14 +30,8 @@ public class FlatBuffersTesting {
         lobbies[1] = builder.createString("Ceres");
         lobbies[2] = builder.createString("Larc");
         lobbies[3] = builder.createString("Gevergreen");
-        
-        //int lobbyVec = Lobbies.createListVector(builder, lobbies);
-        
-        int lobster = Lobbies.createListVector(builder, new int[] {
-                builder.createString("WOO"),
-                builder.createString("lalala")
-        });
-        int lobbyVec = Lobbies.createLobbies(builder, lobster);
+        int lobbyList = Lobbies.createListVector(builder, lobbies);
+        int lobbyVec = Lobbies.createLobbies(builder, lobbyList);
         
         Message.startMessage(builder);
         Message.addDataType(builder, Data.Credentials);
@@ -82,7 +76,7 @@ public class FlatBuffersTesting {
         
         messages[4] = authMsg;
         
-      //expect: cred , auth, chat, lobby, auth"
+      //expect: cred , auth, chat, lobby, auth
         for (int i = 0; i < messages.length; i ++) {
             switch (messages[i].dataType()) {
                 case Type.Chat:

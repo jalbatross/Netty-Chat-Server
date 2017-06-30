@@ -32,7 +32,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     private int msgLen = 0;
     
-    private static int MAX_MSG_LEN = FlatBufferCodec.SERIALIZED_CRED_LEN;
+    private static int MAX_MSG_LEN = FlatBuffersCodec.SERIALIZED_CRED_LEN;
     
     public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
         allUsers = grp;
@@ -62,7 +62,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         }
 
         //Convert credential
-        Credentials credentials = FlatBufferCodec.byteBufToCredentials
+        Credentials credentials = FlatBuffersCodec.byteBufToCredentials
                 (buf.nioBuffer());
        
         String user = credentials.username();

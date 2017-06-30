@@ -157,7 +157,7 @@ public class ChatServerClient {
 			});
 			*/
 			
-			ByteBuffer flatbuf = FlatBufferCodec.credentialsToByteBuffer(name, pwd);
+			ByteBuffer flatbuf = FlatBuffersCodec.credentialsToByteBuffer(name, pwd);
 			
 			//Get size of Flatbuffer
 			byte[] len = new byte[4];
