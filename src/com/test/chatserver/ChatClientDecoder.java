@@ -25,13 +25,13 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
  *
  */
 
-public class ChatClientDecoder extends SimpleChannelInboundHandler<Object> {
+public class ChatClientDecoder extends ChannelInboundHandlerAdapter {
     
     public static final int MAX_BYTES = 1024;
     private List<Object> out = new ArrayList<Object>();
     
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ChatClientDecoder] Sending upstream!");
         
         if (!(msg instanceof ByteBuf)) {
@@ -51,6 +51,13 @@ public class ChatClientDecoder extends SimpleChannelInboundHandler<Object> {
         return;
         
     }
+    
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        System.out.println("[ClientDecoder] Decoder Active");
+    }
+    
+    
     
 
 }

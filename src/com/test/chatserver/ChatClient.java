@@ -132,6 +132,7 @@ public class ChatClient {
             	@Override
             	protected void initChannel(SocketChannel ch) {
             		ChannelPipeline p = ch.pipeline();
+            		p.addLast(new ChatClientDecoder());
             		/*
             		if (sslCtx != null) {
             			p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
@@ -170,20 +171,38 @@ public class ChatClient {
 			//Write to channel
 			ch.write(lenPrefix);
 			ch.writeAndFlush(wordBuf);
-			ch.close();
 			
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			
-			
-			/*
 			while (ch.attr(AUTHKEY).get() == false) {
-			    String msg = console.readLine();
-			    if (msg == null) {
+			    System.out.println("bad username and pass! try again");
+			    
+			    System.out.println("enter a username: ");
+			    name = console.readLine();
+			    System.out.println("enter a password: ");
+			    pwd = console.readLine();
+			   
+			    if (name == null || pwd == null) {
 			        return;
 			    }
-			    WebSocketFrame frame = new TextWebSocketFrame(msg);
-			    ch.writeAndFlush(frame);
-			}*/
+			    flatbuf = FlatBuffersCodec.credentialsToByteBuffer(name, pwd);
+	            
+	            //Get size of Flatbuffer
+	            Arrays.fill(len, (byte) 0); 
+	            len = ByteBuffer.wrap(len).putInt(flatbuf.remaining()).array();
+	            
+	            //Prepend flatbuffer with length
+	            lenPrefix = Unpooled.copiedBuffer(len);
+	            wordBuf = Unpooled.copiedBuffer(flatbuf);
+	            
+	            //Write to channel
+	            ch.write(lenPrefix);
+	            ch.writeAndFlush(wordBuf);
+	            
+
+			}
+			
+			System.out.println("user authenticated!!");
 			
 			//User input
 			while (true) {

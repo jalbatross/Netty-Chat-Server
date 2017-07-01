@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,7 +8,9 @@ import java.util.HashSet;
 import Schema.Credentials;
 import Schema.Message;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
@@ -32,9 +35,15 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private String username = new String();
     private ChannelGroup allUsers;
     private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
-    private int msgLen = 0;
+    
+    private Channel ch;
     
     private static int MAX_MSG_LEN = FlatBuffersCodec.SERIALIZED_CRED_LEN;
+    
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        ch = ctx.channel();
+    }
     
     public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
         allUsers = grp;
@@ -73,21 +82,39 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         //Convert credential 
         Credentials credentials = FlatBuffersCodec.byteBufToData(buf.nioBuffer(), Credentials.class);
        
+        System.out.println("received user: " + credentials.username() +
+                "\nreceived pass: " + credentials.password()); 
         String user = credentials.username();
         char[] pass = credentials.password().toCharArray();
         
         if (login.verifyUser(user, pass)) {
-            ctx.channel().pipeline().remove(this);
-            //ctx.channel().pipeline().addLast(new ChatServerHandler());
+            ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true);
+            
+            byte[] len = new byte[4];
+            len = ByteBuffer.wrap(len).putInt(auth.remaining()).array();
+            
+            //Prepend flatbuffer with length
+            ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
+            ByteBuf authBuf = Unpooled.copiedBuffer(auth);
+
+            //Write to channel
+            ch.write(lenPrefix);
+            ChannelFuture cf = ch.writeAndFlush(authBuf);
+            if (!cf.isSuccess()) {
+                System.out.println(cf.cause());
+            }
+            
             System.out.println("correct user and pass!");
+            
             
         }
         else {
             System.out.println("Wrong user and pass");
+            
         }
         Arrays.fill(pass, '0');
         
-        ctx.close();
+
         return;
 
         /*
