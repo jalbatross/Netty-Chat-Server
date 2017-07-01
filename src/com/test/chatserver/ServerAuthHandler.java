@@ -1,9 +1,11 @@
 package com.test.chatserver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import Schema.Credentials;
+import Schema.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -61,9 +63,15 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        //Convert credential
-        Credentials credentials = FlatBuffersCodec.byteBufToCredentials
-                (buf.nioBuffer());
+        Message received = Message.getRootAsMessage(buf.nioBuffer());
+        
+        if (received.dataType() != Schema.Type.Credentials) {
+            System.out.println("ServerAuthHandler didn't receive Credentials!");
+            ctx.close();
+            return;
+        }
+        //Convert credential 
+        Credentials credentials = FlatBuffersCodec.byteBufToData(buf.nioBuffer(), Credentials.class);
        
         String user = credentials.username();
         char[] pass = credentials.password().toCharArray();
@@ -77,6 +85,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         else {
             System.out.println("Wrong user and pass");
         }
+        Arrays.fill(pass, '0');
         
         ctx.close();
         return;

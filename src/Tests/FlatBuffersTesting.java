@@ -6,6 +6,13 @@ import com.google.flatbuffers.FlatBufferBuilder;
 import com.test.chatserver.FlatBuffersCodec;
 
 import Schema.*;
+
+/**
+ * Testing class for FlatBuffers schema and FlatBuffersCodec
+ * 
+ * @author jalbatross (Joey Albano)
+ *
+ */
 public class FlatBuffersTesting {
     
     public static void main (String[] args) {

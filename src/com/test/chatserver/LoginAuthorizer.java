@@ -67,8 +67,8 @@ public class LoginAuthorizer {
      * 
      * @param name     username in psql database
      * @param password password corresponding to username
-     * @return true if username and password are correct and in db, false
-     *         otherwise
+     * @return         true if username and password are correct 
+     *                 and in db, false otherwise
      */
     public boolean verifyUser(String name, char[] password) throws Exception {
         
@@ -86,7 +86,6 @@ public class LoginAuthorizer {
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
             preparedQuery.setString(1, name);
-            
             
             ResultSet rs = preparedQuery.executeQuery();
             

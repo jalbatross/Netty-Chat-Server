@@ -1,7 +1,7 @@
 package com.test.chatserver;
 
 /**
- * A class intended to be used to transmit chat messages between clients
+ * An object intended to be used to transmit chat messages between clients
  * and servers.
  * 
  * Each chat message contains an author and a message.

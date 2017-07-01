@@ -52,7 +52,7 @@ import Schema.Credentials;
  *
  */
 
-public class ChatServerClient {
+public class ChatClient {
 	
     //Regular Websockets
     static final String URL = System.getProperty("url", "ws://127.0.0.1:8080/websocket");
