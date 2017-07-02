@@ -2,12 +2,6 @@ var socket;
 var connected = false;
 var connectionFailed = true;
 
-var fs = require('fs');
-var flatbuffers = require('../flatbuffers').flatbuffers;
-var MyGame = require('./schema_generated').Message;
-
-var buf = new flatbuffers.ByteBuffer(data);
-
 
 window.onload = function() {
     

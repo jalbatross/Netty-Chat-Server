@@ -1,16 +1,41 @@
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 <div class="login">
   <div class="login-circle"></div>
   
   <h2 class="login-header">Log in</h2>
 
-  <form class="login-container">
-    <p><input type="text" placeholder="Username"></p>
-    <p><input type="password" placeholder="Password"></p>
+<div id ="loginContainer" >
+  <form id = "loginForm" class="login-container" login>
+    <p id ="name"><input type="text" placeholder="Username"></p>
+    <p id ="pass"><input type="password" ng-model='password' placeholder="Password"></p>
     <p><input type="submit" value="Log in"></p>
   </form>
 </div>
 
+</div>
+
+<script>
+  
+var xhr = new XMLHttpRequest();
+var username = document.getElementById("name").data;
+var pass = document.getElementById("pass").data;
+
+document.getElementById("loginForm").onsubmit = function () {
+  xhr.open("POST", "http://localhost:8080/websocket", true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({
+      value: username
+  }));
+}
+
+</script>
+
 <style media="screen" type="text/css">
+
+
+
 
 /**
 Stolen from https://codepen.io/miroot/pen/qwIgC
