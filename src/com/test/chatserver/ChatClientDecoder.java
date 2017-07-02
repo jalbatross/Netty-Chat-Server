@@ -3,6 +3,7 @@ package com.test.chatserver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -28,7 +29,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 public class ChatClientDecoder extends ChannelInboundHandlerAdapter {
     
     public static final int MAX_BYTES = 1024;
-    private List<Object> out = new ArrayList<Object>();
+    private Stack<Object> out = new Stack<Object>();
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -41,12 +42,16 @@ public class ChatClientDecoder extends ChannelInboundHandlerAdapter {
         }
         
         ByteBuf buf = (ByteBuf) msg;
+        System.out.println("Decoder received msg total size: " + buf.readableBytes());
         
         IntegerHeaderFrameDecoder decoder = new IntegerHeaderFrameDecoder();
         
         decoder.decode(ctx, buf, out);
-       
-        ctx.fireChannelRead(out.get(0));
+        
+        ByteBuf decoded = (ByteBuf) out.peek();
+        
+        System.out.println("out size: " + decoded.nioBuffer().remaining());
+        ctx.fireChannelRead(out.pop());
         
         return;
         

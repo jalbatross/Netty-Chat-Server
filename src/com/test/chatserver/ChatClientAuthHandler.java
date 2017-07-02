@@ -29,10 +29,17 @@ public class ChatClientAuthHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buf = (ByteBuf) msg;
         Message flatbufMsg = Message.getRootAsMessage(buf.nioBuffer());
         
-        if (flatbufMsg.dataType() == Type.Auth){
+        if (flatbufMsg.dataType() == Schema.Type.Auth){
+            System.out.println("[ChatClientAuth] Received Auth packet");
             Auth auth = (Auth) flatbufMsg.data(new Auth());
             
             ctx.channel().attr(AttributeKey.valueOf("authorized")).set(auth.verified());
+            if (auth.verified()) {
+                System.out.println("User verified!");
+            }
+            else {
+                System.out.println("User login failed");
+            }
         }
         
         ctx.fireChannelRead(msg);

@@ -104,27 +104,10 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             ByteBuf authBuf = Unpooled.copiedBuffer(auth);
             
             System.out.println("len prefix data: " + lenPrefix.getInt(0));
+            
             //Write to channel
-            ChannelFuture prefix = ch.write(lenPrefix);
-            prefix.addListener(new ChannelFutureListener() {
-                public void operationComplete(ChannelFuture future) {
-                    System.out.println("finished writing prefix");
-                    if (!future.isSuccess()) {
-                        System.out.println("prefix failed to write");
-                    }
-                    else {
-                        System.out.println("prefix wrote!");
-                    }
-                }
-            });
-            
-
-            ChannelFuture cf = ch.writeAndFlush(authBuf);
-            if (!cf.isSuccess()) {
-                System.out.println("write auth failed");
-                System.out.println(cf.cause());
-            }
-            
+            ch.write(lenPrefix);
+            ch.writeAndFlush(authBuf);
             System.out.println("correct user and pass!");
             
             

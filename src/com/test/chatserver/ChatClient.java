@@ -133,6 +133,8 @@ public class ChatClient {
             	protected void initChannel(SocketChannel ch) {
             		ChannelPipeline p = ch.pipeline();
             		p.addLast(new ChatClientDecoder());
+            		p.addLast(new ChatClientAuthHandler());
+            		
             		/*
             		if (sslCtx != null) {
             			p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
@@ -172,6 +174,7 @@ public class ChatClient {
 			ch.write(lenPrefix);
 			ch.writeAndFlush(wordBuf);
 			
+			Thread.sleep(1000);
 			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			
 			while (ch.attr(AUTHKEY).get() == false) {
@@ -198,8 +201,7 @@ public class ChatClient {
 	            //Write to channel
 	            ch.write(lenPrefix);
 	            ch.writeAndFlush(wordBuf);
-	            
-
+	            Thread.sleep(1000);
 			}
 			
 			System.out.println("user authenticated!!");
