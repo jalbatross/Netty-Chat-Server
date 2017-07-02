@@ -84,7 +84,7 @@ public class ChatServer {
                  public void initChannel(SocketChannel ch) throws Exception {
                      ch.pipeline().addLast(new ChatServerDecoder());
                      ch.pipeline().addLast(new ServerAuthHandler(allChannels, lobbies));
-                	 ch.pipeline().addLast(new HTTPInitializer(sslCtx));
+                	 //ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                  }
              })
              .option(ChannelOption.SO_BACKLOG, 128)          // (5)

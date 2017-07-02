@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import Schema.Auth;
 import Schema.Credentials;
 import Schema.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
@@ -90,17 +92,36 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         if (login.verifyUser(user, pass)) {
             ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true);
             
-            byte[] len = new byte[4];
-            len = ByteBuffer.wrap(len).putInt(auth.remaining()).array();
-            
+            System.out.println("auth size: " + auth.remaining());
+
+            ByteBuffer temp = ByteBuffer.allocate(4);
+            temp.putInt(auth.remaining());
+            byte[] len = temp.array();
+
+
             //Prepend flatbuffer with length
             ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
             ByteBuf authBuf = Unpooled.copiedBuffer(auth);
-
+            
+            System.out.println("len prefix data: " + lenPrefix.getInt(0));
             //Write to channel
-            ch.write(lenPrefix);
+            ChannelFuture prefix = ch.write(lenPrefix);
+            prefix.addListener(new ChannelFutureListener() {
+                public void operationComplete(ChannelFuture future) {
+                    System.out.println("finished writing prefix");
+                    if (!future.isSuccess()) {
+                        System.out.println("prefix failed to write");
+                    }
+                    else {
+                        System.out.println("prefix wrote!");
+                    }
+                }
+            });
+            
+
             ChannelFuture cf = ch.writeAndFlush(authBuf);
             if (!cf.isSuccess()) {
+                System.out.println("write auth failed");
                 System.out.println(cf.cause());
             }
             
