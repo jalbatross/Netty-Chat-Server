@@ -149,5 +149,25 @@ public class LoginAuthorizer {
         return pwd.length >=MIN_PW_LEN && pwd.length <= MAX_PW_LEN;
     }
     
+    public static void main (String[] args) {
+        String myPass = "PlatinumP";
+        
+        Argon2 argon2 = Argon2Factory.create();
+        
+        String theHash = argon2.hash(2, 65536, 1, myPass);
+        System.out.println(theHash);
+        
+        if (argon2.verify(theHash,myPass)) {
+            System.out.println(myPass + " was the correct pw!");
+            System.out.println("The hash was: " + theHash);
+        }
+        
+        theHash = argon2.hash(2, 65536, 1, myPass);
+        if (argon2.verify(theHash,myPass)) {
+            System.out.println(myPass + " was the correct pw!");
+            System.out.println("The hash was: " + theHash);
+        }
+    }
+    
     
 }

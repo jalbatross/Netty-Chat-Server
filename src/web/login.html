@@ -8,8 +8,8 @@
 
 <div id ="loginContainer" >
   <form id = "loginForm" class="login-container" login>
-    <p id ="name"><input type="text" placeholder="Username"></p>
-    <p id ="pass"><input type="password" ng-model='password' placeholder="Password"></p>
+    <p><input type="text" id ="name" placeholder="Username"></p>
+    <p><input type="password" id ="pass" ng-model='password' placeholder="Password"></p>
     <p><input type="submit" value="Log in"></p>
   </form>
 </div>
@@ -19,10 +19,12 @@
 <script>
   
 var xhr = new XMLHttpRequest();
-var username = document.getElementById("name").data;
-var pass = document.getElementById("pass").data;
+var username = document.getElementById('name').data;
+var username2 = username.value;
+var pass = document.getElementById('pass').data;
 
 console.log("username: " , username);
+console.log("username2: " , username2);
 console.log("password: " , pass);
 document.getElementById("loginForm").onsubmit = function () {
   xhr.open("POST", "http://localhost:8080", true);
