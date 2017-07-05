@@ -28,9 +28,6 @@ document.getElementById("loginForm").onsubmit = function () {
   username = document.getElementById('name').value;
   pass = document.getElementById('pass').value;
 
-  console.log("user: ", username);
-  console.log("pass: ", pass);
-
   var data = JSON.stringify({username: username, password: pass});
 
   $.ajax({
@@ -41,8 +38,11 @@ document.getElementById("loginForm").onsubmit = function () {
     alert( "Data Saved: " + msg );
   });
 
-  xhr.send
+  xhr.send;
 
+  //TODO: Do cool transition for this (fadeaway)
+  document.getElementById('name').value = '';
+  document.getElementById('pass').value = '';
   return false;
 }
 
