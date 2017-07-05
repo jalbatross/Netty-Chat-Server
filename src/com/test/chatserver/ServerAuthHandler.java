@@ -23,7 +23,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
  * Class used to authenticate users. Current implementation should handle 
  * FlatBuffers Serialized credentials as ByteBufs. Each serialized Credentials
  * should be prefixed by a 4 byte integer indicating the size in bytes of
- * the serialized FlatBuffer.
+ * the serialized FlatBuffer OR a JSON object conforming to the following schema:
+ * {username: someUser, password: somePass}
  * 
  * Upon successful registration or authentication of the provided username/password
  * pair, ServerAuthHandler removes itself from the pipeline with handlers that 
@@ -34,9 +35,11 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
  */
 
 public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
+    
     private String username = new String();
     private ChannelGroup allUsers;
     private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+    private LoginAuthorizer login = new LoginAuthorizer();
     
     private Channel ch;
     
@@ -56,16 +59,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
         
-        LoginAuthorizer login = new LoginAuthorizer();
-        
-        //Close connection if receive invalid credential
-        if (!(msg instanceof ByteBuf)) {
-            System.out.println("Bad credential format received");
-            //TODO: send ERROR flatbuffer to user
-            ctx.close();
-            return;
-        }
-        
+        if (msg instanceof ByteBuf) {
         ByteBuf buf = (ByteBuf) msg;
         
         if (buf.readableBytes() > MAX_MSG_LEN) {
@@ -117,7 +111,14 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             
         }
         Arrays.fill(pass, '0');
+        }
         
+        else {
+            System.out.println(msg.getClass());
+            System.out.println("end");
+            ctx.close();
+            return;
+        }
 
         return;
 

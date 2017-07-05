@@ -8,6 +8,8 @@ import java.util.Stack;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,14 +27,36 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 
+/**
+ * Identifies the protocol that clients are using to send credentials with, 
+ * then delegates the credentials to the appropriate handler based on the 
+ * received format.
+ * 
+ * Current valid credential formats are JSON using HTTP POST conforming to the
+ * following schema: 
+ * 
+ * {username: aUsername, password: aPassword}
+ * 
+ * and Flatbuffers serialized credentials as specified in the Schema package
+ * of this project.
+ * 
+ * @author Jalbatross (Joey Albano)
+ *
+ */
+
 public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
     private List<Object> decoded = new Stack<Object>();
-
+    
+    //number of characters to check at end of HTML request to find JSON 
+    //message
+    public static final int JSON_BUFFER_SIZE = 128;
+    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ChatServerProtocolHandler] channelread called");
@@ -44,12 +68,17 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         
         final int magic1 = buf.getUnsignedByte(buf.readerIndex());
         final int magic2 = buf.getUnsignedByte(buf.readerIndex() + 1);
+        final int readableBytes = buf.readableBytes();
         
+        //If POST, forward the message to the HTTP post decoder
         if (isPost(magic1,magic2)){
+            ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
+            
+            
+            
+        /*
             //Find the JSON object, starting from the end of the HTTP message
-            //Name + password should not be longer than 128 chars, so adding in the JSON
-            //formatting should not change that either
-            char[] chars = new char[128];
+            char[] chars = new char[JSON_BUFFER_SIZE];
             int val = 0;
             for (int i = 0; i < chars.length; i++) {
                 val = buf.getUnsignedByte(buf.readableBytes() - chars.length + i);
@@ -63,7 +92,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
             currentIndex = chars.length - 1;
             
             //Find the JSON object
-            while (!jsonComplete) {
+            while (!jsonComplete && currentIndex > 0) {
                 
                 if (chars[currentIndex] == '}') {
                     endJson = currentIndex;
@@ -73,36 +102,36 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
                     jsonComplete = true;
                 }
                 currentIndex--;
-                
             }
             
             //make sure it's valid
-            if (startJson > endJson || endJson - startJson > 100) {
+            if (startJson > endJson || 
+                endJson - startJson > JSON_BUFFER_SIZE) {
                 ctx.close();
                 return;
             }
             
-            char[] credentials = new char[endJson - startJson + 1];
+            String credJson = new String();
             
-            for (int i = 0; i < credentials.length; i++) {
-                credentials[i] = chars[startJson + i];
+            for (int i = 0; i < endJson - startJson + 1; i++) {
+                credJson += chars[startJson + i];
             }
             
-            String json = new String(credentials);
-            System.out.println(json);
-            //try to parse username and password
-            GsonBuilder builder = new GsonBuilder();
-            Object o = builder.create().fromJson(json, Object.class);
+            JsonObject obj = new JsonParser().parse(credJson).getAsJsonObject();
+            System.out.println(obj.get("name"));
+            System.out.println(obj.get("password"));
             
-            System.out.println(o);
+            String theName = obj.get("name").getAsString();
+            System.out.println(theName);
             
-            return;
-        } else {
-            System.out.println("ProtocolHandler] packet");
-            ctx.fireChannelRead(msg);
+            return;*/
+        }
+        //Otherwise forward the msg to the integer based frame decoder
+        else {
+            ctx.channel().pipeline().replace(this, "intFrameDecoder", new ChatServerIntFrameDecoder());
         }
 
-        return;
+        ctx.fireChannelRead(msg);
     }
 
     private static boolean isPost(int magic1, int magic2) {

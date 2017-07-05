@@ -26,7 +26,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
  *
  */
 
-public class ChatServerDecoder extends SimpleChannelInboundHandler<Object> {
+public class ChatServerIntFrameDecoder extends SimpleChannelInboundHandler<Object> {
     
     public static final int MAX_BYTES = 1024;
     private Stack<Object> out = new Stack<Object>();
