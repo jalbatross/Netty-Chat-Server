@@ -1,9 +1,13 @@
 package com.test.chatserver;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import Schema.Auth;
 import Schema.Credentials;
@@ -16,6 +20,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -40,7 +45,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private ChannelGroup allUsers;
     private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     private LoginAuthorizer login = new LoginAuthorizer();
-    
+
     private Channel ch;
     
     private static int MAX_MSG_LEN = FlatBuffersCodec.SERIALIZED_CRED_LEN;
@@ -60,63 +65,79 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
         
         if (msg instanceof ByteBuf) {
-        ByteBuf buf = (ByteBuf) msg;
-        
-        if (buf.readableBytes() > MAX_MSG_LEN) {
-            System.out.println("too large msg");
-            ctx.close();
-            return;
+            ByteBuf buf = (ByteBuf) msg;
+
+            if (buf.readableBytes() > MAX_MSG_LEN) {
+                System.out.println("too large msg");
+                ctx.close();
+                return;
+            }
+
+            Message received = Message.getRootAsMessage(buf.nioBuffer());
+
+            if (received.dataType() != Schema.Type.Credentials) {
+                System.out.println("ServerAuthHandler didn't receive Credentials!");
+                ctx.close();
+                return;
+            }
+            // Convert credential
+            Credentials credentials = FlatBuffersCodec.byteBufToData(buf.nioBuffer(), Credentials.class);
+
+            String user = credentials.username();
+            char[] pass = credentials.password().toCharArray();
+
+            if (login.verifyUser(user, pass)) {
+                ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true);
+
+                System.out.println("auth size: " + auth.remaining());
+
+                ByteBuffer temp = ByteBuffer.allocate(4);
+                temp.putInt(auth.remaining());
+                byte[] len = temp.array();
+
+                // Prepend flatbuffer with length
+                ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
+                ByteBuf authBuf = Unpooled.copiedBuffer(auth);
+
+                System.out.println("len prefix data: " + lenPrefix.getInt(0));
+
+                // Write to channel
+                ch.write(lenPrefix);
+                ch.writeAndFlush(authBuf);
+                System.out.println("correct user and pass!");
+
+            } 
+            else {
+                System.out.println("Wrong user and pass");
+
+            }
+            Arrays.fill(pass, '0');
         }
 
-        Message received = Message.getRootAsMessage(buf.nioBuffer());
-        
-        if (received.dataType() != Schema.Type.Credentials) {
-            System.out.println("ServerAuthHandler didn't receive Credentials!");
-            ctx.close();
-            return;
-        }
-        //Convert credential 
-        Credentials credentials = FlatBuffersCodec.byteBufToData(buf.nioBuffer(), Credentials.class);
-       
-        System.out.println("received user: " + credentials.username() +
-                "\nreceived pass: " + credentials.password()); 
-        String user = credentials.username();
-        char[] pass = credentials.password().toCharArray();
-        
-        if (login.verifyUser(user, pass)) {
-            ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true);
+        else if (msg instanceof HttpContent) {
+            HttpContent httpCred = (HttpContent) msg;
+            String jsonContent = httpCred.content().toString(StandardCharsets.UTF_8);
+            JsonObject obj = new JsonObject();
+            try {
+                obj = new JsonParser().parse(jsonContent).getAsJsonObject();
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                ctx.close();
+                System.out.println("failed to parse JSON during auth!");
+                System.out.println("Check credentials: bad formatting OR invalid creds");
+            }
             
-            System.out.println("auth size: " + auth.remaining());
-
-            ByteBuffer temp = ByteBuffer.allocate(4);
-            temp.putInt(auth.remaining());
-            byte[] len = temp.array();
-
-
-            //Prepend flatbuffer with length
-            ByteBuf lenPrefix = Unpooled.copiedBuffer(len);
-            ByteBuf authBuf = Unpooled.copiedBuffer(auth);
+            String username = obj.get("username").getAsString();
+            String pass = obj.get("password").getAsString();
             
-            System.out.println("len prefix data: " + lenPrefix.getInt(0));
+            if (login.verifyUser(username, pass)) {
+                System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
+            }
+            else {
+                System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
+            }
             
-            //Write to channel
-            ch.write(lenPrefix);
-            ch.writeAndFlush(authBuf);
-            System.out.println("correct user and pass!");
-            
-            
-        }
-        else {
-            System.out.println("Wrong user and pass");
-            
-        }
-        Arrays.fill(pass, '0');
-        }
-        
-        else {
-            System.out.println(msg.getClass());
-            System.out.println("end");
-            ctx.close();
             return;
         }
 

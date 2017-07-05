@@ -65,8 +65,11 @@ public class LoginAuthorizer {
      * If the password is correct, returns true. All other situations
      * return false
      * 
+     * This implementation is considered to be more secure because we use
+     * a char[] for our password parameter as opposed to String
+     * 
      * @param name     username in psql database
-     * @param password password corresponding to username
+     * @param password password corresponding to username as a char[]
      * @return         true if username and password are correct 
      *                 and in db, false otherwise
      */
@@ -102,7 +105,61 @@ public class LoginAuthorizer {
             return false;
         }
     }
-    
+
+    /**
+     * Verifies a username and password.
+     * 
+     * Checks valid formatting for username and password, then
+     * queries the postgres database for the username and password.
+     * 
+     * If the username/password are malformed or the username is not
+     * in the DB, returns false.
+     * 
+     * Otherwise, queries the database for the Argon2 hash corresponding
+     * to the provided username and uses Argon2 verify function to verify that the 
+     * password is correct for the hash.
+     * 
+     * If the password is correct, returns true. All other situations
+     * return false
+     * 
+     * Recommended to use the implementation where char[] is used for the 
+     * password parameter as opposed to String, as Strings are immutable
+     * 
+     * @param name     username in psql database
+     * @param password password corresponding to username, as a String
+     * @return         true if username and password are correct 
+     *                 and in db, false otherwise
+     */
+    public boolean verifyUser(String name, String password) throws Exception {
+
+        if (!validUsername(name) || !validPassword(password)) {
+            return false;
+        }
+
+        Connection dbConn;
+        Argon2 argon2 = Argon2Factory.create();
+        try {
+            dbConn = this.connect();
+
+            // Query DB for password
+            String query = "SELECT hash FROM auth WHERE name = ?";
+            PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            preparedQuery.setString(1, name);
+
+            ResultSet rs = preparedQuery.executeQuery();
+
+            // Either empty resultset (user not in DB) OR bad password
+            if (!rs.next() || !argon2.verify(rs.getString(1), password)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     /**
      * Helper function for verifyUser. Checks if username is a username
@@ -147,6 +204,16 @@ public class LoginAuthorizer {
      */
     private boolean validPassword(char[] pwd) {
         return pwd.length >=MIN_PW_LEN && pwd.length <= MAX_PW_LEN;
+    }
+    
+    /**
+     * Checks for valid password length. A password should be between 
+     * the min and max password UTF-8 characters long.
+     * @param pwd    A String password
+     * @return       True if pwd is between class min/maxes
+     */
+    private boolean validPassword(String pwd) {
+        return pwd.length() >=MIN_PW_LEN && pwd.length() <= MAX_PW_LEN;
     }
     
     public static void main (String[] args) {
