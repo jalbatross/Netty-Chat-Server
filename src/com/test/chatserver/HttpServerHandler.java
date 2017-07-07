@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -69,8 +70,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
-                
-
+                ctx.pipeline().addLast(new IdleStateHandler(5, 3, 10));
+                ctx.pipeline().addLast( "serverPing", new ServerPing());
                 System.out.println("WebSocketHandler added to the pipeline");
 
                 System.out.println("Opened Channel : " + ctx.channel());

@@ -43,6 +43,7 @@ public class WebSocketHandler extends ChannelInboundHandlerAdapter {
             else if (msg instanceof PongWebSocketFrame) {
                 System.out.println("PongWebSocketFrame Received : ");
                 System.out.println( ((PongWebSocketFrame) msg).content() );
+                ctx.fireChannelRead(msg);
             } 
             else if (msg instanceof CloseWebSocketFrame) {
                 System.out.println("CloseWebSocketFrame Received : ");

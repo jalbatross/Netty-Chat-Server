@@ -25,26 +25,45 @@
 
 
 var socket = new WebSocket("ws://localhost:8080/websocket");
-var connected = (socket.getReadyState == 1) ? true : false;
+var connected;
+
+socket.onopen = function() {
+    socket.onmessage = function(event) {
+    console.log('received ', event.data);
+    }
+    socket.send('pong');
+    connected = (socket.readyState === 1) ? true: false;
+    console.log('state: ' + socket.readyState);
+}
+
 
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope) {
-    $scope.action = (socket.getReadyState == 1) ? 'Disconnect' : 'Connect';
+    $scope.action = (socket.readyState == 1) ? 'Disconnect' : 'Connect';
     $scope.connect = function() {
         
         if (connected) {
             console.log('disconnecting');
             socket.close();
-            
+             
             $scope.action = 'Connect';
             connected = false;
         }
-        //if dc
+        //if not connected
         else {
             console.log('connecting');
             socket = new WebSocket("ws://localhost:8080/websocket");
-            connected = true;
+            socket.onopen = function() {
+    socket.onmessage = function(event) {
+    console.log('received ', event.data);
+    }
+    socket.send('pong');
+    connected = (socket.readyState === 1) ? true: false;
+    console.log('state: ' + socket.readyState);
+}
+
             $scope.action = 'Disconnect';
+
         }
     }
 });
