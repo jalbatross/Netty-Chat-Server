@@ -1,0 +1,132 @@
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angular-ui-router/1.0.0-rc.1/angular-ui-router.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="main-box">
+
+    <div class="input-block-level" id='msg-sender'>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Your message here!">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary" type="button">Send</button>
+        </span>
+      </div>
+    </div>
+
+    <div id='lobby'>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    user1<br>
+    user2<br>
+    user3<br>
+    veryLongusernameIwonderwhathappens<br>
+    
+
+
+    </div>
+
+    <div id='messages'>
+    theMessages
+    <p>person1: this is really great</p>
+    <p>person2: I wonder what happens if I type a really long message? will it overflow or will it not who knows maybe
+    it will be great and not overflow but probably not I wonder what happens if I type a really long message? will it overflow or will it not who knows maybe
+    it will be great and not overflow but probably not I wonder what happens if I type a really long message? will it overflow or will it not who knows maybe
+    it will be great and not overflow but probably not </p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+    <p>person3: exaclty now we have to see what happens when the messages get very very very long vertically</p>
+
+    </div>
+  </div>
+</div>
+</body>
+
+<style media="screen" type="text/css">
+/* 'Open Sans' font from Google Fonts */
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
+
+body {
+  background:#456;
+}
+.main-box{
+  width: 50%;
+  height: 50%;
+  margin: auto;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  z-index: 999;
+  border:5px solid;
+  color:black;
+  background-color:white;
+}
+
+#msg-sender{
+  position: absolute;
+  height:10%;
+  bottom: 0;
+  left: 0;
+}
+
+#lobby {
+  position:absolute;
+  right:0;
+  width:20%;
+  height:90%;
+
+  overflow-x:scroll;
+  overflow-y:scroll;
+}
+
+#messages {
+  width:80%;
+  overflow-y:scroll;
+  height:100%;
+  height:90%;
+}
+
+div:hover {
+    outline: 1px solid blue;
+}
+</style>
