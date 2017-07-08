@@ -1,40 +1,59 @@
 <!--ping.html-->
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angular-ui-router/1.0.0-rc.1/angular-ui-router.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 <html>
     <body>
         
-        <div ng-app="myApp" ng-controller="myCtrl">
-            <button type="button" ng-click="connect()" class="btn">{{action}}</button>
+        <div ng-app="pingApp">
+            <div ng-controller ="statusController">
+                <button type="button" ng-click="toggle = !toggle" class = 'btn' ng-class="{'btn-info': toggle, 'btn-danger': !toggle}">{{action}}</button>
+                <button type="button" ng-click="pinger()">ping {{pingStatus}}</button>
+            </div>
         </div>
-
     </body>
 </html>
 
-<script>
+<script src="/js/ping.js"></script>
+<script src="/js/controllers/statusController.js"></script>
+<!--
+function checkTimeout() {
+    if (Date.now() - lastPing > 5000) {
+        console.log('lost connection to server!');
+    }
+    else {
+        console.log('still alive');
+    }
+}
 
+var refreshId;
 
 var socket = new WebSocket("ws://localhost:8080/websocket");
 var connected;
+var time = new Date().getTime();
+var lastPing = Date.now();
 
 socket.onopen = function() {
     socket.onmessage = function(event) {
-    console.log('received ', event.data);
+        console.log('received message from server: ');
+        console.log('msg: ', event.data);
+        console.log('secs between pings : ', (Date.now() - lastPing));
+        refreshId = setInterval(checkTimeout, 4000);
+        lastPing = Date.now();
     }
     socket.send('pong');
     connected = (socket.readyState === 1) ? true: false;
     console.log('state: ' + socket.readyState);
 }
+
+
 
 
 var app = angular.module('myApp', []);
@@ -53,19 +72,22 @@ app.controller('myCtrl', function($scope) {
         else {
             console.log('connecting');
             socket = new WebSocket("ws://localhost:8080/websocket");
+            clearInterval(refreshId);
             socket.onopen = function() {
-    socket.onmessage = function(event) {
-    console.log('received ', event.data);
-    }
-    socket.send('pong');
-    connected = (socket.readyState === 1) ? true: false;
-    console.log('state: ' + socket.readyState);
+                socket.onmessage = function(event) {
+                    console.log('received message from server: ');
+                    console.log('msg: ', event.data);
+                    console.log('secs between pings : ', (Date.now() - lastPing));
+                    refreshId = setInterval(checkTimeout, 4000);
+                    lastPing = Date.now();
+                }
+            socket.send('pong');
+            connected = (socket.readyState === 1) ? true: false;
+            console.log('state: ' + socket.readyState);
 }
-
             $scope.action = 'Disconnect';
 
         }
     }
 });
-
-</script>
+-->
