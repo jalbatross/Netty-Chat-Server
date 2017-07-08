@@ -9,13 +9,10 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
 public class ServerPing extends ChannelInboundHandlerAdapter {
-    private static final int timeoutMs = 5000;
-    private long lastPingTime = 0;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         System.out.println("pinger added");
-        lastPingTime = System.currentTimeMillis();
         ctx.writeAndFlush(new PingWebSocketFrame());
         ctx.writeAndFlush(new TextWebSocketFrame("ping"));
 
@@ -30,8 +27,9 @@ public class ServerPing extends ChannelInboundHandlerAdapter {
                 ctx.close();
             } 
             else if (e.state() == IdleState.WRITER_IDLE) {
+                //send ping
                 ctx.writeAndFlush(new PingWebSocketFrame());
-                ctx.writeAndFlush(new TextWebSocketFrame("pinging"));
+                ctx.writeAndFlush(new TextWebSocketFrame("ping"));
             }
         }
     }

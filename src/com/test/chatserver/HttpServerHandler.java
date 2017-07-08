@@ -26,6 +26,8 @@ import java.util.HashSet;
 
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	WebSocketServerHandshaker handshaker;
+	public static final int PING_TIMER_SECONDS = 3;
+	public static final int PING_TIMEOUT_SECONDS = 5;
 	
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -70,7 +72,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
-                ctx.pipeline().addLast(new IdleStateHandler(5, 3, 10));
+                ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));
                 ctx.pipeline().addLast( "serverPing", new ServerPing());
                 System.out.println("WebSocketHandler added to the pipeline");
 
