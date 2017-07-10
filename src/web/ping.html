@@ -14,7 +14,7 @@
         
         <div ng-app="pingApp">
             <div ng-controller ="statusController">
-                <button type="button" ng-click="connect()" class = 'btn' ng-class="{'btn-info': connected, 'btn-danger': !connected}">{{action}}</button>
+                <button type="button" ng-click="connect()" class = 'btn' ng-class="{'btn-info': action == 'Connected', 'btn-danger': action == 'Disconnected', 'btn-warning': action == 'Reconnecting'}">{{action}}</button>
                 <button type="button" ng-click="pinger()">ping {{pingStatus}}</button>
             </div>
         </div>

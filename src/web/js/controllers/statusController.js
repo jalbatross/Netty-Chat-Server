@@ -36,6 +36,10 @@ angular.module("pingApp").controller("statusController", function ($scope, $inte
             console.log('maintain');
             return 'connected';
         }
+        else if (Date.now() - lastPing < 10000){
+            console.log('Bad connection or maybe lost connection');
+            $scope.action = 'Reconnecting';
+        }
         else {
             $scope.toggle = false;
             console.log('lost connxn');
