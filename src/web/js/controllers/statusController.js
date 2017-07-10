@@ -34,6 +34,7 @@ angular.module("pingApp").controller("statusController", function ($scope, $inte
     var pingCheck = function() {
         if (Date.now() - lastPing < 5000) {
             console.log('maintain');
+            $scope.action = 'Connected';
             return 'connected';
         }
         else if (Date.now() - lastPing < 10000){
