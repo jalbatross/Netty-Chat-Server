@@ -27,7 +27,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import sun.misc.IOUtils;
     
 /**
  * A simple chat server meant to be used between people who have a chat client.

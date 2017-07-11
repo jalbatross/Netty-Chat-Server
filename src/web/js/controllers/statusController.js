@@ -9,61 +9,72 @@ angular.module("pingApp").controller("statusController", function ($scope, $inte
 
 
     var sendPings = false;
-    var promise;
+    var pingerPromise;
     var lastPing;
-    $scope.pinger = function() {
-        sendPings = !sendPings;
 
-        if (sendPings) {
-            promise = $interval(function() {
-                console.log('sending ping at time ', Date.now());
-                lastPing = Date.now();
+    $scope.pinger = function() {
+        promise = $interval(function() {
+            console.log('sending ping at time ', Date.now());
+            lastPing = Date.now();
+            //socket.send('pong');
             }, 2000);
         }
-        else {
-            $interval.cancel(promise);
-            console.log('pinger off');
-        }
-        $scope.pingStatus = sendPings ? "on" : "off";
-
-    }
+    
 
     var checkerPromise;
+    var rcPromise;
     var started = false;
 
     var pingCheck = function() {
+        //good connection
         if (Date.now() - lastPing < 5000) {
             console.log('maintain');
             $scope.action = 'Connected';
             return 'connected';
         }
+        //bad connection - spam pongs to network
         else if (Date.now() - lastPing < 10000){
             console.log('Bad connection or maybe lost connection');
+            rcPromise = $interval(pinger,1000);
             $scope.action = 'Reconnecting';
         }
+        //lost connection, DC
         else {
-            $scope.toggle = false;
             console.log('lost connxn');
             $interval.cancel(checkerPromise);
-            $scope.connected = false;
             $scope.action = 'Disconnected';
             return 'disconnected';
 
         }
     }
 
-    $scope.connect = function () {
-        $scope.connected = !$scope.connected;
-        $scope.action = $scope.connected ? 'Connected' : 'Disconnected';
+    var pinger2 = function(socket) {
+        socket.send('pong');
+    }
 
-        if($scope.connected) {
+    $scope.connect = function () {
+        var ws = new WebSocket("ws://localhost:8080/websocket");
+
+        ws.onopen = function (event) {
+            console.log('successfully connected');
+            lastPing = Date.now();
+            pingerPromise = $interval(pinger2(ws),3000);
             checkerPromise = $interval(pingCheck, 1000);
-            console.log('applied checker');
+
+            $scope.action = 'Connected';
 
         }
-        else {
+
+        ws.onmessage = function(event) {
+            console.log('received msg from server');
+            lastPing = Date.now();
+        }
+
+        ws.onclose = function(event) {
+            console.log('disconnected from server');
             $interval.cancel(checkerPromise);
-            console.log('stopped checking');
+            $interval.cancel(pingerPromise);
+            $scope.action = 'Disconnected';
         }
     }
 });
