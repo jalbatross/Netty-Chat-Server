@@ -1,80 +1,104 @@
 //statusController.js
 
 angular.module("pingApp").controller("statusController", function ($scope, $interval) {
-    $scope.connected = false;
     $scope.action = "Connect";
-
     
-    $scope.pingStatus = "off";
+    var connected = false;
 
+    var ws;
 
-    var sendPings = false;
-    var pingerPromise;
-    var lastPing;
-
-    $scope.pinger = function() {
-        promise = $interval(function() {
-            console.log('sending ping at time ', Date.now());
-            lastPing = Date.now();
-            //socket.send('pong');
-            }, 2000);
-        }
-    
-
-    var checkerPromise;
     var rcPromise;
-    var started = false;
+    var checkerPromise;
+    var pingerPromise;
 
-    var pingCheck = function() {
+    var reconnecting = false;
+
+    //a long corresponding to Unix time in ms
+    var lastPing;
+    
+    var pingCheck = function(socket) {
         //good connection
         if (Date.now() - lastPing < 5000) {
             console.log('maintain');
+            
+            
+            if (reconnecting) {
+                $interval.cancel(rcPromise);
+                reconnecting = false;
+            }
+
             $scope.action = 'Connected';
-            return 'connected';
         }
         //bad connection - spam pongs to network
         else if (Date.now() - lastPing < 10000){
             console.log('Bad connection or maybe lost connection');
             rcPromise = $interval(pinger,1000);
             $scope.action = 'Reconnecting';
+            reconnecting = true;
         }
+
         //lost connection, DC
         else {
+            socket.close();
             console.log('lost connxn');
-            $interval.cancel(checkerPromise);
-            $scope.action = 'Disconnected';
-            return 'disconnected';
+            
+            if (reconnecting) {
+                $interval.cancel(rcPromise);
+                reconnecting = false;
+            }
 
+            $scope.action = 'Disconnected';
         }
     }
 
-    var pinger2 = function(socket) {
+    var pinger = function(socket) {
         socket.send('pong');
     }
 
     $scope.connect = function () {
-        var ws = new WebSocket("ws://localhost:8080/websocket");
+        if (!connected) {
+          ws = new WebSocket("ws://localhost:8080/websocket");
 
-        ws.onopen = function (event) {
-            console.log('successfully connected');
-            lastPing = Date.now();
-            pingerPromise = $interval(pinger2(ws),3000);
-            checkerPromise = $interval(pingCheck, 1000);
+          ws.onopen = function (event) {
+              console.log('successfully connected');
+              lastPing = Date.now();
+              pingerPromise = $interval(function() {pinger(ws)},3000);
+              checkerPromise = $interval(function() {pingCheck(ws)}, 1000);
+              connected = true;
 
-            $scope.action = 'Connected';
+              $scope.action = 'Connected';
 
+          }
+
+          ws.onmessage = function(event) {
+              console.log('received msg from server');
+              lastPing = Date.now();
+          }
+
+          ws.onclose = function(event) {
+              console.log('disconnected from server');
+              if ($interval.cancel(checkerPromise)) {
+                console.log('turned off checker');
+              }
+              if ($interval.cancel(pingerPromise)) {
+                console.log('turned off pinger');
+              }
+              checkerPromise = undefined;
+              pingerPromise = undefined;
+              connected = false;
+
+              $scope.action = 'Disconnected';
+              $scope.$apply();
+
+              return;
+          }
         }
 
-        ws.onmessage = function(event) {
-            console.log('received msg from server');
-            lastPing = Date.now();
-        }
-
-        ws.onclose = function(event) {
-            console.log('disconnected from server');
+        else {
             $interval.cancel(checkerPromise);
             $interval.cancel(pingerPromise);
-            $scope.action = 'Disconnected';
+            ws.close();
+            console.log('closed ws connection');
         }
     }
 });
