@@ -59,3 +59,11 @@ Simple netty chat server &amp; client
  - Tried Flatbuffers again and realized that the Flatbuffers was compiling but outputted to a different folder instead of the same folder as the flatc binary (the only place I was looking!)
  - Been working on creating a schema that will fit the needs of the server. Made a basic schema, credentials, that handled usernames/passwords. Most of today was spent expanding, testing, and writing a codec for that schema, which is why most of the recent activity has been in FlatBuffersTesting and FlatBuffersCodec.
  - I have come to like Flatbuffers and I think the codec is finished for the most part now, which means I can finally get back to the networking side of things! Learned a lot about writing schemas, codecs, and had to do a little review on generics to write the method that converts ByteBuffers into the different objects that can lie in one of the FlatBuffers Messages.
+
+### July 12, 2017: Version 0.24
+ - Long time since I made an update. The past week was vacation + an illness beginning on Thursday, so not as many commits as I would have liked to get in. Consequently most of my work has been on the browser client.
+ - Also, now that I know how to do longer commit messages my dev log stuff has kind of been relegated to my commits.
+ - In terms of new things, I've got a very rudimentary understanding of Angular and have even made a controller that is used for pings and checking the status of a WebSockets connection, dynamically updating the view depending on the status.
+ - Auth on both browser/java clients works and registration needs to be done. Also, the App section of this should be started as there is not much point in continuing to use a Netty client with just Java.
+ - Finally recovering for my illness so I'm hoping for a lot more changes to come in the near future!
+ - Updated version
