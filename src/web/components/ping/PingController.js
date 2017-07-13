@@ -1,4 +1,4 @@
-//statusController.js
+//pingController.js
 
 /**
  * Controller that indicates the status of a WebSockets connection to the UI.
@@ -9,7 +9,7 @@
  * by @jalbatross (Joey Albano)
  */
 
-angular.module("pingApp").controller("statusController", function($scope, $interval) {
+angular.module("chatApp").controller("PingController", function($scope, $interval) {
     
     $scope.action = "Connect";
 
