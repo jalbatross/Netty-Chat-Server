@@ -32,6 +32,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 
 /**
@@ -74,21 +77,9 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         
         //If POST, forward the message to the HTTP post decoder
         if (isPost(magic1,magic2)){
+            System.out.println("got post");
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
             
-        }
-        else if(isOptions(magic1,magic2)) {
-            ctx.channel().pipeline().addFirst(new HttpResponseEncoder());
-            DefaultFullHttpResponse response = new DefaultFullHttpResponse (
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK);
-
-            response.headers().add("Access-Control-Allow-Headers", "Content-Type");
-            response.headers().add("Access-Allow-Methods", "POST");
-            response.headers().add("Access-Control-Allow-Origin", "*");
-            
-            ctx.writeAndFlush(response);
-            return;
         }
         
         //Otherwise forward the msg to the integer based frame decoder

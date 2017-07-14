@@ -21,13 +21,17 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.CharsetUtil;
 
 /**
  * Class used to authenticate users. Current implementation should handle
@@ -132,12 +136,20 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
-                DefaultHttpResponse resp = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
-                        HttpResponseStatus.OK);
-                System.out.println(resp.toString());
+                
+                FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
+                        HttpResponseStatus.OK, 
+                        Unpooled.copiedBuffer("Authorized: " + "user" + "\r\n", 
+                        CharsetUtil.UTF_8));
+
+                resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                /*
                 byte[] bytes = resp.toString().getBytes();
                 ByteBuf buf = Unpooled.wrappedBuffer(bytes);
-                ctx.writeAndFlush(buf);
+                ctx.writeAndFlush(buf);*/
+                System.out.println(resp.toString());
+                ctx.writeAndFlush(resp).addListener(ChannelFutureListener.CLOSE);
                 
             } 
             else {

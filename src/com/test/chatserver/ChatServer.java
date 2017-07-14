@@ -20,6 +20,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -81,6 +85,13 @@ public class ChatServer {
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
+                     CorsConfigBuilder builder = CorsConfigBuilder.forAnyOrigin();
+                     builder.allowCredentials();
+                     builder.allowedRequestMethods(HttpMethod.POST,HttpMethod.OPTIONS);
+                     CorsConfig config = builder.build();
+                     
+                     ch.pipeline().addFirst(new CorsHandler(config));
+                     
                      ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler());
                      ch.pipeline().addLast("authHandler", new ServerAuthHandler(allChannels, lobbies));
                 	 
