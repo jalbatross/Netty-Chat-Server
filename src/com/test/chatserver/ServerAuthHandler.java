@@ -28,6 +28,8 @@ import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
@@ -137,8 +139,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
-                
-                ctx.writeAndFlush(httpAuthResponse(username)).addListener(ChannelFutureListener.CLOSE);
+
+                ctx.writeAndFlush(httpAuthResponse(username));
                 
             } 
             else {
@@ -250,7 +252,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
         resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-        
+        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
         return resp;
     }
 
