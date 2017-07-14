@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -47,7 +49,7 @@ public class ChatServer {
 	 * 
 	 */
 	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+	private List<ChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<ChannelGroup>());
     //static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
    
     private int port;
@@ -57,13 +59,7 @@ public class ChatServer {
     }
     
     public void run() throws Exception {
-        
-    	//configure SSL
-        
-        //TODO: Make sure "Admin" is a reserved username in database
-        //usernames.add("Admin");
-        
-        
+                
     	final SslContext sslCtx;
         if (SSL) {
         	System.out.print("Running SSL");
@@ -85,6 +81,7 @@ public class ChatServer {
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
+                     
                      CorsConfigBuilder builder = CorsConfigBuilder.forAnyOrigin();
                      builder.allowCredentials();
                      builder.allowedRequestMethods(HttpMethod.POST,HttpMethod.OPTIONS);

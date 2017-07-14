@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -51,7 +52,7 @@ import io.netty.util.CharsetUtil;
 public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
     private ChannelGroup allUsers;
-    private ArrayList<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
+    private List<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     private LoginAuthorizer login = new LoginAuthorizer();
 
     //User credentials
@@ -67,7 +68,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         ch = ctx.channel();
     }
 
-    public ServerAuthHandler(ChannelGroup grp, ArrayList<ChannelGroup> lobbies) {
+    public ServerAuthHandler(ChannelGroup grp, List<ChannelGroup> lobbies) {
         allUsers = grp;
         this.lobbies = lobbies;
     }
@@ -137,19 +138,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
                 
-                FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
-                        HttpResponseStatus.OK, 
-                        Unpooled.copiedBuffer("Authorized: " + "user" + "\r\n", 
-                        CharsetUtil.UTF_8));
-
-                resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-                resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-                /*
-                byte[] bytes = resp.toString().getBytes();
-                ByteBuf buf = Unpooled.wrappedBuffer(bytes);
-                ctx.writeAndFlush(buf);*/
-                System.out.println(resp.toString());
-                ctx.writeAndFlush(resp).addListener(ChannelFutureListener.CLOSE);
+                ctx.writeAndFlush(httpAuthResponse(username)).addListener(ChannelFutureListener.CLOSE);
                 
             } 
             else {
@@ -246,6 +235,23 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         }
 
         return true;
+    }
+    
+    /**
+     * Creates an authorization response to browser client
+     * 
+     * @param username    their username
+     */
+    private FullHttpResponse httpAuthResponse(String username) {
+        FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
+                HttpResponseStatus.OK, 
+                Unpooled.copiedBuffer("Authorized: " + username + "\r\n", 
+                CharsetUtil.UTF_8));
+
+        resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        
+        return resp;
     }
 
 }

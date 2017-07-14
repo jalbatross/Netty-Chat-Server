@@ -79,7 +79,12 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         if (isPost(magic1,magic2)){
             System.out.println("got post");
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
-            
+        }
+        else if (isOptions(magic1,magic2)) {
+            System.out.println("got options; not supposed to happen");
+            ctx.close();
+            throw new Exception("Options for no reason");
+
         }
         
         //Otherwise forward the msg to the integer based frame decoder
