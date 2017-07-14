@@ -14,6 +14,7 @@ import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -26,6 +27,7 @@ import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpVersion;
@@ -74,58 +76,21 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         if (isPost(magic1,magic2)){
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
             
-            
-            
-        /*
-            //Find the JSON object, starting from the end of the HTTP message
-            char[] chars = new char[JSON_BUFFER_SIZE];
-            int val = 0;
-            for (int i = 0; i < chars.length; i++) {
-                val = buf.getUnsignedByte(buf.readableBytes() - chars.length + i);
-                chars[i] = (char) val;
-            }
-            
-            boolean jsonComplete = false;
-            int startJson, endJson, currentIndex;
-            
-            startJson = endJson = 0;
-            currentIndex = chars.length - 1;
-            
-            //Find the JSON object
-            while (!jsonComplete && currentIndex > 0) {
-                
-                if (chars[currentIndex] == '}') {
-                    endJson = currentIndex;
-                }
-                if (chars[currentIndex] == '{') {
-                    startJson = currentIndex;
-                    jsonComplete = true;
-                }
-                currentIndex--;
-            }
-            
-            //make sure it's valid
-            if (startJson > endJson || 
-                endJson - startJson > JSON_BUFFER_SIZE) {
-                ctx.close();
-                return;
-            }
-            
-            String credJson = new String();
-            
-            for (int i = 0; i < endJson - startJson + 1; i++) {
-                credJson += chars[startJson + i];
-            }
-            
-            JsonObject obj = new JsonParser().parse(credJson).getAsJsonObject();
-            System.out.println(obj.get("name"));
-            System.out.println(obj.get("password"));
-            
-            String theName = obj.get("name").getAsString();
-            System.out.println(theName);
-            
-            return;*/
         }
+        else if(isOptions(magic1,magic2)) {
+            ctx.channel().pipeline().addFirst(new HttpResponseEncoder());
+            DefaultFullHttpResponse response = new DefaultFullHttpResponse (
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK);
+
+            response.headers().add("Access-Control-Allow-Headers", "Content-Type");
+            response.headers().add("Access-Allow-Methods", "POST");
+            response.headers().add("Access-Control-Allow-Origin", "*");
+            
+            ctx.writeAndFlush(response);
+            return;
+        }
+        
         //Otherwise forward the msg to the integer based frame decoder
         else {
             ctx.channel().pipeline().replace(this, "intFrameDecoder", new ChatServerIntFrameDecoder());
@@ -136,6 +101,10 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
 
     private static boolean isPost(int magic1, int magic2) {
         return  magic1 == 'P' && magic2 == 'O';
+    }
+    
+    private static boolean isOptions(int magic1, int magic2) {
+        return magic1 == 'O' && magic2 == 'P';
     }
 
 

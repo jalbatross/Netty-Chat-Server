@@ -9,6 +9,8 @@
  * by @jalbatross (Joey Albano)
  */
 
+
+
 angular.module("chatApp").controller("PingController", function($scope, $interval) {
     
     $scope.action = "Connect";

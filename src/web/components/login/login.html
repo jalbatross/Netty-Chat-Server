@@ -1,23 +1,31 @@
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<head>
+    <!--- Angular, jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
 
 <div class="login">
   <div class="login-circle"></div>
   
   <h2 class="login-header">Log in</h2>
 
-<div id ="loginContainer" >
-  <form id = "loginForm" class="login-container" login>
-    <p><input type="text" id ="name" placeholder="Username"></p>
-    <p><input type="password" id ="pass" ng-model='password' placeholder="Password"></p>
+<div ng-app="chatApp" id ="loginContainer" ng-controller="LoginController" >
+  <form id = "loginForm" class="login-container" ng-submit = "login()">
+    <p><input type="text" ng-model ="username" id ="name" placeholder="Username"></p>
+    <p><input type="password" ng-model ="password" id ="pass" placeholder="Password"></p>
     <p><input type="submit" value="Log in"></p>
   </form>
 </div>
 
 </div>
+<script src="LoginController.js"></script>
+<!--
+<div ng-controller="LoginController">
+ <form id = "l"
+</div>
 
 <script>
-  
+/*
 var xhr = new XMLHttpRequest();
 var username;
 var pass;
@@ -43,10 +51,10 @@ document.getElementById("loginForm").onsubmit = function () {
   document.getElementById('name').value = '';
   document.getElementById('pass').value = '';
   return false;
-}
+}*/
 
 </script>
-
+-->
 <style media="screen" type="text/css">
 
 
@@ -65,9 +73,14 @@ body {
 }
 
 .login {
-  width: 400px;
-  margin: 16px auto;
-  font-size: 16px;
+  width: 30%;
+  height: 40%;
+  margin: auto;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  z-index: 999;
+  color:black;
+  background-color:white;
 }
 
 /* Reset top and bottom margins from certain elements */

@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,11 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.codec.http.DefaultHttpRequest;
+import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -127,6 +132,13 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
+                DefaultHttpResponse resp = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.OK);
+                System.out.println(resp.toString());
+                byte[] bytes = resp.toString().getBytes();
+                ByteBuf buf = Unpooled.wrappedBuffer(bytes);
+                ctx.writeAndFlush(buf);
+                
             } 
             else {
                 System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
@@ -134,6 +146,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             httpCred.release();
         }
+       
 
         return;
 
@@ -170,6 +183,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             e.printStackTrace();
             System.out.println("failed to parse JSON during auth!");
             System.out.println("Check credentials: bad formatting OR invalid creds");
+            System.out.println("Credentials: " + httpCred.toString());
             return false;
         }
 
