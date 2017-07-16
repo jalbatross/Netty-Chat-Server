@@ -15,7 +15,7 @@ angular.module("chatApp").controller("PingController", function($scope, $interva
     
     $scope.action = "Connect";
 
-    var uri = "ws://localhost:8080/websocket";
+    var uri = "ws://hohoho@localhost:8080/websocket?ticket=aaaa-aaaa-aaaa-aaaa";
 
     var connected = false;
     var reconnecting = false;

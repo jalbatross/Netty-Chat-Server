@@ -12,7 +12,7 @@ angular.module("chatApp").controller("LoginController", function($scope, $http) 
             password: $scope.password
         };
 
-        var config = {'Content-Type': 'text/plain'};
+        var config = {'Content-Type': 'application/x-www-form-urlencoded'};
 
         $http({
             method: 'post',
@@ -21,6 +21,7 @@ angular.module("chatApp").controller("LoginController", function($scope, $http) 
             headers: config
         }).then(function (response) {
             console.log(response.data);
+            
         }, function (response) {
             console.log(response.data);
         });

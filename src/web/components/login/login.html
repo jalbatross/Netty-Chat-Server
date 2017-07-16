@@ -2,6 +2,7 @@
     <!--- Angular, jQuery-->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 </head>
 
 <div class="login">
@@ -9,56 +10,20 @@
   
   <h2 class="login-header">Log in</h2>
 
-<div ng-app="chatApp" id ="loginContainer" ng-controller="LoginController" >
-  <form id = "loginForm" class="login-container" ng-submit = "login()">
-    <p><input type="text" ng-model ="username" id ="name" placeholder="Username"></p>
-    <p><input type="password" ng-model ="password" id ="pass" placeholder="Password"></p>
+<div ng-app="chatApp" id ="loginContainer" ng-controller="LoginController">
+  <form id = "loginForm" class="login-container" ng-submit = "login()" >
+    <p><input type="text"  ng-model ="username" id ="name" placeholder="Username" required></p>
+    <p><input type="password" ng-model ="password" id ="pass" placeholder="Password" required></p>
     <p><input type="submit" value="Log in"></p>
   </form>
+
+
 </div>
 
 </div>
 <script src="LoginController.js"></script>
-<!--
-<div ng-controller="LoginController">
- <form id = "l"
-</div>
 
-<script>
-/*
-var xhr = new XMLHttpRequest();
-var username;
-var pass;
-
-document.getElementById("loginForm").onsubmit = function () {
-
-  username = document.getElementById('name').value;
-  pass = document.getElementById('pass').value;
-
-  var data = JSON.stringify({username: username, password: pass});
-
-  $.ajax({
-    method: "POST",
-    url: "http://localhost:8080",
-    data: data
-  }).done(function( msg ) {
-    alert( "Data Saved: " + msg );
-  });
-
-  xhr.send;
-
-  //TODO: Do cool transition for this (fadeaway)
-  document.getElementById('name').value = '';
-  document.getElementById('pass').value = '';
-  return false;
-}*/
-
-</script>
--->
 <style media="screen" type="text/css">
-
-
-
 
 /**
 Stolen from https://codepen.io/miroot/pen/qwIgC
@@ -68,7 +33,7 @@ Stolen from https://codepen.io/miroot/pen/qwIgC
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
 body {
-  background: #456;
+  /*background: #456;*/
   font-family: 'Open Sans', sans-serif;
 }
 
