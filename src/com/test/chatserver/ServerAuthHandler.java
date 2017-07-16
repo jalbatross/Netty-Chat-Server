@@ -141,10 +141,13 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
 
                 ctx.writeAndFlush(httpAuthResponse(username));
+                //put http initializer in front of pipeline
+                //put chat server with lobby stuff after
                 
             } 
             else {
                 System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
+                ctx.writeAndFlush(httpDeniedResponse());
             }
 
             httpCred.release();
@@ -243,6 +246,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
      * Creates an authorization response to browser client
      * 
      * @param username    their username
+     * 
+     * @return    username authorized http response
      */
     private FullHttpResponse httpAuthResponse(String username) {
         FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
@@ -253,6 +258,24 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
         resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+        
+        return resp;
+    }
+    
+    /**
+     * Creates an authorization denied HTTP response to browser client
+     * 
+     * @return   denied http response
+     */
+    private FullHttpResponse httpDeniedResponse() {
+        FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.copiedBuffer("Denied\r\n",CharsetUtil.UTF_8));
+        
+        resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+        
         return resp;
     }
 
