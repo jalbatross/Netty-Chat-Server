@@ -1,12 +1,17 @@
 package com.test.chatserver;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -20,6 +25,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -56,6 +62,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private ChannelGroup allUsers;
     private List<ChannelGroup> lobbies = new ArrayList<ChannelGroup>();
     private LoginAuthorizer login = new LoginAuthorizer();
+    private Map<String,TimeChatMessage> ticketDB;
 
     //User credentials
     private String username, pwdStr;
@@ -73,6 +80,10 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     public ServerAuthHandler(ChannelGroup grp, List<ChannelGroup> lobbies) {
         allUsers = grp;
         this.lobbies = lobbies;
+    }
+
+    public ServerAuthHandler(Map<String, TimeChatMessage> sessionTicketDB) {
+        ticketDB = sessionTicketDB;
     }
 
     @Override
@@ -139,11 +150,14 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
-
-                ctx.writeAndFlush(httpAuthResponse(username));
-                //put http initializer in front of pipeline
-                //put chat server with lobby stuff after
                 
+                String ticket = generateTicket(username, ctx.channel().remoteAddress(),ctx.channel().id());
+                
+                //generate timestamped message with username as author and IP address as message content
+                TimeChatMessage value = new TimeChatMessage(username, ctx.channel().remoteAddress().toString());
+                ticketDB.put(ticket, value);
+                
+                ctx.writeAndFlush(httpAuthResponse(ticket));
             } 
             else {
                 System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
@@ -245,14 +259,16 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     /**
      * Creates an authorization response to browser client
      * 
+     * 
+     * 
      * @param username    their username
      * 
      * @return    username authorized http response
      */
-    private FullHttpResponse httpAuthResponse(String username) {
+    private FullHttpResponse httpAuthResponse(String ticket) {
         FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
                 HttpResponseStatus.OK, 
-                Unpooled.copiedBuffer("Authorized: " + username + "\r\n", 
+                Unpooled.copiedBuffer("Authorized: " + ticket + "\r\n", 
                 CharsetUtil.UTF_8));
 
         resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
@@ -277,6 +293,15 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
         
         return resp;
+    }
+    
+    private String generateTicket(String username, SocketAddress ip, ChannelId chId) {
+        
+        String seed = username + ip.toString() + chId.toString() + Instant.now().toEpochMilli();
+
+        UUID ticketId = UUID.nameUUIDFromBytes(seed.getBytes());
+        
+        return ticketId.toString();
     }
 
 }

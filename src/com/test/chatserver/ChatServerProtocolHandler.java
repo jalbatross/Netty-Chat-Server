@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import com.google.gson.Gson;
@@ -57,11 +58,16 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
     private List<Object> decoded = new Stack<Object>();
+    private Map<String,TimeChatMessage> ticketDB;
     
     //number of characters to check at end of HTML request to find JSON 
     //message
     public static final int JSON_BUFFER_SIZE = 128;
     
+    public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB) {
+        this.ticketDB = sessionTicketDB;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ChatServerProtocolHandler] channelread called");
@@ -80,11 +86,19 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
             System.out.println("got post");
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
         }
+        else if (isGet(magic1,magic2)) {
+            System.out.println("got GET, ws upgrade");
+            //clear channel
+            ctx.channel().pipeline().remove("authHandler");
+            ctx.channel().pipeline().remove("corsHandler");
+            
+            //replace with ws handshaker
+            ctx.channel().pipeline().replace(this, "wsHandler", new HTTPInitializer(ticketDB));
+        }
         else if (isOptions(magic1,magic2)) {
             System.out.println("got options; not supposed to happen");
             ctx.close();
             throw new Exception("Options for no reason");
-
         }
         
         //Otherwise forward the msg to the integer based frame decoder
@@ -101,6 +115,10 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     
     private static boolean isOptions(int magic1, int magic2) {
         return magic1 == 'O' && magic2 == 'P';
+    }
+    
+    private static boolean isGet(int magic1, int magic2) {
+        return magic1 == 'G' && magic2 =='E';
     }
 
 

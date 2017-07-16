@@ -15,6 +15,7 @@ import io.netty.handler.codec.http.HttpHeaders.Values;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
@@ -23,12 +24,18 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	WebSocketServerHandshaker handshaker;
 	public static final int PING_TIMER_SECONDS = 3;
 	public static final int PING_TIMEOUT_SECONDS = 5;
+	private Map<String,TimeChatMessage> ticketDB;
 	
+    public HttpServerHandler(Map<String, TimeChatMessage> ticketDB) {
+        this.ticketDB = ticketDB;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("httpseverhandler caleld");
@@ -43,14 +50,14 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
             }
 
             HttpRequest httpRequest = (HttpRequest) msg;
-
+            
             System.out.println("Http Request Received");
 
             HttpHeaders headers = httpRequest.headers();
             
             //Non Websockets
             if (headers.get("Upgrade") == null) {
-                byte[] CONTENT = { 'N','i','k','F','u','r','g','s'};
+                byte[] CONTENT = "Need to do websockets!!".getBytes();
                 System.out.println("No upgrade in headers. Skipping.");
                 
                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
@@ -64,12 +71,22 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
             }
             
             System.out.println("Headers: " + headers.names().toString());
+            
             System.out.println("Connection : " +headers.get("Connection"));
             System.out.println("Upgrade : " + headers.get("Upgrade"));
             
             if (headers.get("Connection").equalsIgnoreCase("Upgrade") ||
                     headers.get("Upgrade").equalsIgnoreCase("WebSocket")) {
-
+                
+                QueryStringDecoder decoder = new QueryStringDecoder(httpRequest.uri());
+                String ticketId = decoder.parameters().get("ticket").get(0);
+                
+                if (ticketDB.containsKey(ticketId)) {
+                    System.out.println("proceed with handshake");
+                }
+                else {
+                    System.out.println("stop handshake, bad bad user");
+                }
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
                 ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));

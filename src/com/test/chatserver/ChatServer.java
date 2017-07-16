@@ -9,6 +9,9 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -50,7 +53,9 @@ public class ChatServer {
 	 */
 	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	private List<ChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<ChannelGroup>());
-    //static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
+	private final Map<String, TimeChatMessage> sessionTicketDB = new ConcurrentHashMap<String,TimeChatMessage>();
+	
+	//static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
    
     private int port;
     
@@ -84,13 +89,13 @@ public class ChatServer {
                      
                      CorsConfigBuilder builder = CorsConfigBuilder.forAnyOrigin();
                      builder.allowCredentials();
-                     builder.allowedRequestMethods(HttpMethod.POST,HttpMethod.OPTIONS);
+                     builder.allowedRequestMethods(HttpMethod.POST,HttpMethod.OPTIONS,HttpMethod.GET);
                      CorsConfig config = builder.build();
                      
-                     ch.pipeline().addFirst(new CorsHandler(config));
+                     ch.pipeline().addFirst("corsHandler", new CorsHandler(config));
                      
-                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler());
-                     ch.pipeline().addLast("authHandler", new ServerAuthHandler(allChannels, lobbies));
+                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler(sessionTicketDB));
+                     ch.pipeline().addLast("authHandler", new ServerAuthHandler(sessionTicketDB));
                 	 
                      //ch.pipeline().addLast(new HTTPInitializer(sslCtx));
                  }
