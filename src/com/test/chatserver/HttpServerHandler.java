@@ -21,7 +21,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,12 +82,43 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 
                 QueryStringDecoder decoder = new QueryStringDecoder(httpRequest.uri());
                 String ticketId = decoder.parameters().get("ticket").get(0);
+                String username;
+                
+                if (ticketDB.get(ticketId) != null) {
+                    TimeChatMessage ticketInfo = ticketDB.get(ticketId);
+                    
+                    if (Instant.now().toEpochMilli() - ticketInfo.getTime() >= 30000) {
+                        System.out.println("Ticket expired");
+                        ctx.close();
+                        return;
+                    }
+                    else {
+                        System.out.println("ticket OK");
+                    }
+                    
+                    InetSocketAddress addy = (InetSocketAddress) ctx.channel().remoteAddress();
+                    String addyString = addy.getAddress().toString();
+                    System.out.println("addy: " + ticketInfo.message);
+                    if (addyString.equals(ticketInfo.message)) {
+                        System.out.println("remote addy matches");
+                    }
+                    else {
+                        System.out.println("remote address mismatch");
+                    }
+                }
                 
                 if (ticketDB.containsKey(ticketId)) {
                     System.out.println("proceed with handshake");
+                    //Check to make sure that time is ok
+                    
+                    
+                    //remove from the ticket db
+                    ticketDB.remove(ticketId);
                 }
                 else {
                     System.out.println("stop handshake, bad bad user");
+                    ctx.close();
+                    return;
                 }
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());

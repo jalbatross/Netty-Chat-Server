@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -154,7 +155,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 String ticket = generateTicket(username, ctx.channel().remoteAddress(),ctx.channel().id());
                 
                 //generate timestamped message with username as author and IP address as message content
-                TimeChatMessage value = new TimeChatMessage(username, ctx.channel().remoteAddress().toString());
+                InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
+                TimeChatMessage value = new TimeChatMessage(username, address.getAddress().toString());
                 ticketDB.put(ticket, value);
                 
                 ctx.writeAndFlush(httpAuthResponse(ticket));
