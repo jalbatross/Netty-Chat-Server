@@ -68,6 +68,6 @@ Simple netty chat server &amp; client
  - Finally recovering for my illness so I'm hoping for a lot more changes to come in the near future!
  - Updated version
  
- ###July 17, 2017: Version 0.25
- - A picture is worth a thousand words! ui-router shennanigans.
+ ### July 17, 2017: Version 0.25
+ - A picture is worth a thousand words! ui-router shenanigans.
  ![Alt text](https://thumbs.gfycat.com/NegligiblePowerfulGartersnake-size_restricted.gif "ui-router")
