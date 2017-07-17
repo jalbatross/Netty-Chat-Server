@@ -1,7 +1,5 @@
 //chatApp.routes.js
 
-var chatApp = angular.module('chatApp', ['ui.router']);
-
 chatApp.config(function($stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider.otherwise('/');
@@ -9,9 +7,14 @@ chatApp.config(function($stateProvider, $urlRouterProvider) {
     $stateProvider
 
         // HOME STATES AND NESTED VIEWS ========================================
-        .state('login', {
-            url: '/components/login',
-            templateUrl: 'components/login/login.html'
+        .state('/', {
+            url: '/',
+            templateUrl: '/components/login/login.html'
+        })
+
+        .state('chat', {
+            url: '/chat',
+            templateUrl: 'components/chat/chat.html'
         })
 
         // ABOUT PAGE AND MULTIPLE NAMED VIEWS =================================

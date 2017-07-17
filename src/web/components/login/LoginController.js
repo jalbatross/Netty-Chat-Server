@@ -1,8 +1,7 @@
 //LoginController.js
 
-var app = angular.module("chatApp", []);
 
-angular.module("chatApp").controller("LoginController", function($scope, $http) {
+angular.module("chatApp").controller("LoginController", function($scope,$state, $http, websockets) {
     var aurl = "http://localhost:8080";
 
     $scope.login = function() {
@@ -21,7 +20,20 @@ angular.module("chatApp").controller("LoginController", function($scope, $http) 
             headers: config
         }).then(function (response) {
             console.log(response.data);
-            
+            websockets.setTicket(response.data);
+            websockets.connect();
+            $state.go('chat');
+
+            var socket;
+            setTimeout(function() {
+                socket = websockets.getSocket();
+                socket.onmessage = function(event) {
+                    console.log("socket received something");
+                    console.log(event.data);
+                }
+
+            },1000);
+
         }, function (response) {
             console.log(response.data);
         });
