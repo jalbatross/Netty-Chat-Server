@@ -2,6 +2,13 @@
     <!--- Angular, jQuery-->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.3/angular-ui-router.min.js"></script>
+    
+    <!-- Tether -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
 </head>
 
@@ -10,7 +17,7 @@
   
   <h2 class="login-header">Log in</h2>
 
-<div ng-app="chatApp" id ="loginContainer" ng-controller="LoginController">
+<div id ="loginContainer" ng-controller="LoginController">
   <form id = "loginForm" class="login-container" ng-submit = "login()" >
     <p><input type="text"  ng-model ="username" id ="name" placeholder="Username" required></p>
     <p><input type="password" ng-model ="password" id ="pass" placeholder="Password" required></p>
@@ -33,7 +40,7 @@ Stolen from https://codepen.io/miroot/pen/qwIgC
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
 body {
-  /*background: #456;*/
+  background: #456;
   font-family: 'Open Sans', sans-serif;
 }
 

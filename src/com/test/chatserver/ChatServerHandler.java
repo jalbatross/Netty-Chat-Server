@@ -53,14 +53,17 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         lobbies = null;
     }
     
-    public ChatServerHandler(String username, List<ChannelGroup> lobbies, ChannelGroup channels) {
+    public ChatServerHandler(ChannelHandlerContext ctx, String username, List<ChannelGroup> lobbies, ChannelGroup channels) {
         this.username = username;
         this.lobbies = lobbies;
         this.channels = channels;
         
+        this.channels.add(ctx.channel());
+        
     }
 
     @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        
         TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
         TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
         channels.writeAndFlush(JsonMessage);

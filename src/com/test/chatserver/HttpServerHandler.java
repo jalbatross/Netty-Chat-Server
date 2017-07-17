@@ -108,7 +108,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
-                ctx.pipeline().addLast("chatHandler", new ChatServerHandler(username, lobbies, allChannels));
+                ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels));
                 ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));
                 ctx.pipeline().addLast( "serverPing", new ServerPing());
                 System.out.println("WebSocketHandler added to the pipeline");

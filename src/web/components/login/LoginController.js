@@ -22,14 +22,16 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
             console.log(response.data);
             websockets.setTicket(response.data);
             websockets.connect();
-            $state.go('chat');
+            //$state.go('chat');
 
             var socket;
             setTimeout(function() {
                 socket = websockets.getSocket();
-                socket.onmessage = function(event) {
-                    console.log("socket received something");
-                    console.log(event.data);
+                if (websockets.isConnected()) {
+                    $state.go('chat');
+                }
+                else {
+                    //show error message
                 }
 
             },1000);

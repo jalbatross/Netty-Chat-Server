@@ -57,5 +57,9 @@
             _socket = undefined;
         }
 
+        this.isConnected = function() {
+            return connected;
+        }
+
 
     });

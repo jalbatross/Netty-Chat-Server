@@ -12,53 +12,26 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
-<body>
+
+<body >
   <div class="main-box">
     <div class="input-block-level" id='msg-sender'>
-      <div class="input-group">
-        <input type="text" class="form-control" placeholder="Your message here!">
+
+      <div class="input-group" ng-controller = "ChatSendController">
+      <form ng-submit = "sendMessage()">
+        <input type="text" class="form-control" placeholder="Your message here!" ng-model = "message" >
+        </form>
         <span class="input-group-btn">
-          <button class="btn btn-secondary" type="button">Send</button>
+          <button class="btn btn-secondary" type="button" ng-click="sendMessage()">Send</button>
         </span>
+
       </div>
     </div>
     <div id='lobby'>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
-      user1<br>
-      user2<br>
-      user3<br>
-      veryLongusernameIwonderwhathappens<br>
       
     </div>
-    <div id='messages'>
-      theMessages
+    <div id='messages' >
+      <h>theMessages</h>
       <p>person1: this is really great</p>
       <p>person2: I wonder what happens if I type a really long message? will it overflow or will it not who knows maybe
         it will be great and not overflow but probably not I wonder what happens if I type a really long message? will it overflow or will it not who knows maybe
@@ -76,6 +49,9 @@
   </div>
 </div>
 </body>
+
+<script src="ChatController.js"></script>
+
 <style media="screen" type="text/css">
 /* 'Open Sans' font from Google Fonts */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
