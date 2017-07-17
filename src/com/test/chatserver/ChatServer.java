@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -41,7 +43,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
  * A simple chat server meant to be used between people who have a chat client.
  */
 public class ChatServer {
- 
+
+    public static final long TICKET_CLEANUP_TIME_MS = 30000;
+    public static final long TICKET_EXPIRY_TIME_MS = 20000;
 	static boolean SSL = false;
 	
 	/**
@@ -94,7 +98,7 @@ public class ChatServer {
                      
                      ch.pipeline().addFirst("corsHandler", new CorsHandler(config));
                      
-                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler(sessionTicketDB));
+                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler(sessionTicketDB, lobbies, allChannels));
                      ch.pipeline().addLast("authHandler", new ServerAuthHandler(sessionTicketDB));
                 	 
                      //ch.pipeline().addLast(new HTTPInitializer(sslCtx));
@@ -105,6 +109,23 @@ public class ChatServer {
     
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); // (7)
+            
+            //Clean every 30 seconds
+            java.util.Timer t = new java.util.Timer();
+            t.schedule(new TimerTask() {
+
+                        @Override
+                        public void run() {
+                            System.out.println("cleaning ticket db");
+                            for(String key : sessionTicketDB.keySet()) {
+                                if (Instant.now().toEpochMilli() - sessionTicketDB.get(key).getTime() 
+                                        >= TICKET_EXPIRY_TIME_MS) {
+                                    sessionTicketDB.remove(key);
+                                }
+                            }
+
+                        }
+                    }, TICKET_CLEANUP_TIME_MS, TICKET_CLEANUP_TIME_MS);
             
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully

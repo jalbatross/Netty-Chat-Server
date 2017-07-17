@@ -29,7 +29,7 @@ public class ServerPing extends ChannelInboundHandlerAdapter {
             else if (e.state() == IdleState.WRITER_IDLE) {
                 //send ping
                 ctx.writeAndFlush(new PingWebSocketFrame());
-                ctx.writeAndFlush(new TextWebSocketFrame("ping"));
+                //espanoctx.writeAndFlush(new TextWebSocketFrame("ping"));
             }
         }
     }

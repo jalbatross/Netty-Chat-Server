@@ -15,6 +15,7 @@ import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
@@ -57,8 +58,10 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 
 public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
-    private List<Object> decoded = new Stack<Object>();
+    
+    private List<ChannelGroup> lobbies;
     private Map<String,TimeChatMessage> ticketDB;
+    private ChannelGroup allChannels;
     
     //number of characters to check at end of HTML request to find JSON 
     //message
@@ -66,6 +69,15 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     
     public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB) {
         this.ticketDB = sessionTicketDB;
+    }
+
+    public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB, List<ChannelGroup> lobbies,
+            ChannelGroup allChannels) {
+        this.ticketDB = sessionTicketDB;
+        this.lobbies = lobbies;
+        this.allChannels = allChannels;
+        
+        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -93,7 +105,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
             ctx.channel().pipeline().remove("corsHandler");
             
             //replace with ws handshaker
-            ctx.channel().pipeline().replace(this, "wsHandler", new HTTPInitializer(ticketDB));
+            ctx.channel().pipeline().replace(this, "wsHandler", new HTTPInitializer(ticketDB, lobbies, allChannels));
         }
         else if (isOptions(magic1,magic2)) {
             System.out.println("got options; not supposed to happen");

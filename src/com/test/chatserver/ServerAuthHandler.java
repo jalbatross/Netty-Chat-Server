@@ -270,7 +270,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private FullHttpResponse httpAuthResponse(String ticket) {
         FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
                 HttpResponseStatus.OK, 
-                Unpooled.copiedBuffer("Authorized: " + ticket + "\r\n", 
+                Unpooled.copiedBuffer(ticket, 
                 CharsetUtil.UTF_8));
 
         resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
@@ -297,6 +297,13 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         return resp;
     }
     
+    /**
+     * 
+     * @param username
+     * @param ip
+     * @param chId
+     * @return
+     */
     private String generateTicket(String username, SocketAddress ip, ChannelId chId) {
         
         String seed = username + ip.toString() + chId.toString() + Instant.now().toEpochMilli();

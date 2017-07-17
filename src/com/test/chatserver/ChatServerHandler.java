@@ -19,6 +19,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -41,14 +43,23 @@ import java.util.Stack;
  */
 public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
-    final ChannelGroup channels;
-    final String username;
+    private final List<ChannelGroup> lobbies;
+    private final ChannelGroup channels;
+    private final String username;
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;
         this.username = username;
+        lobbies = null;
     }
     
+    public ChatServerHandler(String username, List<ChannelGroup> lobbies, ChannelGroup channels) {
+        this.username = username;
+        this.lobbies = lobbies;
+        this.channels = channels;
+        
+    }
+
     @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
         TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
@@ -112,6 +123,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                     }
                 }
             });
+		}
+		else if (msg instanceof PongWebSocketFrame) {
+		    //pass through to idle handler
+		    ctx.fireChannelRead(msg);
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
