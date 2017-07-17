@@ -67,3 +67,7 @@ Simple netty chat server &amp; client
  - Auth on both browser/java clients works and registration needs to be done. Also, the App section of this should be started as there is not much point in continuing to use a Netty client with just Java.
  - Finally recovering for my illness so I'm hoping for a lot more changes to come in the near future!
  - Updated version
+ 
+ ###July 17, 2017: Version 0.25
+ - A picture is worth a thousand words! ui-router shennanigans.
+ ![Alt text](https://thumbs.gfycat.com/NegligiblePowerfulGartersnake-size_restricted.gif "ui-router")
