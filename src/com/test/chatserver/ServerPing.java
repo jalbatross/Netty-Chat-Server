@@ -33,5 +33,13 @@ public class ServerPing extends ChannelInboundHandlerAdapter {
             }
         }
     }
+    
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("[ServerPing] Reading" );
+        if (!(msg instanceof PongWebSocketFrame)) {
+            ctx.fireChannelRead(msg);
+        }
+    }
 
 }

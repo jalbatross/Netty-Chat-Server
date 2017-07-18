@@ -77,7 +77,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
 			String strMsg = ((TextWebSocketFrame) msg).text();
-            
+
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
             
@@ -126,10 +126,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                     }
                 }
             });
-		}
-		else if (msg instanceof PongWebSocketFrame) {
-		    //pass through to idle handler
-		    ctx.fireChannelRead(msg);
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
