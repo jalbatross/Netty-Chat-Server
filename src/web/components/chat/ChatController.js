@@ -8,13 +8,27 @@ angular.module("chatApp").controller("ChatSendController", function ($scope, $st
     }
 
     var socket = websockets.getSocket();
-    socket.onmessage = function(event) {
-        console.log('server said: ', event.data);
-    }
 
     $scope.sendMessage = function() {
         console.log("sending message");
         socket.send($scope.message);
     }
 
+})
+
+angular.module("chatApp").controller("ChatReceiveController", function($scope, websockets) {
+    var socket = websockets.getSocket();
+    $scope.messages = [];
+
+    socket.onmessage = function(event) {
+        console.log('server said: ', event.data);
+        var obj = JSON.parse(event.data);
+        var time = new Date(obj.time);
+        obj.time = time.toLocaleString();
+
+        ($scope.messages).push(obj);
+
+        $scope.$apply();
+
+    }
 })
