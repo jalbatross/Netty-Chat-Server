@@ -19,7 +19,7 @@
 
       <div class="input-group" ng-controller = "ChatSendController">
       <form ng-submit = "sendMessage()">
-        <input type="text" class="form-control" placeholder="Your message here!" ng-model = "message" >
+        <input type="text" class="form-control" placeholder="Your message here!" ng-model = "message" ng-init="message = '' " >
         </form>
         <span class="input-group-btn">
           <button class="btn btn-secondary" type="button" ng-click="sendMessage()">Send</button>
@@ -31,7 +31,7 @@
       
     </div>
     <div id='messages' ng-controller="ChatReceiveController">
-    <div ng-repeat ="x in messages">{{x.time}} {{x.author}}: {{x.message}}</div>
+    <h ng-repeat ="x in messages">{{x.time}} {{x.author}}: {{x.message}} <br></h>
     </div>
   </div>
 </div>

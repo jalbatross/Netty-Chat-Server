@@ -13,6 +13,9 @@ angular.module("chatApp").controller("ChatSendController", function ($scope, $st
         console.log("sending message");
         socket.send($scope.message);
     }
+    socket.onclose = function() {
+        $state.go('/');
+    }
 
 })
 
