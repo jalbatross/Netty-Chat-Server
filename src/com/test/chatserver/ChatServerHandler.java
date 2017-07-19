@@ -3,6 +3,7 @@ package com.test.chatserver;
 
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
@@ -81,12 +82,16 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
             
+            JsonObject json = new JsonParser().parse(new Gson().toJson(timeMessage)).getAsJsonObject();
+            json.addProperty("type", "msg");
+            System.out.println("json: " + json);
             //Send it back to every client in the group as a Json
             TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
             channels.writeAndFlush(JsonMessage);
 			
 		}
 		else if (msg instanceof ByteBuf) {
+		    System.out.println("[ChatServerHandler] Received ByteBuf");
 		    ByteBuf buf = (ByteBuf) msg;
 		    
 		    //Get the lobby id

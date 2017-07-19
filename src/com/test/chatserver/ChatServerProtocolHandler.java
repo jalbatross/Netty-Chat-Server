@@ -96,7 +96,12 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         //If POST, forward the message to the HTTP post decoder
         if (isPost(magic1,magic2)){
             System.out.println("got post");
+            for (int i = 0; i < buf.readableBytes(); i++) {
+                System.out.print((char) buf.getByte(i));  
+            }
+            ctx.channel().pipeline().addAfter("protocolHandler", "intFrameDecoder", new ChatServerIntFrameDecoder());
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
+            
         }
         else if (isGet(magic1,magic2)) {
             System.out.println("got GET, ws upgrade");
@@ -115,6 +120,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         
         //Otherwise forward the msg to the integer based frame decoder
         else {
+            System.out.println("[ChatServerProtocolHandler] Received bytebuf");
             ctx.channel().pipeline().replace(this, "intFrameDecoder", new ChatServerIntFrameDecoder());
         }
 
