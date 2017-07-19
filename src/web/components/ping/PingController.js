@@ -9,57 +9,6 @@
  * by @jalbatross (Joey Albano)
  */
 
-angular.module("chatApp").controller("PingController2", function($scope, $http) {
-    var aurl = "http://localhost:8080";
-    function run() {
-        
-
-
-        var config = {'Content-Type': 'application/x-www-form-urlencoded'};
-
-        var buf = new flatbuffers.ByteBuffer(bytes);
-
-        console.log('buf ', bytes );
-
-
-        $http({
-            method: 'post',
-            url: aurl,
-            data: bytes,
-            headers: config,
-            transformRequest: []
-        }).then(function (response) {
-            console.log(response.data);
-            websockets.setTicket(response.data);
-            websockets.connect();
-            //$state.go('chat');
-
-            var socket;
-            setTimeout(function() {
-                socket = websockets.getSocket();
-                if (websockets.isConnected()) {
-                    $state.go('chat');
-                }
-                else {
-                    //show error message
-                }
-
-            },1000);
-
-        }, function (response) {
-            console.log(response.data);
-        });
-        var msg = Schema.Message.getRootAsMessage(buf);
-
-        var receivedName = msg.data(new Schema.Credentials()).username();
-        var receivedPw = msg.data(new Schema.Credentials()).password();
-        console.log(receivedName);
-        console.log(receivedPw);
-
-        console.log("done");
-    }
-    $scope.testSchema = run;
-})
 
 angular.module("chatApp").controller("PingController", function($scope, $interval) {
     

@@ -60,7 +60,6 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
             }
             websockets.setTicket(ticket);
             websockets.connect();
-            //$state.go('chat');
 
             var socket;
             setTimeout(function() {

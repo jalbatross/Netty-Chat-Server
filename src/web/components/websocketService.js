@@ -34,6 +34,8 @@
             
             _socket = new WebSocket(uri);
 
+            _socket.binaryType = "arraybuffer";
+
             _socket.onopen = function() {
                 connected = true;
             }

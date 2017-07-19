@@ -31,7 +31,7 @@
       
     </div>
     <div id='messages' ng-controller="ChatReceiveController">
-    <h ng-repeat ="x in messages">{{x.time}} {{x.author}}: {{x.message}} <br></h>
+    <h ng-repeat ="x in messages track by $index">{{x.time}} {{x.author}}: {{x.message}} <br></h>
     </div>
   </div>
 </div>

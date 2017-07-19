@@ -23,16 +23,58 @@ angular.module("chatApp").controller("ChatSendController", function ($scope, $st
 angular.module("chatApp").controller("ChatReceiveController", function($scope, websockets) {
     var socket = websockets.getSocket();
     $scope.messages = [];
+    function errorMessage(time) {
+        this.time = time.toLocaleString();
+        this.author = "";
+        this.message = "ERROR!";
+    }
+
 
     socket.onmessage = function(event) {
-        console.log('server said: ', event.data);
+        var bytes = new Uint8Array(event.data);
+
+        var buf = new flatbuffers.ByteBuffer(bytes);
+        var msg = Schema.Message.getRootAsMessage(buf);
+
+        var dataType = msg.dataType();
+
+        if (dataType == Schema.Data.Chat) {
+            var time = msg.data(new Schema.Chat()).timestamp().toFloat64();
+            var author = msg.data(new Schema.Chat()).author();
+            var contents = msg.data(new Schema.Chat()).message();
+
+            var converted = new Date(time);
+
+            var obj = {time: converted.toLocaleString(), author: author, message: contents};
+            ($scope.messages).push(obj);
+
+
+        } else if (dataType == Schema.Data.Lobbies){
+            console.log("got Lobbies");
+            var len = msg.data(new Schema.Lobbies()).listLength();
+
+            for (var i = 0; i < len; i++) {
+                console.log(i, " th lobby: " , msg.data(new Schema.Lobbies()).list(i));
+            }
+
+            
+            
+        }
+        else {
+            console.log("dataType ", dataType);
+            var currentTime = new Date(Date.now());
+            ($scope.messages).push(new errorMessage(currentTime));
+        }
+
+        $scope.$apply();
+        /*
         var obj = JSON.parse(event.data);
         var time = new Date(obj.time);
         obj.time = time.toLocaleString();
 
         ($scope.messages).push(obj);
 
-        $scope.$apply();
+        $scope.$apply();*/
 
     }
 })
