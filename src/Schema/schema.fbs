@@ -17,7 +17,7 @@ table Credentials {
 
 table Auth {
   verified:bool;
-  token:string;
+  ticket:string;
 }
 
 table Lobbies {

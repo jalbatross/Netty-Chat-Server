@@ -41,6 +41,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 
 /**
@@ -65,6 +66,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     private LoginAuthorizer login = new LoginAuthorizer();
     private Map<String,TimeChatMessage> ticketDB;
 
+    private final AttributeKey<String> PROTOCOLKEY = AttributeKey.valueOf("protocol");
+    
     //User credentials
     private String username, pwdStr;
     private char[] pwdChar;
@@ -111,8 +114,15 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             // Check DB for credentials
             if (login.verifyUser(username, pwdChar)) {
                 
+                String ticket = generateTicket(username, ch.remoteAddress(),ch.id());
+                
+                //generate timestamped message with username as author and IP address as message content
+                InetSocketAddress address = (InetSocketAddress) ch.remoteAddress();
+                TimeChatMessage value = new TimeChatMessage(username, address.getAddress().toString());
+                ticketDB.put(ticket, value);
+                
                 //Send authorized packet to client
-                ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true);
+                ByteBuffer auth = FlatBuffersCodec.authToByteBuffer(true, ticket);
 
                 ByteBuffer temp = ByteBuffer.allocate(4);
                 temp.putInt(auth.remaining());
@@ -123,7 +133,12 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 ByteBuf authBuf = Unpooled.copiedBuffer(auth);
 
                 System.out.println("len prefix data: " + lenPrefix.getInt(0));
-
+                
+                if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
+                    System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
+                    
+                    ctx.writeAndFlush(httpAuthResponse(ticket));
+                }
                 // Write to channel
                 ch.write(lenPrefix);
                 ch.writeAndFlush(authBuf);
@@ -152,10 +167,10 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             if (login.verifyUser(username, pwdStr)) {
                 System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
                 
-                String ticket = generateTicket(username, ctx.channel().remoteAddress(),ctx.channel().id());
+                String ticket = generateTicket(username, ch.remoteAddress(),ch.id());
                 
                 //generate timestamped message with username as author and IP address as message content
-                InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
+                InetSocketAddress address = (InetSocketAddress) ch.remoteAddress();
                 TimeChatMessage value = new TimeChatMessage(username, address.getAddress().toString());
                 ticketDB.put(ticket, value);
                 

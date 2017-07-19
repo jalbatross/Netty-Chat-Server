@@ -15,16 +15,21 @@ public final class Auth extends Table {
   public Auth __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public boolean verified() { int o = __offset(4); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public String ticket() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer ticketAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
 
   public static int createAuth(FlatBufferBuilder builder,
-      boolean verified) {
-    builder.startObject(1);
+      boolean verified,
+      int ticketOffset) {
+    builder.startObject(2);
+    Auth.addTicket(builder, ticketOffset);
     Auth.addVerified(builder, verified);
     return Auth.endAuth(builder);
   }
 
-  public static void startAuth(FlatBufferBuilder builder) { builder.startObject(1); }
+  public static void startAuth(FlatBufferBuilder builder) { builder.startObject(2); }
   public static void addVerified(FlatBufferBuilder builder, boolean verified) { builder.addBoolean(0, verified, false); }
+  public static void addTicket(FlatBufferBuilder builder, int ticketOffset) { builder.addOffset(1, ticketOffset, 0); }
   public static int endAuth(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

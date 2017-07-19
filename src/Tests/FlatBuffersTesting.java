@@ -25,7 +25,7 @@ public class FlatBuffersTesting {
         int cred = Credentials.createCredentials(builder, user, pw);
         
         //make auth
-        int verif = Auth.createAuth(builder, false);
+        int verif = Auth.createAuth(builder, false, user);
         
         //make chat
         int chatMsg = Chat.createChat(builder, 6969, 

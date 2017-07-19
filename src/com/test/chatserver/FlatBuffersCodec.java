@@ -59,20 +59,21 @@ public class FlatBuffersCodec {
     }
     
     /**
-     * Wraps a boolean into a serialized FlatBuffer ByteBuf with Data type
-     * Auth. Intended to be used to verify user logins, authorizations, etc.
-     * by a server.
-     * 
+     * Wraps a boolean and a String ticket into a serialized FlatBuffer ByteBuf 
+     * with Data type Auth. Intended to be used to verify user logins and 
+     * authorization by a server.
      * @param verified      True if verified, false otherwise
+     * @param ticket        A ticket String
+     * 
      * @return              Serialized FlatBuffer Message as a ByteBuf, Data type
      *                      Auth
      *                      
      * @see Schema
      */
-    static public ByteBuffer authToByteBuffer(boolean verified) {
+    static public ByteBuffer authToByteBuffer(boolean verified, String ticket) {
         FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
         
-        int auth = Auth.createAuth(fbb, verified);
+        int auth = Auth.createAuth(fbb, verified, fbb.createString(ticket));
         
         Message.startMessage(fbb);
         Message.addDataType(fbb, Data.Auth);

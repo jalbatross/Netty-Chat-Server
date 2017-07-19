@@ -36,6 +36,7 @@ public class ChatClientAuthHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().attr(AttributeKey.valueOf("authorized")).set(auth.verified());
             if (auth.verified()) {
                 System.out.println("User verified!");
+                System.out.println("Ticket: " + auth.ticket());
             }
             else {
                 System.out.println("User login failed");

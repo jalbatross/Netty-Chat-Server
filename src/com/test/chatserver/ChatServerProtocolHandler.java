@@ -38,6 +38,7 @@ import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.util.AttributeKey;
 
 /**
  * Identifies the protocol that clients are using to send credentials with, 
@@ -62,6 +63,8 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private List<ChannelGroup> lobbies;
     private Map<String,TimeChatMessage> ticketDB;
     private ChannelGroup allChannels;
+    
+    private final AttributeKey<String> PROTOCOLKEY = AttributeKey.valueOf("protocol");
     
     //number of characters to check at end of HTML request to find JSON 
     //message
@@ -96,9 +99,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         //If POST, forward the message to the HTTP post decoder
         if (isPost(magic1,magic2)){
             System.out.println("got post");
-            for (int i = 0; i < buf.readableBytes(); i++) {
-                System.out.print((char) buf.getByte(i));  
-            }
+            ctx.channel().attr(PROTOCOLKEY).set("http");
             ctx.channel().pipeline().addAfter("protocolHandler", "intFrameDecoder", new ChatServerIntFrameDecoder());
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
             
@@ -120,7 +121,9 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         
         //Otherwise forward the msg to the integer based frame decoder
         else {
+            
             System.out.println("[ChatServerProtocolHandler] Received bytebuf");
+            ctx.channel().attr(PROTOCOLKEY).set("mobile");
             ctx.channel().pipeline().replace(this, "intFrameDecoder", new ChatServerIntFrameDecoder());
         }
 
