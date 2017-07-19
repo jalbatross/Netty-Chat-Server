@@ -82,6 +82,15 @@ public class ChatServer {
     	System.out.println(" on port " + this.port);
         EventLoopGroup bossGroup = new NioEventLoopGroup(); 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+        
+        ChannelGroup first = new DefaultChannelGroup("Antares", GlobalEventExecutor.INSTANCE);
+        ChannelGroup second = new DefaultChannelGroup("Ascella", GlobalEventExecutor.INSTANCE);
+        ChannelGroup third = new DefaultChannelGroup("Avior",GlobalEventExecutor.INSTANCE);
+        
+        lobbies.add(first);
+        lobbies.add(second);
+        lobbies.add(third);
+        
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

@@ -49,12 +49,13 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
             ($scope.messages).push(obj);
 
 
-        } else if (dataType == Schema.Data.Lobbies){
-            console.log("got Lobbies");
-            var len = msg.data(new Schema.Lobbies()).listLength();
-
+        } else if (dataType == Schema.Data.List){
+            console.log("got List");
+            var len = msg.data(new Schema.List()).contentsLength();
+            var listType = msg.data(new Schema.List()).type();
+            console.log("type of list: ", listType);
             for (var i = 0; i < len; i++) {
-                console.log(i, " th lobby: " , msg.data(new Schema.Lobbies()).list(i));
+                console.log(i, " : " , msg.data(new Schema.List()).contents(i));
             }
 
             

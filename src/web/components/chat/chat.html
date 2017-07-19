@@ -16,28 +16,24 @@
 <body >
   <div class="main-box">
     <div class="input-block-level" id='msg-sender'>
-
       <div class="input-group" ng-controller = "ChatSendController">
-      <form ng-submit = "sendMessage()">
-        <input type="text" class="form-control" placeholder="Your message here!" ng-model = "message" ng-init="message = '' " >
+        <form ng-submit = "sendMessage()">
+          <input type="text" class="form-control" placeholder="Your message here!" ng-model = "message" ng-init="message = '' " >
         </form>
         <span class="input-group-btn">
           <button class="btn btn-secondary" type="button" ng-click="sendMessage()">Send</button>
         </span>
-
       </div>
     </div>
     <div id='lobby'>
-      
+      here
     </div>
     <div id='messages' ng-controller="ChatReceiveController">
-    <h ng-repeat ="x in messages track by $index">{{x.time}} {{x.author}}: {{x.message}} <br></h>
+      <h ng-repeat ="x in messages track by $index"><pre>{{x}}</pre> </h>
     </div>
   </div>
 </div>
 </body>
-
-<script src="ChatController.js"></script>
 
 <style media="screen" type="text/css">
 /* 'Open Sans' font from Google Fonts */

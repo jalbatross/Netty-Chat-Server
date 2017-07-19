@@ -78,16 +78,29 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
 			String strMsg = ((TextWebSocketFrame) msg).text();
-
+			
+			if (strMsg.equalsIgnoreCase("/lobbies")) {
+			    
+			    String[] lobbyList = new String[lobbies.size()];
+			    for (int i = 0; i < lobbies.size(); i++) {
+			        lobbyList[i]=lobbies.get(i).name();
+			    }
+	            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+	            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
+	            channels.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
+	            
+	            return;
+			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
             
-            JsonObject json = new JsonParser().parse(new Gson().toJson(timeMessage)).getAsJsonObject();
-            json.addProperty("type", "msg");
-            System.out.println("json: " + json);
-            //Send it back to every client in the group as a Json
-            TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
-            channels.writeAndFlush(JsonMessage);
+            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+            ByteBuf buf = Unpooled.copiedBuffer(data);
+            
+            
+            
+            channels.writeAndFlush(new BinaryWebSocketFrame(buf));
+            
 			
 		}
 		else if (msg instanceof ByteBuf) {
