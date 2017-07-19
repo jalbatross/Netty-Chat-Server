@@ -137,7 +137,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
                     System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
                     
-                    ctx.writeAndFlush(httpAuthResponse(ticket));
+                    ctx.writeAndFlush(httpAuthResponse(authBuf));
                 }
                 // Write to channel
                 ch.write(lenPrefix);
@@ -174,7 +174,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 TimeChatMessage value = new TimeChatMessage(username, address.getAddress().toString());
                 ticketDB.put(ticket, value);
                 
-                ctx.writeAndFlush(httpAuthResponse(ticket));
+                //ctx.writeAndFlush(httpAuthResponse(ticket));
             } 
             else {
                 System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
@@ -282,11 +282,10 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
      * 
      * @return    username authorized http response
      */
-    private FullHttpResponse httpAuthResponse(String ticket) {
+    private FullHttpResponse httpAuthResponse(ByteBuf data) {
         FullHttpResponse resp = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, 
                 HttpResponseStatus.OK, 
-                Unpooled.copiedBuffer(ticket, 
-                CharsetUtil.UTF_8));
+                data);
 
         resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");

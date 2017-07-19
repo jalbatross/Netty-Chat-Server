@@ -251,10 +251,19 @@ Schema.Auth.prototype.verified = function() {
 };
 
 /**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+Schema.Auth.prototype.ticket = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Schema.Auth.startAuth = function(builder) {
-  builder.startObject(1);
+  builder.startObject(2);
 };
 
 /**
@@ -263,6 +272,14 @@ Schema.Auth.startAuth = function(builder) {
  */
 Schema.Auth.addVerified = function(builder, verified) {
   builder.addFieldInt8(0, +verified, +false);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} ticketOffset
+ */
+Schema.Auth.addTicket = function(builder, ticketOffset) {
+  builder.addFieldOffset(1, ticketOffset, 0);
 };
 
 /**

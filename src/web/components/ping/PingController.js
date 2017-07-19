@@ -12,27 +12,7 @@
 angular.module("chatApp").controller("PingController2", function($scope, $http) {
     var aurl = "http://localhost:8080";
     function run() {
-        console.log("meeseeks");
         
-        var builder = new flatbuffers.Builder(1024);
-
-        var theName = builder.createString("admin");
-        var thePw = builder.createString("abcde");
-
-        Schema.Credentials.startCredentials(builder);
-        Schema.Credentials.addUsername(builder, theName);
-        Schema.Credentials.addPassword(builder, thePw);
-        var cred = Schema.Credentials.endCredentials(builder);
-
-        Schema.Message.startMessage(builder);
-        Schema.Message.addDataType(builder, Schema.Data.Credentials);
-        Schema.Message.addData(builder, cred);
-
-        var fin = Schema.Message.endMessage(builder);
-        builder.finish(fin);
-        console.log(fin);
-
-        var bytes = builder.asUint8Array();
 
 
         var config = {'Content-Type': 'application/x-www-form-urlencoded'};
