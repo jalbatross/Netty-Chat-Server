@@ -2,4 +2,7 @@
 <div ng-controller ="PingController">
     <button type="button" ng-click="connect()" class = 'btn' ng-class="{'btn-info': action == 'Connected', 'btn-danger': action == 'Disconnected', 'btn-warning': action == 'Reconnecting'}">{{action}}</button>
 </div>
+<div ng-controller ="PingController2">
+    <button type="button" ng-click="testSchema()" class = 'btn btn-info'>wowza</button>
+</div>
 <script src="PingController.js"></script>
