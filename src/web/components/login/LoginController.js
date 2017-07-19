@@ -38,6 +38,7 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
         }).then(function (response) {
 
             var bytes = new Uint8Array(response.data);
+
             var buf = new flatbuffers.ByteBuffer(bytes);
             var msg = Schema.Message.getRootAsMessage(buf);
 
@@ -57,7 +58,7 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
                 console.log("dataType was ", dataType);
                 console.log("got unknown stuff, here it is: ", response.data);
             }
-            websockets.setTicket(response.data);
+            websockets.setTicket(ticket);
             websockets.connect();
             //$state.go('chat');
 
