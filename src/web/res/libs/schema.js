@@ -14,7 +14,7 @@ Schema.Data = {
   Chat: 1,
   Credentials: 2,
   Auth: 3,
-  Lobbies: 4
+  List: 4
 };
 
 /**
@@ -294,7 +294,7 @@ Schema.Auth.endAuth = function(builder) {
 /**
  * @constructor
  */
-Schema.Lobbies = function() {
+Schema.List = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -309,9 +309,9 @@ Schema.Lobbies = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Schema.Lobbies}
+ * @returns {Schema.List}
  */
-Schema.Lobbies.prototype.__init = function(i, bb) {
+Schema.List.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -319,11 +319,20 @@ Schema.Lobbies.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Schema.Lobbies=} obj
- * @returns {Schema.Lobbies}
+ * @param {Schema.List=} obj
+ * @returns {Schema.List}
  */
-Schema.Lobbies.getRootAsLobbies = function(bb, obj) {
-  return (obj || new Schema.Lobbies).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+Schema.List.getRootAsList = function(bb, obj) {
+  return (obj || new Schema.List).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+Schema.List.prototype.type = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
 
 /**
@@ -331,32 +340,40 @@ Schema.Lobbies.getRootAsLobbies = function(bb, obj) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array}
  */
-Schema.Lobbies.prototype.list = function(index, optionalEncoding) {
-  var offset = this.bb.__offset(this.bb_pos, 4);
+Schema.List.prototype.contents = function(index, optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__string(this.bb.__vector(this.bb_pos + offset) + index * 4, optionalEncoding) : null;
 };
 
 /**
  * @returns {number}
  */
-Schema.Lobbies.prototype.listLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 4);
+Schema.List.prototype.contentsLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
 /**
  * @param {flatbuffers.Builder} builder
  */
-Schema.Lobbies.startLobbies = function(builder) {
-  builder.startObject(1);
+Schema.List.startList = function(builder) {
+  builder.startObject(2);
 };
 
 /**
  * @param {flatbuffers.Builder} builder
- * @param {flatbuffers.Offset} listOffset
+ * @param {flatbuffers.Offset} typeOffset
  */
-Schema.Lobbies.addList = function(builder, listOffset) {
-  builder.addFieldOffset(0, listOffset, 0);
+Schema.List.addType = function(builder, typeOffset) {
+  builder.addFieldOffset(0, typeOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} contentsOffset
+ */
+Schema.List.addContents = function(builder, contentsOffset) {
+  builder.addFieldOffset(1, contentsOffset, 0);
 };
 
 /**
@@ -364,7 +381,7 @@ Schema.Lobbies.addList = function(builder, listOffset) {
  * @param {Array.<flatbuffers.Offset>} data
  * @returns {flatbuffers.Offset}
  */
-Schema.Lobbies.createListVector = function(builder, data) {
+Schema.List.createContentsVector = function(builder, data) {
   builder.startVector(4, data.length, 4);
   for (var i = data.length - 1; i >= 0; i--) {
     builder.addOffset(data[i]);
@@ -376,7 +393,7 @@ Schema.Lobbies.createListVector = function(builder, data) {
  * @param {flatbuffers.Builder} builder
  * @param {number} numElems
  */
-Schema.Lobbies.startListVector = function(builder, numElems) {
+Schema.List.startContentsVector = function(builder, numElems) {
   builder.startVector(4, numElems, 4);
 };
 
@@ -384,8 +401,9 @@ Schema.Lobbies.startListVector = function(builder, numElems) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Schema.Lobbies.endLobbies = function(builder) {
+Schema.List.endList = function(builder) {
   var offset = builder.endObject();
+  builder.requiredField(offset, 4); // type
   return offset;
 };
 
