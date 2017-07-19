@@ -38,8 +38,8 @@ public class FlatBuffersTesting {
         lobbies[1] = builder.createString("Ceres");
         lobbies[2] = builder.createString("Larc");
         lobbies[3] = builder.createString("Gevergreen");
-        int lobbyList = Lobbies.createListVector(builder, lobbies);
-        int lobbyVec = Lobbies.createLobbies(builder, lobbyList);
+        int contentsList = List.createContentsVector(builder, lobbies);
+        int listVec = List.createList(builder, builder.createString("lobbies"), contentsList);
         
         Message.startMessage(builder);
         Message.addDataType(builder, Data.Credentials);
@@ -74,8 +74,8 @@ public class FlatBuffersTesting {
         messages[2] = chatFin;
         
         Message.startMessage(builder);
-        Message.addDataType(builder, Data.Lobbies);
-        Message.addData(builder, lobbyVec);
+        Message.addDataType(builder, Data.List);
+        Message.addData(builder, listVec);
         int lobbyMsg = Message.endMessage(builder);
         builder.finish(lobbyMsg);
         buf = builder.dataBuffer();
@@ -84,7 +84,7 @@ public class FlatBuffersTesting {
         
         messages[4] = authMsg;
         
-      //expect: cred , auth, chat, lobby, auth
+      //expect: cred , auth, chat, list, auth
         for (int i = 0; i < messages.length; i ++) {
             switch (messages[i].dataType()) {
                 case Type.Chat:
@@ -108,13 +108,16 @@ public class FlatBuffersTesting {
                     else {
                         System.out.println("not verified");
                     }
+                    System.out.println("Auth Ticket: " + auth.ticket());
                     break;
-                case Type.Lobbies:
+                case Type.List:
                     System.out.println("got lobbies");
-                    Lobbies lobs = (Lobbies)messages[i].data(new Lobbies());
-                    System.out.println("num of lobbies: " + lobs.listLength());
-                    for (int j = 0; j < lobs.listLength(); j++) {
-                        System.out.println("lobby " + j + ": " + lobs.list(j));
+                    List stuff = (List)messages[i].data(new List());
+                    System.out.println("type of contents: " + stuff.type());
+                    System.out.println("num of elements in contents: " + stuff.contentsLength());
+                    
+                    for (int j = 0; j < stuff.contentsLength(); j++) {
+                        System.out.println("lobby " + j + ": " + stuff.contents(j));
                     }
                     break;
                 default:
@@ -126,16 +129,16 @@ public class FlatBuffersTesting {
         
         //Testing FlatBuffersCodecs
         String[] dudes = {"eli","ralph","sirak","ADJUSTMENTS"};
-        ByteBuffer theBUF = FlatBuffersCodec.lobbiesToByteBuffer(dudes);
+        ByteBuffer theBUF = FlatBuffersCodec.listToByteBuffer("dudes", dudes);
         
         Message theMsg = Message.getRootAsMessage(theBUF);
-        if (theMsg.dataType() == Type.Lobbies) {
+        if (theMsg.dataType() == Type.List) {
             System.out.println("successs!");
             
-            Lobbies lobster = (Lobbies)theMsg.data(new Lobbies());
-            
-            for (int j = 0; j < lobster.listLength(); j++) {
-                System.out.println("lobby: " + ": " + lobster.list(j));
+            List liszt = (List)theMsg.data(new List());
+            System.out.println("list type: " + liszt.type());
+            for (int j = 0; j < liszt.contentsLength(); j++) {
+                System.out.println("content: " + liszt.contents(j));
             }
         }
         System.out.println("\n");

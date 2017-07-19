@@ -120,7 +120,7 @@ public class FlatBuffersCodec {
     
     /**
      * Serializes a vector of strings to a ByteBuffer using FlatBuffers.
-     * Intended to be used to transmit lists of server lobbies between server
+     * Intended to be used to transmit lists of Strings between server
      * and client. The serialized data is a Message conforming to the schema
      * in schema.fbs which can be found in the Schema package.
      * 
@@ -129,28 +129,31 @@ public class FlatBuffersCodec {
      * and casting the return of the Message.data() function to 
      * Lobbies.
      * 
-     * 
-     * @param lobbies   A vector of Strings that should be a list of server 
-     *                  lobbies
+     * @param type      The type of data that contents refers to, i.e lobbies or
+     *                  usernames
+     *                  
+     * @param contents  A vector of Strings 
      *                  
      * @return          Serialized FlatBuffer as ByteBuf with Data type
      *                  Lobbies
      * 
      * @see Schema
      */
-    static public ByteBuffer lobbiesToByteBuffer(String[] lobbies) {
+    static public ByteBuffer listToByteBuffer(String type, String[] contents) {
         FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
         
-        int[] lobbiesOffsets = new int[lobbies.length];
-        for (int i = 0; i < lobbies.length; i ++) {
-            lobbiesOffsets[i] = fbb.createString(lobbies[i]);
+        int[] contentsOffsets = new int[contents.length];
+        for (int i = 0; i < contents.length; i ++) {
+            contentsOffsets[i] = fbb.createString(contents[i]);
         }
-        int listVect = Lobbies.createListVector(fbb, lobbiesOffsets);
-        int lobbiesFinal = Lobbies.createLobbies(fbb, listVect);
+        int contentsVect = List.createContentsVector(fbb, contentsOffsets);
+        int typeVect = fbb.createString(type);
+        
+        int listFinal = List.createList(fbb, typeVect, contentsVect);
         
         Message.startMessage(fbb);
-        Message.addDataType(fbb, Data.Lobbies);
-        Message.addData(fbb, lobbiesFinal);
+        Message.addDataType(fbb, Data.List);
+        Message.addData(fbb, listFinal);
         
         int finishedMsg = Message.endMessage(fbb);
         fbb.finish(finishedMsg);
