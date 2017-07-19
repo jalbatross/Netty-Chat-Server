@@ -20,7 +20,7 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
      * @return {string} ret       concatenation of above strings, date is in local format
      */
     function chatMessageString(date, author, message) {
-        return date.toLocaleString() + " " + author +  " " + message;
+        return date.toLocaleString() + " " + author +  ": " + message;
     }
 
     /**
@@ -41,7 +41,9 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
 
         for (var i = 0; i < len; i++) {
             ret += msg.data(new Schema.List()).contents(i);
-            ret += "\n";
+            if (i != len - 1) {
+                ret += "\n";
+            }
         }
 
         return ret;
