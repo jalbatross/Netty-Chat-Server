@@ -10,7 +10,7 @@ angular.module("chatApp").controller("ChatSendController", function ($scope, $st
     var socket = websockets.getSocket();
 
     $scope.sendMessage = function() {
-        console.log("sending message");
+        console.log("[ChatSendController] sending message");
         socket.send($scope.message);
         $scope.message = "";
     }

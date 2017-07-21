@@ -49,8 +49,8 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel">Modal title</h4>
       </div>
-      <div class="modal-body">
-        ...
+      <div class="modal-body" ng-controller="ChatLobbiesController">
+        <div  ng-repeat="y in data track by $index" >{{y}} wtf wtf wtf </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -68,7 +68,7 @@
 body {
   background:#456;
 }
-
+ 
 .main-box{
   width: 50%;
   height: 60%;
@@ -118,4 +118,43 @@ body {
 div:hover {
     outline: 1px solid blue;
 }
+
+.modal {
+  display:flex;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  
+  max-width:100%;
+  max-height:100%;
+  
+}
+
+.modal-content {
+
+  /* other stuff we already covered */
+
+  /* cover the modal */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  /* spacing as needed */
+  padding: 20px 50px 20px 20px;
+
+  /* let it scroll */
+}
+
+.modal-body {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+
+  overflow:auto;
+}
+
+
 </style>

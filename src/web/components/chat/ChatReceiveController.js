@@ -49,7 +49,8 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         return ret;
     }
 
-    socket.onmessage = function(event) {
+    socket.addEventListener("message", function(event) {
+        console.log("[ChatReceiveController] Received msg");
         var bytes = new Uint8Array(event.data);
 
         var buf = new flatbuffers.ByteBuffer(bytes);
@@ -90,5 +91,5 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
 
         $scope.$apply();*/
 
-    }
-})
+    });
+});
