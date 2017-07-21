@@ -13,10 +13,15 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 
-<body >
+<body>
 
   <div class="main-box">
-  <div id ="chat-toolbar">chat toolbar here</div>
+    <div id ="chat-toolbar" class = "btn-group">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Lobbies</button>
+      <button type="button" class="btn btn-info">Sign Out</button>
+      <button type="button" class="btn btn-default">no-op</button>
+    </div>
+
     <div id='user-list'>
       here
     </div>
@@ -36,6 +41,25 @@
   </div>
 </div>
 </body>
+    <!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+    
+  </div>
+</div>
 
 <style media="screen" type="text/css">
 /* 'Open Sans' font from Google Fonts */
@@ -44,6 +68,7 @@
 body {
   background:#456;
 }
+
 .main-box{
   width: 50%;
   height: 60%;
@@ -59,7 +84,7 @@ body {
 #chat-toolbar {
   height: 10%;
   width: 100%;
-  background-color: #456;
+  background-color: white;
 }
 
 #msg-sender{
