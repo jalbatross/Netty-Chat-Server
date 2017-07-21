@@ -36,7 +36,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
 
     var socket = websockets.getSocket();
 
-    $scope.data = [];
+    $scope.data = "";
     
     socket.addEventListener("message", function(event) {
         console.log("[LobbiesController] read message");
@@ -50,7 +50,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         if (dataType == Schema.Data.List){
             console.log("[LobbiesController] got List");
             console.log("[LobbiesController] going to push: ", lobbyListString(msg));
-            ($scope.data).push(lobbyListString(msg));
+            $scope.data = lobbyListString(msg)
             console.log("[LobbiesController] data: ", $scope.data);
             
         }
