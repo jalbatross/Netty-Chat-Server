@@ -60,7 +60,9 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         $scope.$apply();
     });
 
-    $scope.changeLobby = function() {
+    $scope.changeLobby = function(lobbyName) {
         console.log("[LobbiesController] changeLobby called");
+        console.log("[LobbiesController] Param: ", lobbyName);
+        socket.send("/lobby " + lobbyName);
     }
 });
