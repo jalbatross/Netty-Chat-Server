@@ -1,4 +1,8 @@
 angular.module("chatApp").controller("ChatReceiveController", function($scope, websockets) {
+    if (!websockets.isConnected()) {
+        return;
+    }
+
     var socket = websockets.getSocket();
 
     //array of strings
