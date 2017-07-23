@@ -2,18 +2,25 @@ package com.test.chatserver;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -46,6 +53,8 @@ public class ChatServer {
 
     public static final long TICKET_CLEANUP_TIME_MS = 30000;
     public static final long TICKET_EXPIRY_TIME_MS = 20000;
+    public static final int LOBBY_SIZE = 16;
+    public static final int NUM_LOBBIES = 10;
 	static boolean SSL = false;
 	
 	/**
@@ -68,7 +77,7 @@ public class ChatServer {
     }
     
     public void run() throws Exception {
-                
+        
     	final SslContext sslCtx;
         if (SSL) {
         	System.out.print("Running SSL");
@@ -83,13 +92,7 @@ public class ChatServer {
         EventLoopGroup bossGroup = new NioEventLoopGroup(); 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         
-        ChannelGroup first = new DefaultChannelGroup("Antares", GlobalEventExecutor.INSTANCE);
-        ChannelGroup second = new DefaultChannelGroup("Ascella", GlobalEventExecutor.INSTANCE);
-        ChannelGroup third = new DefaultChannelGroup("Avior",GlobalEventExecutor.INSTANCE);
-        
-        lobbies.add(first);
-        lobbies.add(second);
-        lobbies.add(third);
+        initLobbies();
         
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -170,5 +173,31 @@ public class ChatServer {
         } 
 
         new ChatServer(port).run();
+    }
+    
+    /**
+     * Populates lobbies arrayList with randomly named ChannelGroups
+     */
+    private void initLobbies() {
+        String lobbyNameFile = "src/star_names.txt";
+
+        try (Stream<String> stream = Files.lines(Paths.get(lobbyNameFile))) {
+            Set<Integer> nums = new HashSet<Integer>();
+            Object[] parsed = stream.toArray();
+            
+            while (nums.size() < NUM_LOBBIES) {
+                nums.add((int) (Math.random() * parsed.length));
+            }
+
+            Iterator<Integer> iter = nums.iterator();
+            for (int i = 0; i < NUM_LOBBIES; i++) {
+                lobbies.add(new DefaultChannelGroup((String) parsed[iter.next()], GlobalEventExecutor.INSTANCE));
+            }
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 }

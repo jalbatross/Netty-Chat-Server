@@ -47,27 +47,44 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private final List<ChannelGroup> lobbies;
     private final ChannelGroup channels;
     private final String username;
+    private final Channel ch;
+    
+    private ChannelGroup currentLobby;
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;
         this.username = username;
         lobbies = null;
+        ch = null;
     }
     
     public ChatServerHandler(ChannelHandlerContext ctx, String username, List<ChannelGroup> lobbies, ChannelGroup channels) {
         this.username = username;
         this.lobbies = lobbies;
         this.channels = channels;
-        
-        this.channels.add(ctx.channel());
+        this.ch = ctx.channel();
         
     }
 
     @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         
+        this.channels.add(ch);
+
         TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
         TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
         channels.writeAndFlush(JsonMessage);
+        
+        for (int i = 0; i < lobbies.size(); i++) {
+            if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE) {
+                lobbies.get(i).add(ch);
+                currentLobby = lobbies.get(i);
+                return;
+            }
+        }
+        
+        ctx.close();
+        System.out.println("[ChatServerHandler] Server was full");
+        
     }
     
 	@Override
@@ -90,6 +107,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	            channels.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
 	            
 	            return;
+			}
+			if (strMsg.equalsIgnoreCase("/lobby")) {
+
+			    TimeChatMessage timeMessage = new TimeChatMessage("admin", currentLobby.name());
+	            
+	            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+	            ByteBuf buf = Unpooled.copiedBuffer(data);
+	            
+	            channels.writeAndFlush(new BinaryWebSocketFrame(buf));
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
