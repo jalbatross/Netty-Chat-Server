@@ -138,6 +138,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
                     
                     ctx.writeAndFlush(httpAuthResponse(authBuf));
+                    return;
                 }
                 // Write to channel
                 ch.write(lenPrefix);

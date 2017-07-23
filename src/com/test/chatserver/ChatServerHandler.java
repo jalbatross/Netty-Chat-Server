@@ -116,6 +116,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	            ByteBuf buf = Unpooled.copiedBuffer(data);
 	            
 	            channels.writeAndFlush(new BinaryWebSocketFrame(buf));
+	            
+	            return;
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
