@@ -134,7 +134,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			            !lobbies.get(i).containsUser(username)) {
 			        
 			            currentLobby.remove(ch);
-			            lobbies.get(i).remove(username);
+			            currentLobby.removeUser(username);
 			            
 			            lobbies.get(i).add(ch);
 			            lobbies.get(i).addUser(username);
