@@ -9,20 +9,23 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
     }
 
     /**
-     * Converts a Message Flatbuffers object containing a List to string
-     * @param  {[type]} msg [description]
+     * Converts a list of lobbies to a String
+     * @param  {FlatBuffers Message} msg [description]
      * @return {[type]}     [description]
      */
     function lobbyListString(msg) {
         console.log("[LobbiesController] data type: " + msg.dataType());
 
         if (msg == null || msg.dataType() != Schema.Data.List){
-            throw 'Invalid lobby list';
+            throw 'Invalid list';
         }
 
         var len = msg.data(new Schema.List()).contentsLength();
         var listType = msg.data(new Schema.List()).type();
 
+        if (listType != "lobbies") {
+            throw 'Invalid list type: expected lobbies';
+        }
 
         var ret = [];
 
@@ -49,8 +52,12 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
 
         if (dataType == Schema.Data.List){
             console.log("[LobbiesController] got List");
-            console.log("[LobbiesController] going to push: ", lobbyListString(msg));
+            var listType = msg.data(new Schema.List()).type();
 
+            if (listType != "lobbies") {
+                console.log("[LobbiesController] List was not lobbies");
+                return;
+            }
             var ret = lobbyListString(msg);
             
             $scope.data = ret;
@@ -63,6 +70,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
     $scope.changeLobby = function(lobbyName) {
         console.log("[LobbiesController] changeLobby called");
         console.log("[LobbiesController] Param: ", lobbyName);
-        socket.send("/lobby " + lobbyName);
+        socket.send("/connect " + lobbyName);
     }
 });
+

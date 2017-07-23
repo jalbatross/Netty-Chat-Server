@@ -14,17 +14,16 @@
 </head>
 
 <body>
-
   <div class="main-box">
     <div id ="chat-toolbar" class = "btn-group">
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
       <button type="button" class="btn btn-default">no-op</button>
     </div>
-
-    <div id='user-list'>
-      here
+    <div id='user-list' ng-controller="ChatUsersController" >
+      <div ng-repeat = "user in usernames">{{user}}</div>
     </div>
+    
     <div id='messages' ng-controller="ChatReceiveController">
       <div ng-repeat ="x in messages track by $index"> <code>{{x}}</code> </div>
     </div>
@@ -41,41 +40,40 @@
   </div>
 </div>
 </body>
-    <!-- Modal -->
+<!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Lobbies</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" ng-controller="ChatLobbiesController" ng-init=" data = [] ">
-      <table class="table table-hover" >
-  <thead>
-    <tr>
-      <th>Lobby</th>
-      <th>Capacity</th>
-    </tr>
-  </thead>
-  <tbody>
-   <tr ng-repeat = "x in data" ng-click = "changeLobby(x)">
-      <td>{{ x }}</td>
-      <td >n/a</td>
-   </tr>
-  </tbody>
-</table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Lobbies</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+      <span aria-hidden="true">&times;</span>
+      </button>
     </div>
-    
+    <div class="modal-body" ng-controller="ChatLobbiesController" ng-init=" data = [] ">
+      <table class="table table-hover" >
+        <thead>
+          <tr>
+            <th>Lobby</th>
+            <th>Capacity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat = "x in data" ng-click = "changeLobby(x)">
+            <td>{{ x }}</td>
+            <td >n/a</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary">Save changes</button>
+    </div>
   </div>
+  
 </div>
-
+</div>
 <style media="screen" type="text/css">
 /* 'Open Sans' font from Google Fonts */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
