@@ -60,7 +60,7 @@ import io.netty.util.AttributeKey;
 public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
     
-    private List<ChannelGroup> lobbies;
+    private List<NamedChannelGroup> lobbies;
     private Map<String,TimeChatMessage> ticketDB;
     private ChannelGroup allChannels;
     
@@ -74,7 +74,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         this.ticketDB = sessionTicketDB;
     }
 
-    public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB, List<ChannelGroup> lobbies,
+    public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB, List<NamedChannelGroup> lobbies,
             ChannelGroup allChannels) {
         this.ticketDB = sessionTicketDB;
         this.lobbies = lobbies;

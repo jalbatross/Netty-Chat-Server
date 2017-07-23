@@ -40,14 +40,14 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	public static final long TICKET_TIMEOUT_MS = 30000;
 	
 	private ChannelGroup allChannels;
-    private List<ChannelGroup> lobbies;
+    private List<NamedChannelGroup> lobbies;
 	private Map<String,TimeChatMessage> ticketDB;
 	
     public HttpServerHandler(Map<String, TimeChatMessage> ticketDB) {
         this.ticketDB = ticketDB;
     }
 
-    public HttpServerHandler(Map<String, TimeChatMessage> ticketDB,List<ChannelGroup> lobbies, 
+    public HttpServerHandler(Map<String, TimeChatMessage> ticketDB,List<NamedChannelGroup> lobbies, 
             ChannelGroup channels) {
         this.ticketDB = ticketDB;
         this.allChannels = channels;

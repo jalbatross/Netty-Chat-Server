@@ -44,12 +44,12 @@ import java.util.Stack;
  */
 public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
-    private final List<ChannelGroup> lobbies;
+    private final List<NamedChannelGroup> lobbies;
     private final ChannelGroup channels;
     private final String username;
-    private final Channel ch;
-    
-    private ChannelGroup currentLobby;
+    private Channel ch;
+
+    private NamedChannelGroup currentLobby;
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;
@@ -58,7 +58,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         ch = null;
     }
     
-    public ChatServerHandler(ChannelHandlerContext ctx, String username, List<ChannelGroup> lobbies, ChannelGroup channels) {
+    public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies, ChannelGroup channels) {
         this.username = username;
         this.lobbies = lobbies;
         this.channels = channels;
@@ -78,6 +78,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE) {
                 lobbies.get(i).add(ch);
                 currentLobby = lobbies.get(i);
+                lobbies.get(i).addUser(username);
                 return;
             }
         }
@@ -118,6 +119,44 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	            ch.writeAndFlush(new BinaryWebSocketFrame(buf));
 	            
 	            return;
+			}
+			if (strMsg.startsWith("/connect ")) {
+			    //get lobby name
+			    String lobbyName = strMsg.substring(9);
+			    if (lobbyName.contentEquals(currentLobby.name())) {
+			        return;
+			    }
+			    //make sure it's valid
+			    for (int i = 0; i < lobbies.size(); i++) {
+			        if (lobbyName.equals(lobbies.get(i).name()) && 
+			            lobbies.get(i).size() < ChatServer.LOBBY_SIZE &&
+			            !lobbies.get(i).contains(ch) && 
+			            !lobbies.get(i).containsUser(username)) {
+			        
+			            currentLobby.remove(ch);
+			            lobbies.get(i).remove(username);
+			            
+			            lobbies.get(i).add(ch);
+			            lobbies.get(i).addUser(username);
+			            currentLobby = lobbies.get(i);
+			            
+			            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Switched to " + currentLobby.name());
+		                
+		                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+		                ByteBuf buf = Unpooled.copiedBuffer(data);
+		                
+		                ch.writeAndFlush(new BinaryWebSocketFrame(buf));
+		                
+		                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
+		                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
+		                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
+		                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf));
+		                
+			            return;
+			        }
+			    }
+			    
+			    return;
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);

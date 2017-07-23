@@ -65,7 +65,7 @@ public class ChatServer {
 	 * 
 	 */
 	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	private List<ChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<ChannelGroup>());
+	private List<NamedChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
 	private final Map<String, TimeChatMessage> sessionTicketDB = new ConcurrentHashMap<String,TimeChatMessage>();
 	
 	//static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
@@ -191,7 +191,7 @@ public class ChatServer {
 
             Iterator<Integer> iter = nums.iterator();
             for (int i = 0; i < NUM_LOBBIES; i++) {
-                lobbies.add(new DefaultChannelGroup((String) parsed[iter.next()], GlobalEventExecutor.INSTANCE));
+                lobbies.add(new NamedChannelGroup((String) parsed[iter.next()], GlobalEventExecutor.INSTANCE));
             }
 
         }
