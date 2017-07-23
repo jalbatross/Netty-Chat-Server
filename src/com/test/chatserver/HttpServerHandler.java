@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Values;
@@ -95,8 +96,16 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                     headers.get("Upgrade").equalsIgnoreCase("WebSocket")) {
                 
                 QueryStringDecoder decoder = new QueryStringDecoder(httpRequest.uri());
-                String ticketId = decoder.parameters().get("ticket").get(0);
                 
+                String ticketId = "";
+                if (decoder.parameters().get("ticket") != null) {
+                    ticketId = decoder.parameters().get("ticket").get(0);
+                }
+                else {
+                    System.out.println("No ticket on ws request");
+                    ctx.close();
+                    return;
+                }
                 //Make sure the client has a valid WS ticket
                 if (!validSession(ctx, ticketId)) {
                     //TODO: send message to client on fail
@@ -125,6 +134,11 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
         } 
         else {
             System.out.println("Incoming request is unknown");
+            //System.out.println(msg.getClass());
+            HttpContent content = (HttpContent) msg;
+            for (int i = 0; i <content.content().readableBytes(); i++) {
+                System.out.print(content.content().getByte(i));
+            }
             //send something to client to let them know they aren't using WS
         }
 

@@ -104,6 +104,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
             ctx.channel().pipeline().replace(this, "httpServerCodec", new HttpServerCodec());
             
         }
+        // Get -> WebSockets
         else if (isGet(magic1,magic2)) {
             System.out.println("got GET, ws upgrade");
             //clear channel
