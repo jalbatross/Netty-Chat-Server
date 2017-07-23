@@ -104,18 +104,18 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    }
 	            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
 	            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-	            channels.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
+	            ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
 	            
 	            return;
 			}
 			if (strMsg.equalsIgnoreCase("/lobby")) {
 
-			    TimeChatMessage timeMessage = new TimeChatMessage("admin", currentLobby.name());
+			    TimeChatMessage timeMessage = new TimeChatMessage("Server", currentLobby.name());
 	            
 	            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
 	            ByteBuf buf = Unpooled.copiedBuffer(data);
 	            
-	            channels.writeAndFlush(new BinaryWebSocketFrame(buf));
+	            ch.writeAndFlush(new BinaryWebSocketFrame(buf));
 	            
 	            return;
 			}
@@ -127,9 +127,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             
             
             
-            channels.writeAndFlush(new BinaryWebSocketFrame(buf));
+            currentLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
             
-			
 		}
 		else if (msg instanceof ByteBuf) {
 		    System.out.println("[ChatServerHandler] Received ByteBuf");
