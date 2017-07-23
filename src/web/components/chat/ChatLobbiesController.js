@@ -39,7 +39,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
     var socket = websockets.getSocket();
 
     $scope.data = "";
-    
+
     socket.addEventListener("message", function(event) {
         console.log("[LobbiesController] read message");
         var bytes = new Uint8Array(event.data);

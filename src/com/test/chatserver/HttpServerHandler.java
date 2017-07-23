@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -117,18 +118,32 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 
                 //Adding new handler to the existing pipeline to handle WebSocket Messages
                 ctx.pipeline().replace(this, "websocketHandler", new WebSocketHandler());
-                ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));
-                ctx.pipeline().addLast( "serverPing", new ServerPing());
-                ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels));
                 
                 System.out.println("WebSocketHandler added to the pipeline");
 
                 System.out.println("Opened Channel : " + ctx.channel());
+                
 
                 System.out.println("Handshaking....");
                 //Do the Handshake to upgrade connection from HTTP to WebSocket protocol
-                handleHandshake(ctx, httpRequest);
-                System.out.println("Handshake is done");
+                ChannelFuture cf = handleHandshake(ctx, httpRequest);
+                if (cf == null) {
+                    System.out.println("[HttpServerHandler] Couldn't handshake");
+                    return;
+                }
+                
+                cf.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));
+                        ctx.pipeline().addLast( "serverPing", new ServerPing());
+                        ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels));
+                    }
+                });
+                
+                
+                
+                
                 
             }
         } 
@@ -145,15 +160,17 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     /* Do the handshaking for WebSocket request */
-    protected void handleHandshake(ChannelHandlerContext ctx, HttpRequest req) throws URISyntaxException {
+    protected ChannelFuture handleHandshake(ChannelHandlerContext ctx, HttpRequest req) throws URISyntaxException {
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketURL(req),
-                                                                                          null, true);
+                                                                                 null, true);
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
-            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
+            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel()); 
+            return null;
+
         } 
         else {
-            handshaker.handshake(ctx.channel(), req);
+            return handshaker.handshake(ctx.channel(), req);
         }
     }
 

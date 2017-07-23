@@ -66,23 +66,42 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         
     }
 
-    @Override public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    @Override 
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         
         this.channels.add(ch);
-
-        TimeChatMessage timeMessage = new TimeChatMessage("Admin", username + " connected!");
-        TextWebSocketFrame JsonMessage = new TextWebSocketFrame(new Gson().toJson(timeMessage));
-        channels.writeAndFlush(JsonMessage);
         
         for (int i = 0; i < lobbies.size(); i++) {
             if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE) {
                 lobbies.get(i).add(ch);
                 currentLobby = lobbies.get(i);
                 lobbies.get(i).addUser(username);
+                
+                System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
+                
+                TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
+                
+                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+                ByteBuf buf = Unpooled.copiedBuffer(data);
+                
+                currentLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
+                
+                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
+                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
+                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
+                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
+                
+                String[] lobbyList = new String[lobbies.size()];
+                for (int j = 0; j < lobbies.size(); j++) {
+                    lobbyList[j]=lobbies.get(j).name();
+                }
+                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
+                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
+                
                 return;
             }
         }
-        
         ctx.close();
         System.out.println("[ChatServerHandler] Server was full");
         

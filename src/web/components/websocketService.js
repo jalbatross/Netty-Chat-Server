@@ -9,12 +9,7 @@
         var connected = false;
 
         this.getSocket = function() {
-            if (connected) {
-                return _socket;
-            }
-            else {
-                return null;
-            }
+            return (_socket != null) ? _socket: null;
         }
 
         this.setTicket = function(ticketId) {

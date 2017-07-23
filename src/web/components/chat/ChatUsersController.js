@@ -11,7 +11,7 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
     $scope.usernames = "";
 
     var socket = websockets.getSocket();
-
+    
     function userListString(msg) {
         console.log("[UsersController] data type: " + msg.dataType());
 
@@ -56,9 +56,10 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
             var ret = userListString(msg);
             
             $scope.usernames = ret;
-            console.log("[UsersController] data: ", $scope.data);
+            console.log("[UsersController] data: ", $scope.usernames);
             
         }
         $scope.$apply();
     });
+
 });

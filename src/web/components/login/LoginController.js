@@ -61,17 +61,11 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
             websockets.setTicket(ticket);
             websockets.connect();
 
-            var socket;
-            setTimeout(function() {
-                socket = websockets.getSocket();
-                if (websockets.isConnected()) {
-                    $state.go('chat');
-                }
-                else {
-                    //show error message
-                }
-
-            },1000);
+            var socket = websockets.getSocket();
+            
+            socket.addEventListener("open", function(event) {
+                $state.go('chat');
+            });
 
         }, function (response) {
             console.log(response.data);

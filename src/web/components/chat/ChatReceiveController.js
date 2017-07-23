@@ -27,32 +27,6 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         return date.toLocaleString() + " " + author +  ": " + message;
     }
 
-    /**
-     * Converts a Message Flatbuffers object containing a List to string
-     * @param  {[type]} msg [description]
-     * @return {[type]}     [description]
-     */
-    function lobbyListString(msg) {
-        if (msg == null || msg.dataType() != Schema.Data.List){
-            throw 'Invalid lobby list';
-        }
-
-        var len = msg.data(new Schema.List()).contentsLength();
-        var listType = msg.data(new Schema.List()).type();
-
-
-        var ret = listType + ":\n";
-
-        for (var i = 0; i < len; i++) {
-            ret += msg.data(new Schema.List()).contents(i);
-            if (i != len - 1) {
-                ret += "\n";
-            }
-        }
-
-        return ret;
-    }
-
     socket.addEventListener("message", function(event) {
         console.log("[ChatReceiveController] Received msg");
         var bytes = new Uint8Array(event.data);
@@ -74,13 +48,10 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
 
         } 
         else if (dataType == Schema.Data.List){
-            console.log("got List");
-            
-            ($scope.messages).push(lobbyListString(msg));
-            
+            return;
         }
         else {
-            console.log("dataType ", dataType);
+            console.log("[ChatReceiveController] Received unknown, dataType ", dataType);
             var currentTime = new Date(Date.now());
             ($scope.messages).push(new errorMessage(currentTime));
         }
