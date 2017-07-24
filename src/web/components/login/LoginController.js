@@ -52,7 +52,7 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
                 if (auth) {
                     console.log("got auth");
                 }
-                console.log("ticket: ", ticket);
+                console.log("[LoginController] ticket: ", ticket);
             } 
             else {
                 console.log("dataType was ", dataType);
@@ -64,6 +64,7 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
             var socket = websockets.getSocket();
             
             socket.addEventListener("open", function(event) {
+                console.log('[LoginController] Handshake complete');
                 $state.go('chat');
             });
 

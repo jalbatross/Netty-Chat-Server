@@ -1,5 +1,6 @@
 angular.module("chatApp").controller("ChatReceiveController", function($scope, websockets) {
     if (!websockets.isConnected()) {
+        console.log('[ReceiveController] Not connected. exit');
         return;
     }
 
@@ -13,7 +14,7 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         this.author = "";
         this.message = "ERROR!";
     }
-
+    console.log('[ChatReceiveController] Connected');
     /**
      * Converts a time, author, and message into a chat string.
      * 
@@ -52,6 +53,7 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         }
         else {
             console.log("[ChatReceiveController] Received unknown, dataType ", dataType);
+            console.log("[ChatReceiveController] Raw data: ", event.data);
             var currentTime = new Date(Date.now());
             ($scope.messages).push(new errorMessage(currentTime));
         }

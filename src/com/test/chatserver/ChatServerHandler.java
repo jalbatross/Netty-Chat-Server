@@ -48,6 +48,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private final ChannelGroup channels;
     private final String username;
     private Channel ch;
+    private boolean init = false;
 
     private NamedChannelGroup currentLobby;
     
@@ -65,45 +66,14 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         this.ch = ctx.channel();
         
     }
-
-    @Override 
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        
-        this.channels.add(ch);
-        
-        for (int i = 0; i < lobbies.size(); i++) {
-            if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE) {
-                lobbies.get(i).add(ch);
-                currentLobby = lobbies.get(i);
-                lobbies.get(i).addUser(username);
-                
-                System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
-                
-                TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
-                
-                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-                ByteBuf buf = Unpooled.copiedBuffer(data);
-                
-                currentLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
-                
-                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
-                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
-                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
-                
-                String[] lobbyList = new String[lobbies.size()];
-                for (int j = 0; j < lobbies.size(); j++) {
-                    lobbyList[j]=lobbies.get(j).name();
-                }
-                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
-                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
-                
-                return;
-            }
-        }
-        ctx.close();
-        System.out.println("[ChatServerHandler] Server was full");
+    
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        System.out.println("[ChatServerHandler] Disconnecting user: " + username);
+        //remove username from current channelGroup
+        currentLobby.removeUser(username);
+        System.out.println("[ChatServerHandler] Num users in lobby: " + currentLobby.size());
         
     }
     
@@ -111,6 +81,78 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	public void channelRead(ChannelHandlerContext ctx, Object msg) 
 	{
 		System.out.println("\n[ChatServerHandler] channelRead called!");
+		
+		if (!init) {
+		    System.out.println("[ChatServerHandler] Added new instance of handler to " + username);
+	        this.channels.add(ch);
+	        
+	        for (int i = 0; i < lobbies.size(); i++) {
+	            if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE &&
+	                !lobbies.get(i).contains(ch) &&
+	                !lobbies.get(i).containsUser(username)) {
+	                
+	                if (lobbies.get(i).add(ch) && lobbies.get(i).addUser(username)) {
+	                    System.out.println("[ChatServerHandler] Add success");
+	                }
+	                
+	                currentLobby = lobbies.get(i);
+	                
+	                System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
+	                
+	                //server message on connect
+	                TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
+	                
+	                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+	                ByteBuf buf = Unpooled.copiedBuffer(data);
+	                
+	                ch.writeAndFlush(new BinaryWebSocketFrame(buf)).addListener( new ChannelFutureListener() {
+
+	                    @Override
+	                    public void operationComplete(ChannelFuture future) throws Exception {
+	                        System.out.println("[ChatServerHandler] Sent welcome message to user");
+	                        
+	                    }
+	                    
+	                });
+	                
+	                
+	                //update user list
+	                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
+	                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
+	                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
+	                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf)).addListener( new ChannelFutureListener() {
+
+	                    @Override
+	                    public void operationComplete(ChannelFuture future) throws Exception {
+	                        System.out.println("[ChatServerHandler] Sent user list to user");
+	                        
+	                    }
+	                    
+	                });
+	                
+	                //update lobby list
+	                String[] lobbyList = new String[lobbies.size()];
+	                for (int j = 0; j < lobbies.size(); j++) {
+	                    lobbyList[j]=lobbies.get(j).name();
+	                }
+	                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+	                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
+	                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf)).addListener( new ChannelFutureListener() {
+
+	                    @Override
+	                    public void operationComplete(ChannelFuture future) throws Exception {
+	                        System.out.println("[ChatServerHandler] Sent lobby list to user");
+	                        
+	                    }
+	                    
+	                });
+	                init = true;
+	                return;
+	            }
+	        }
+	        ctx.close();
+	        System.out.println("[ChatServerHandler] Server was full");
+		}
 		
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
@@ -155,9 +197,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			            currentLobby.remove(ch);
 			            currentLobby.removeUser(username);
 			            
-			            lobbies.get(i).add(ch);
-			            lobbies.get(i).addUser(username);
 			            currentLobby = lobbies.get(i);
+			            currentLobby.add(ch);
+			            currentLobby.addUser(username);
 			            
 			            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Switched to " + currentLobby.name());
 		                
@@ -220,6 +262,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    final String dcMsg = username + " disconnected";
 		    //try to close connection
             ChannelFuture cf = ctx.channel().close();
+            /*
             cf.addListener(new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture future) {
                     //Broadcast removal of user from channel group to all channels connected
@@ -229,6 +272,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                     }
                 }
             });
+            */
 		}
 		else {
 			System.out.println("[ChatServerHandler] received unknown type of frame!");
@@ -238,7 +282,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 		
 	}
-	
 	
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)

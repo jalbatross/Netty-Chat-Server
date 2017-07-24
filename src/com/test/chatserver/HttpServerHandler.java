@@ -135,6 +135,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 cf.addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
+                        System.out.println("[HttpServerHandler] Handshake completed");
+                        
                         ctx.pipeline().addLast(new IdleStateHandler(PING_TIMEOUT_SECONDS, PING_TIMER_SECONDS, 0));
                         ctx.pipeline().addLast( "serverPing", new ServerPing());
                         ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels));

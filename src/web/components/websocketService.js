@@ -32,10 +32,13 @@
             _socket.binaryType = "arraybuffer";
 
             _socket.onopen = function() {
+                console.log("[WebsocketService] finished connecting");
                 connected = true;
             }
             _socket.onclose = function() {
-                connected = false;
+                 connected = false;
+                _socket = undefined;
+                _ticket = undefined;
             }
             _socket.onerror = function() {
                 connected = false;
