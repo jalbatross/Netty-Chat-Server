@@ -59,14 +59,6 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         }
 
         $scope.$apply();
-        /*
-        var obj = JSON.parse(event.data);
-        var time = new Date(obj.time);
-        obj.time = time.toLocaleString();
-
-        ($scope.messages).push(obj);
-
-        $scope.$apply();*/
 
     });
 });

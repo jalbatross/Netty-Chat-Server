@@ -21,6 +21,7 @@
       <button type="button" class="btn btn-default">no-op</button>
     </div>
     <div id='user-list' ng-controller="ChatUsersController" >
+      <div ng-style = "{'text-align' : 'center'}"><h4>{{lobbyName}}</h4></div>
       <div ng-repeat = "user in usernames">{{user}}</div>
     </div>
     
@@ -50,7 +51,7 @@
       <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <div class="modal-body" ng-controller="ChatLobbiesController" ng-init=" data = [] ">
+    <div class="modal-body" ng-controller="ChatLobbiesController">
       <table class="table table-hover" >
         <thead>
           <tr>
@@ -59,9 +60,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat = "x in data" ng-click = "changeLobby(x)">
-            <td>{{ x }}</td>
-            <td >n/a</td>
+          <tr ng-repeat = "x in lobbies" ng-click = "changeLobby(x.name)">
+            <td>{{ x.name }}</td>
+            <td>{{ x.capacity }}</td>
           </tr>
         </tbody>
       </table>

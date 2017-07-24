@@ -9,7 +9,7 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
     }
 
     $scope.usernames = "";
-
+    $scope.lobbyName = "loading . . .";
     var socket = websockets.getSocket();
     
     function userListString(msg) {
@@ -28,7 +28,8 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
 
         var ret = [];
 
-        for (var i = 0; i < len; i++) {
+        $scope.lobbyName = msg.data(new Schema.List()).contents(0);
+        for (var i = 1; i < len; i++) {
             ret [i] = msg.data(new Schema.List()).contents(i);
         }
 

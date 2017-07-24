@@ -117,7 +117,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                
 	                
 	                //update user list
-	                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
+	                //user list is prepended with lobby name for client
+	                ArrayList<String> users = currentLobby.getUsers();
+	                users.add(0, currentLobby.name());
+	                System.out.println(users.toString());
+	                String[] userList = users.toArray(new String[users.size()]);
 	                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
 	                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
 	                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf)).addListener( new ChannelFutureListener() {
@@ -134,6 +138,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                String[] lobbyList = new String[lobbies.size()];
 	                for (int j = 0; j < lobbies.size(); j++) {
 	                    lobbyList[j]=lobbies.get(j).name();
+	                    lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
 	                }
 	                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
 	                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
@@ -160,9 +165,14 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			
 			if (strMsg.equalsIgnoreCase("/lobbies")) {
 			    
+			    // sends a String[] of all lobbies in the server in the following format:
+			    // lobbyName,lobbySize/lobbyCapacity
+			    // for example, for the lobby myLobby with 2 users out of 10 capacity:
+			    // myLobby,2/10
 			    String[] lobbyList = new String[lobbies.size()];
 			    for (int i = 0; i < lobbies.size(); i++) {
 			        lobbyList[i]=lobbies.get(i).name();
+			        lobbyList[i] += "," + lobbies.get(i).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
 			    }
 	            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
 	            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
@@ -208,10 +218,23 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		                
 		                ch.writeAndFlush(new BinaryWebSocketFrame(buf));
 		                
-		                String[] userList = currentLobby.getUsers().toArray(new String[currentLobby.numUsers()]);
+		                ArrayList<String> users = currentLobby.getUsers();
+	                    users.add(0, currentLobby.name());
+	                    System.out.println(users.toString());
+	                    String[] userList = users.toArray(new String[users.size()]);
+	                   
 		                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
 		                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
 		                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf));
+		                
+		                String[] lobbyList = new String[lobbies.size()];
+		                for (int j = 0; j < lobbies.size(); j++) {
+		                    lobbyList[j]=lobbies.get(j).name();
+		                    lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
+		                }
+		                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+		                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
+		                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
 		                
 			            return;
 			        }

@@ -8,6 +8,15 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         console.log('[LobbiesController] connected');
     }
 
+    $scope.lobbies = [];
+
+    function Lobby(name, capacity) {
+        this.name = name;
+        this.capacity = capacity;
+
+        return this;
+    }
+
     /**
      * Converts a list of lobbies to a String
      * @param  {FlatBuffers Message} msg [description]
@@ -28,9 +37,14 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         }
 
         var ret = [];
+        var temp = "";
 
         for (var i = 0; i < len; i++) {
-            ret [i] = msg.data(new Schema.List()).contents(i);
+            temp = msg.data(new Schema.List()).contents(i);
+            temp = temp.split(",");
+            console.log("temp[0]: " + temp[0]);
+            console.log("temp[1]: " + temp[1]);
+            ret[i] = new Lobby(temp[0], temp[1]);
         }
 
         return ret;
@@ -60,8 +74,8 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
             }
             var ret = lobbyListString(msg);
             
-            $scope.data = ret;
-            console.log("[LobbiesController] data: ", $scope.data);
+            $scope.lobbies = ret;
+            console.log("[LobbiesController] data: ", $scope.lobbies);
             
         }
         $scope.$apply();

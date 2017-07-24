@@ -20,7 +20,6 @@ public class NamedChannelGroup extends DefaultChannelGroup {
 
     public NamedChannelGroup(String name, EventExecutor executor) {
         super(name, executor);
-        // TODO Auto-generated constructor stub
     }
     
     public boolean addUser(String username) {
@@ -39,6 +38,11 @@ public class NamedChannelGroup extends DefaultChannelGroup {
         return userSet.size();
     }
     
+    /**
+     * Gets the list of users in the channelGroup as an ArrayList. 
+     * 
+     * @return   ArrayList<String> of users
+     */
     public ArrayList<String> getUsers() {
         ArrayList<String> arr = new ArrayList<String>();
         
