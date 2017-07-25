@@ -147,13 +147,25 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
             } 
             else {
-                System.out.println("Wrong user and pass");
+                if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
+                    System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
+                    
+                    FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                            HttpResponseStatus.UNAUTHORIZED,
+                            Unpooled.copiedBuffer("Denied\r\n",CharsetUtil.UTF_8));
+                    
+                    resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                    resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                    resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+                    
+                    ch.writeAndFlush(resp);
+                    return;
+                }
 
             }
 
             // Clear sensitive information
             Arrays.fill(pwdChar, '0');
-            ((ByteBuf) msg).clear();
 
         }
 

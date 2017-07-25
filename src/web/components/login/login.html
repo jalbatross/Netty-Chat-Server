@@ -19,6 +19,7 @@
 
 <div id ="loginContainer" ng-controller="LoginController">
   <form id = "loginForm" class="login-container" ng-submit = "login()" >
+    <p ng-hide = "!error" class = "alert alert-warning">{{errorText}}</p>
     <p><input type="text"  ng-model ="username" id ="name" placeholder="Username" required></p>
     <p><input type="password" ng-model ="password" id ="pass" placeholder="Password" required></p>
     <p><input type="submit" value="Log in"></p>

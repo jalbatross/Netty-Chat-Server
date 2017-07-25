@@ -3,6 +3,8 @@
 
 angular.module("chatApp").controller("LoginController", function($scope,$state, $http, websockets) {
     var aurl = "http://localhost:8080";
+    $scope.error = false;
+    $scope.errorText = "Error!";
 
     $scope.login = function() {
 
@@ -10,6 +12,9 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
 
         var nameData = builder.createString($scope.username);
         var pwData = builder.createString($scope.password);
+        $scope.username = "";
+        $scope.password = "";
+
 
         Schema.Credentials.startCredentials(builder);
         Schema.Credentials.addUsername(builder, nameData);
@@ -68,8 +73,25 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
                 $state.go('chat');
             });
 
-        }, function (response) {
-            console.log(response.data);
+        }, function (error) {
+            $scope.error = true;
+            switch(error.status) {
+                case -1:
+                  console.log("Couldn't establish connection to the server!");
+                  $scope.errorText = "Couldn't establish connection to the server!";
+                  break;
+                case 401:
+                  $scope.errorText = "Invalid username/password combination!";
+                  break;
+                default:
+                  console.log("Unk error");
+                  console.log("Errorcode: " + error.status);
+                  $scope.errorText = "ERROR";
+                  break;
+            }
+
+
+
         });
     }
 });
