@@ -174,10 +174,18 @@ Schema.Credentials.prototype.password = function(optionalEncoding) {
 };
 
 /**
+ * @returns {boolean}
+ */
+Schema.Credentials.prototype.signup = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? !!this.bb.readInt8(this.bb_pos + offset) : false;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Schema.Credentials.startCredentials = function(builder) {
-  builder.startObject(2);
+  builder.startObject(3);
 };
 
 /**
@@ -194,6 +202,14 @@ Schema.Credentials.addUsername = function(builder, usernameOffset) {
  */
 Schema.Credentials.addPassword = function(builder, passwordOffset) {
   builder.addFieldOffset(1, passwordOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {boolean} signup
+ */
+Schema.Credentials.addSignup = function(builder, signup) {
+  builder.addFieldInt8(2, +signup, +false);
 };
 
 /**

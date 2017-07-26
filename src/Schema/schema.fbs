@@ -13,6 +13,7 @@ table Chat {
 table Credentials {
   username:string (required);
   password:string (required);
+  signup:bool = false;
 }
 
 table Auth {

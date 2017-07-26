@@ -18,19 +18,33 @@ public final class Credentials extends Table {
   public ByteBuffer usernameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   public String password() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer passwordAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
+  public boolean signup() { int o = __offset(8); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createCredentials(FlatBufferBuilder builder,
       int usernameOffset,
-      int passwordOffset) {
-    builder.startObject(2);
+      int passwordOffset,
+      boolean signup) {
+    builder.startObject(3);
     Credentials.addPassword(builder, passwordOffset);
     Credentials.addUsername(builder, usernameOffset);
+    Credentials.addSignup(builder, signup);
     return Credentials.endCredentials(builder);
   }
+  
+  public static int createCredentials(FlatBufferBuilder builder,
+          int usernameOffset,
+          int passwordOffset) {
+        builder.startObject(3);
+        Credentials.addPassword(builder, passwordOffset);
+        Credentials.addUsername(builder, usernameOffset);
+        Credentials.addSignup(builder, false);
+        return Credentials.endCredentials(builder);
+      }
 
-  public static void startCredentials(FlatBufferBuilder builder) { builder.startObject(2); }
+  public static void startCredentials(FlatBufferBuilder builder) { builder.startObject(3); }
   public static void addUsername(FlatBufferBuilder builder, int usernameOffset) { builder.addOffset(0, usernameOffset, 0); }
   public static void addPassword(FlatBufferBuilder builder, int passwordOffset) { builder.addOffset(1, passwordOffset, 0); }
+  public static void addSignup(FlatBufferBuilder builder, boolean signup) { builder.addBoolean(2, signup, false); }
   public static int endCredentials(FlatBufferBuilder builder) {
     int o = builder.endObject();
     builder.required(o, 4);  // username
