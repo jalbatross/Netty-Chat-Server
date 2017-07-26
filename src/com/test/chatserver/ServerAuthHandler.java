@@ -117,14 +117,55 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             }
             
             if (signup) {
-                System.out.println("[ServerAuthHandler] Got request to signup");
+                if (login.verifySignup(username, pwdChar)) {
+                    
+                    //Send successful signup response to web client
+                    if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
+                        System.out.println("[ServerAuthHandler] Registered new username");
+
+                        FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                HttpResponseStatus.OK, Unpooled.copiedBuffer("Registered\r\n", CharsetUtil.UTF_8));
+
+                        resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                        resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+
+                        ch.writeAndFlush(resp);
+                    }
+                    //Send successful signup response to mobile client
+                    else {
+                        
+                    }
+
+                        
+                }
+                else {
+                    //Send failed registration response to web client
+                    if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
+                        System.out.println("[ServerAuthHandler] Failed to register user");
+
+                        FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                HttpResponseStatus.UNPROCESSABLE_ENTITY, Unpooled.copiedBuffer("Failure\r\n", CharsetUtil.UTF_8));
+
+                        resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                        resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                        resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+
+                        ch.writeAndFlush(resp);
+                    }
+                    //Send failed signup response to mobile client
+                    else {
+                        
+                    }
+                    
+                }
                 ctx.close();
                 Arrays.fill(pwdChar,  '0');
                 return;
             }
 
-            // Check DB for credentials
-            if (login.verifyUser(username, pwdChar)) {
+            // Not signing up, verify login
+            if (login.verifyLogin(username, pwdChar)) {
                 
                 String ticket = generateTicket(username, ch.remoteAddress(),ch.id());
                 
@@ -158,22 +199,25 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 System.out.println("correct user and pass!");
 
             } 
-            else {
-                if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
-                    System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
-                    
-                    FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                            HttpResponseStatus.UNAUTHORIZED,
-                            Unpooled.copiedBuffer("Denied\r\n",CharsetUtil.UTF_8));
-                    
-                    resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-                    resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-                    resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
-                    
-                    ch.writeAndFlush(resp);
-                    return;
-                }
+            //Send unauthorized to web client
+            else if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
 
+                System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
+
+                FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("Denied\r\n", CharsetUtil.UTF_8));
+
+                resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+
+                ch.writeAndFlush(resp);
+                return;
+
+            }
+            //Send unauthorized to mobile client
+            else {
+                
             }
 
             // Clear sensitive information

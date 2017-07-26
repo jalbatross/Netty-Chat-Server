@@ -1,4 +1,5 @@
 angular.module("chatApp").controller("SignupController", function($scope, $http, $state) {
+    $scope.response = false;
     $scope.error = false;
     var aurl = "http://localhost:8080";
 
@@ -37,52 +38,26 @@ angular.module("chatApp").controller("SignupController", function($scope, $http,
             responseType: "arraybuffer",
             transformRequest: []
         }).then(function (response) {
+            $scope.response = true;
+            $scope.error = false;
 
-            var bytes = new Uint8Array(response.data);
-
-            var buf = new flatbuffers.ByteBuffer(bytes);
-            var msg = Schema.Message.getRootAsMessage(buf);
-
-            var dataType = msg.dataType();
-
-            if (dataType == Schema.Data.Auth) {
-                console.log("got auth packet from server");
-                var auth = msg.data(new Schema.Auth()).verified();
-                var ticket = msg.data(new Schema.Auth()).ticket();
-
-                if (auth) {
-                    console.log("got auth");
-                }
-                console.log("[LoginController] ticket: ", ticket);
-            } 
-            else {
-                console.log("dataType was ", dataType);
-                console.log("got unknown stuff, here it is: ", response.data);
-            }
-            websockets.setTicket(ticket);
-            websockets.connect();
-
-            var socket = websockets.getSocket();
-            
-            socket.addEventListener("open", function(event) {
-                console.log('[LoginController] Handshake complete');
-                $state.go('chat');
-            });
+            $scope.responseInfo = "Successfully registered!";
 
         }, function (error) {
+            $scope.response = true;
             $scope.error = true;
             switch(error.status) {
                 case -1:
                   console.log("Couldn't establish connection to the server!");
-                  $scope.errorText = "Couldn't establish connection to the server!";
+                  $scope.responseInfo = "Couldn't establish connection to the server!";
                   break;
-                case 401:
-                  $scope.errorText = "Invalid username/password combination!";
+                case 422:
+                  $scope.responseInfo = "Invalid username/password combination!";
                   break;
                 default:
                   console.log("Unk error");
                   console.log("Errorcode: " + error.status);
-                  $scope.errorText = "ERROR";
+                  $scope.responseInfo = "ERROR";
                   break;
             }
 

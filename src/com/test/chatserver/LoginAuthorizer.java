@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,7 +51,7 @@ public class LoginAuthorizer {
     }
     
     /**
-     * Verifies a username and password.
+     * Verifies a username and password for login.
      * 
      * Checks valid formatting for username and password, then
      * queries the postgres database for the username and password.
@@ -73,7 +74,7 @@ public class LoginAuthorizer {
      * @return         true if username and password are correct 
      *                 and in db, false otherwise
      */
-    public boolean verifyUser(String name, char[] password) throws Exception {
+    public boolean verifyLogin(String name, char[] password) throws Exception {
         
         if (!validUsername(name) || !validPassword(password)){
             return false;
@@ -91,23 +92,26 @@ public class LoginAuthorizer {
             preparedQuery.setString(1, name);
             
             ResultSet rs = preparedQuery.executeQuery();
-            
+
             //Either empty resultset (user not in DB) OR bad password
             if (!rs.next() || !argon2.verify(rs.getString(1), password) ){
+                Arrays.fill(password, '0');
                 return false;
             }
             else{
+                Arrays.fill(password, '0');
                 return true;
             }   
         }
         catch (Exception e) {
             e.printStackTrace();
+            Arrays.fill(password, '0');
             return false;
         }
     }
 
     /**
-     * Verifies a username and password.
+     * Verifies a username and password for login.
      * 
      * Checks valid formatting for username and password, then
      * queries the postgres database for the username and password.
@@ -130,7 +134,7 @@ public class LoginAuthorizer {
      * @return         true if username and password are correct 
      *                 and in db, false otherwise
      */
-    public boolean verifyUser(String name, String password) throws Exception {
+    public boolean verifyLogin(String name, String password) throws Exception {
 
         if (!validUsername(name) || !validPassword(password)) {
             return false;
@@ -160,6 +164,68 @@ public class LoginAuthorizer {
             return false;
         }
     }
+    
+    /**
+     * Verifies a username and password for registration into the 
+     * database.
+     * 
+     * If the username/password are malformed or not in accordance with
+     * the specifications set by validUsername and validPassword, returns
+     * false. If a username is found in the DB that is the same
+     * as the username passed to the verifySignup function,
+     * case insensitive, returns false.
+     * 
+     * 
+     * 
+     * @param name     A UTF-8 String
+     * @param pwdChar  A char[] consisting of UTF-8 characters.
+     * @return         True if the username/password combination is valid
+     *                 and the database does not contain an entry with
+     *                 the same username, false otherwise
+     */
+    public boolean verifySignup(String name, char[] password) {
+
+        if (!validUsername(name) || !validPassword(password)) {
+            return false;
+        }
+
+        Connection dbConn;
+        Argon2 argon2 = Argon2Factory.create(20, 148);
+
+        try {
+            dbConn = this.connect();
+
+            // Query DB for existence of username
+            String query = "SELECT * FROM auth WHERE name = ? LIMIT 1";
+            PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            
+            preparedQuery.setString(1, name);
+
+            ResultSet rs = preparedQuery.executeQuery();
+
+            // Empty result set means user not in DB
+            if (!rs.next()) {
+                query = "INSERT INTO auth(name, hash) VALUES(?, ?)";
+ 
+                preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                preparedQuery.setString(1,  name);
+                preparedQuery.setString(2,  argon2.hash(2, 65536, 1, password));
+                int returnedId = preparedQuery.executeUpdate();
+                Arrays.fill(password, '0');
+                return true;
+            }
+            else {
+                Arrays.fill(password, '0');
+                return false;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Arrays.fill(password, '0');
+            return false;
+        }
+    }
+    
 
     /**
      * Helper function for verifyUser. Checks if username is a username
@@ -235,6 +301,8 @@ public class LoginAuthorizer {
             System.out.println("The hash was: " + theHash);
         }
     }
+
+    
     
     
 }

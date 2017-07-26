@@ -6,11 +6,12 @@
 
 <div id ="signupContainer" ng-controller="SignupController">
   <form id = "signupForm" class="signup-container" ng-submit = "signup()" >
-    <p ng-hide = "!error" class = "alert alert-warning">{{errorText}}</p>
+    <p ng-hide = "!response" class = "alert" ng-class = "{'alert-warning': error, 'alert-success': !error}">{{responseInfo}}</p>
     <p><input type="text"  ng-model ="username" id ="name" placeholder="Username" required></p>
     <p><input type="password" ng-model ="password" id ="pass" placeholder="Password" required></p>
     <p><input type="submit" value="Create Account"></p>
   </form>
+  <a ui-sref = '/'>Login</a>
 
 </body>
 
