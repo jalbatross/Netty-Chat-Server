@@ -187,37 +187,40 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
                 System.out.println("len prefix data: " + lenPrefix.getInt(0));
                 
+                //Send http success response to web client
                 if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
                     System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
                     
                     ctx.writeAndFlush(httpAuthResponse(authBuf));
-                    return;
                 }
-                // Write to channel
-                ch.write(lenPrefix);
-                ch.writeAndFlush(authBuf);
-                System.out.println("correct user and pass!");
+                //Send success response to mobile client
+                else {
+                    ch.write(lenPrefix);
+                    ch.writeAndFlush(authBuf);
+                    System.out.println("correct user and pass!");
+                }
 
             } 
-            //Send unauthorized to web client
-            else if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
-
-                System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
-
-                FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                        HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("Denied\r\n", CharsetUtil.UTF_8));
-
-                resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-                resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-                resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
-
-                ch.writeAndFlush(resp);
-                return;
-
-            }
-            //Send unauthorized to mobile client
+            //Failed login
             else {
-                
+                //send unauthorized to web client
+                if (ch.attr(PROTOCOLKEY).get().equalsIgnoreCase("http")) {
+                    System.out.println("[ServerAuthHandler] Got correct user/pass (HTTP)");
+
+                    FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                            HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("Denied\r\n", CharsetUtil.UTF_8));
+
+                    resp.headers().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                    resp.headers().add(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                    resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+
+                    ch.writeAndFlush(resp);
+                    
+                }
+                //Send unauthorized to mobile client
+                else {
+                    
+                }
             }
 
             // Clear sensitive information
