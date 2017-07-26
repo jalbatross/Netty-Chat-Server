@@ -17,5 +17,10 @@ chatApp.config(function($stateProvider, $urlRouterProvider) {
             templateUrl: 'components/chat/chat.html'
         })
 
+        .state('signup', {
+            url: '/signup/',
+            templateUrl: 'components/signup/signup.html'
+        })
+
 
 });

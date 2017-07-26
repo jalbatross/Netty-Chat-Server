@@ -37,7 +37,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         }
 
         var ret = [];
-        var temp = "";
+        var temp = ""; 
 
         for (var i = 0; i < len; i++) {
             temp = msg.data(new Schema.List()).contents(i);

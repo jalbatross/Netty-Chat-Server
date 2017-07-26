@@ -56,6 +56,10 @@ public class ChatServerIntFrameDecoder extends SimpleChannelInboundHandler<Objec
            
             ctx.fireChannelRead(out.pop());
         }
+        else {
+            System.out.println("[ChatServerDecoder] Got message of type: " 
+                                 +  msg.getClass()+ " . DISCARDING");
+        }
         
         return;
         

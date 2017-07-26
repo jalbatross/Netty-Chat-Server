@@ -71,6 +71,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     //User credentials
     private String username, pwdStr;
     private char[] pwdChar;
+    private boolean signup = false;
 
     private Channel ch;
 
@@ -108,6 +109,13 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
                 ctx.close();
                 Arrays.fill(pwdChar, '0');
                 ((ByteBuf) msg).clear();
+                return;
+            }
+            
+            if (signup) {
+                System.out.println("[ServerAuthHandler] Got request to signup");
+                ctx.close();
+                Arrays.fill(pwdChar,  '0');
                 return;
             }
 
@@ -171,7 +179,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
 
         else if (msg instanceof HttpContent) {
             HttpContent httpCred = (HttpContent) msg;
-            
+
             if (!validateHttpCredentials(httpCred)) {
                 ctx.close();
                 return;
@@ -253,6 +261,9 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
      * Returns true otherwise, setting this.username and this.pwdChar to 
      * the Credentials parsed from buf.
      * 
+     * If the Credentials object has signup set to true, assigns true to
+     * this.signup.
+     * 
      * @param buf     A ByteBuf containing a serialized FlatBuffers Credentials
      * @return        True if buf contains valid FlatBuffers Credentials. Sets
      *                this.username and this.pwdChar to those credentials.
@@ -275,6 +286,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
         Credentials credentials = FlatBuffersCodec.byteBufToData(buf.nioBuffer(), Credentials.class);
         this.username = credentials.username();
         this.pwdChar = credentials.password().toCharArray();
+        this.signup = credentials.signup();
+       
         }
         catch (Exception e) {
             System.out.println("[ServerAuthHandler] Couldn't get credentials from FlatBuffers!");
