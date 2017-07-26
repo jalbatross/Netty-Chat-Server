@@ -94,8 +94,12 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("[ServerAuthHandler] Auth Handler Called");
+        if (!(msg instanceof ByteBuf)) {
+            ctx.close();
+            throw new Exception("[ServerAuthHandler] Bad data type received");
 
-        if (msg instanceof ByteBuf) {
+        }
+        else {
             ByteBuf buf = (ByteBuf) msg;
 
             if (buf.readableBytes() > MAX_MSG_LEN) {
@@ -176,36 +180,6 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
             Arrays.fill(pwdChar, '0');
 
         }
-
-        else if (msg instanceof HttpContent) {
-            HttpContent httpCred = (HttpContent) msg;
-
-            if (!validateHttpCredentials(httpCred)) {
-                ctx.close();
-                return;
-            }
-
-            if (login.verifyUser(username, pwdStr)) {
-                System.out.println("[AuthHandler] Got correct user/pass (HTTP)");
-                
-                String ticket = generateTicket(username, ch.remoteAddress(),ch.id());
-                
-                //generate timestamped message with username as author and IP address as message content
-                InetSocketAddress address = (InetSocketAddress) ch.remoteAddress();
-                TimeChatMessage value = new TimeChatMessage(username, address.getAddress().toString());
-                ticketDB.put(ticket, value);
-                
-                //ctx.writeAndFlush(httpAuthResponse(ticket));
-            } 
-            else {
-                System.out.println("[AuthHandler] Got wrong user/pass (HTTP)");
-                ctx.writeAndFlush(httpDeniedResponse());
-            }
-
-            httpCred.release();
-        }
-       
-
         return;
 
     }
@@ -213,6 +187,8 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
     /**
      * Private helper method to validate received credentials from a client 
      * that sends credentials via HTTP POST.
+     * 
+     * @deprecated use {@link #validateFlatbuffersCredentials(ByteBuf buf)} instead.  
      * 
      * Returns false if the JsonParser fails to correctly parse the JSON object
      * OR if we fail to extract a username and password from expected JSON object
@@ -229,6 +205,7 @@ public class ServerAuthHandler extends ChannelInboundHandlerAdapter {
      *                   false otherwise. Sets this username and 
      *                   this pwdStr to received credentials.
      */
+    @Deprecated
     private boolean validateHttpCredentials(HttpContent httpCred) {
         String jsonContent = httpCred.content().toString(StandardCharsets.UTF_8);
         JsonObject obj = new JsonObject();
