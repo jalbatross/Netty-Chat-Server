@@ -124,7 +124,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                String[] userList = users.toArray(new String[users.size()]);
 	                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
 	                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-	                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf)).addListener( new ChannelFutureListener() {
+	                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf)).addListener( new ChannelFutureListener() {
 
 	                    @Override
 	                    public void operationComplete(ChannelFuture future) throws Exception {
@@ -222,11 +222,12 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                    users.add(0, currentLobby.name());
 	                    System.out.println(users.toString());
 	                    String[] userList = users.toArray(new String[users.size()]);
-	                   
+	                    
+	                    //update users for all people in lobby
 		                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
 		                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-		                ch.writeAndFlush(new BinaryWebSocketFrame(userBuf));
-		                
+		                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
+		               
 		                String[] lobbyList = new String[lobbies.size()];
 		                for (int j = 0; j < lobbies.size(); j++) {
 		                    lobbyList[j]=lobbies.get(j).name();
