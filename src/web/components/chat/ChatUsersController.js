@@ -1,10 +1,9 @@
-angular.module("chatApp").controller("ChatUsersController", function ($scope, websockets) {
+angular.module("chatApp").controller("ChatUsersController", function($scope, websockets) {
     if (!websockets.isConnected()) {
         console.log("[UsersController] Not connected, exit");
         $state.go('/');
         return;
-    }
-    else {
+    } else {
         console.log('[UsersController] connected');
     }
 
@@ -12,20 +11,28 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
     $scope.lobbyName = "loading . . .";
     var socket = websockets.getSocket();
 
-     $scope.rightClickUser = [
-          ['Favorite Color', function ($itemScope, $event, color) {
-                alert(color);
-          }],
-          ['Get User Info', function($itemScope) {
+    $scope.rightClickUser = [
+      {
+        text: 'Get User Info',
+        click: function($itemScope) {
             alert($itemScope.user);
-          }
-          ]
-      ];
+        }
+      },
+      {
+        text: 'Play Rock Paper Scissors', 
+        click: function($itemScope) {
+            var alertMsg = "Sent request to play RPS with " + $itemScope.user;
+            alert(alertMsg);
+            var request = "/play rps " + $itemScope.user;
+            socket.send(request);
+        }
+      }
+    ];
     
     function userListString(msg) {
         console.log("[UsersController] data type: " + msg.dataType());
 
-        if (msg == null || msg.dataType() != Schema.Data.List){
+        if (msg == null || msg.dataType() != Schema.Data.List) {
             throw 'Invalid list';
         }
 
@@ -40,7 +47,7 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
 
         $scope.lobbyName = msg.data(new Schema.List()).contents(0);
         for (var i = 1; i < len; i++) {
-            ret [i] = msg.data(new Schema.List()).contents(i);
+            ret[i] = msg.data(new Schema.List()).contents(i);
         }
 
         return ret;
@@ -56,7 +63,7 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
         var dataType = msg.dataType();
         console.log("[UsersController DataType: ", dataType);
 
-        if (dataType == Schema.Data.List){
+        if (dataType == Schema.Data.List) {
             console.log("[UsersController] got List");
             var listType = msg.data(new Schema.List()).type();
 
@@ -65,10 +72,10 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
                 return;
             }
             var ret = userListString(msg);
-            
+
             $scope.usernames = ret;
             console.log("[UsersController] data: ", $scope.usernames);
-            
+
         }
         $scope.$apply();
     });
