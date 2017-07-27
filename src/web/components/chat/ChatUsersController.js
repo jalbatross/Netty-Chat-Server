@@ -11,6 +11,16 @@ angular.module("chatApp").controller("ChatUsersController", function ($scope, we
     $scope.usernames = "";
     $scope.lobbyName = "loading . . .";
     var socket = websockets.getSocket();
+
+     $scope.rightClickUser = [
+          ['Favorite Color', function ($itemScope, $event, color) {
+                alert(color);
+          }],
+          ['Get User Info', function($itemScope) {
+            alert($itemScope.user);
+          }
+          ]
+      ];
     
     function userListString(msg) {
         console.log("[UsersController] data type: " + msg.dataType());

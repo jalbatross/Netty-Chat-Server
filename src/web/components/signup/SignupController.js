@@ -3,6 +3,7 @@ angular.module("chatApp").controller("SignupController", function($scope, $http,
     $scope.error = false;
     var aurl = "http://localhost:8080";
 
+
     $scope.signup = function() {
         var builder = new flatbuffers.Builder(1024);
 
@@ -29,7 +30,6 @@ angular.module("chatApp").controller("SignupController", function($scope, $http,
         var credBytes = builder.asUint8Array();
 
         var config = {'Content-Type': 'application/x-www-form-urlencoded'};
-
         $http({
             method: 'post',
             url: aurl,

@@ -20,9 +20,10 @@
       <button type="button" class="btn btn-info">Sign Out</button>
       <button type="button" class="btn btn-default">no-op</button>
     </div>
+    
     <div id='user-list' ng-controller="ChatUsersController" >
       <div ng-style = "{'text-align' : 'center'}"><h4>{{lobbyName}}</h4></div>
-      <div ng-repeat = "user in usernames">{{user}}</div>
+      <div ng-repeat = "user in usernames" context-menu = "rightClickUser" >{{user}}</div>
     </div>
     
     <div id='messages' ng-controller="ChatReceiveController">
