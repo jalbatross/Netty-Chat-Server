@@ -105,15 +105,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
 	                ByteBuf buf = Unpooled.copiedBuffer(data);
 	                
-	                ch.writeAndFlush(new BinaryWebSocketFrame(buf)).addListener( new ChannelFutureListener() {
-
-	                    @Override
-	                    public void operationComplete(ChannelFuture future) throws Exception {
-	                        System.out.println("[ChatServerHandler] Sent welcome message to user");
-	                        
-	                    }
+	                ch.writeAndFlush(new BinaryWebSocketFrame(buf));
 	                    
-	                });
+	                    
+	               
 	                
 	                
 	                //update user list
@@ -124,15 +119,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                String[] userList = users.toArray(new String[users.size()]);
 	                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
 	                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-	                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf)).addListener( new ChannelFutureListener() {
-
-	                    @Override
-	                    public void operationComplete(ChannelFuture future) throws Exception {
-	                        System.out.println("[ChatServerHandler] Sent user list to user");
-	                        
-	                    }
-	                    
-	                });
+	                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
 	                
 	                //update lobby list
 	                String[] lobbyList = new String[lobbies.size()];
@@ -142,15 +129,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                }
 	                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
 	                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-	                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf)).addListener( new ChannelFutureListener() {
-
-	                    @Override
-	                    public void operationComplete(ChannelFuture future) throws Exception {
-	                        System.out.println("[ChatServerHandler] Sent lobby list to user");
-	                        
-	                    }
-	                    
-	                });
+	                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
 	                init = true;
 	                return;
 	            }
