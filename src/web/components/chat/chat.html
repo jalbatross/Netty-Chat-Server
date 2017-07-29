@@ -16,9 +16,10 @@
 <body>
   <div class="main-box">
     <div id ="chat-toolbar" class = "btn-group">
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Lobbies</button>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#lobbyModal">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
-      <button type="button" class="btn btn-default">no-op</button>
+      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal" ng-controller="ChatGameController" id="game-modal-button">Game
+      </button>
     </div>
     
     <div id='user-list' ng-controller="ChatUsersController" >
@@ -41,9 +42,9 @@
     </div>
   </div>
 </div>
-</body>
+
 <!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="lobbyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 <div class="modal-dialog" role="document">
   <div class="modal-content">
     <div class="modal-header">
@@ -76,6 +77,30 @@
   
 </div>
 </div>
+
+<div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal-dialog" role="document">
+  <div class="modal-content game-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">Rock Paper Scissors</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+      <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" ng-controller = "ChatGameController">
+       {{game.data}}
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+  </div>
+  
+</div>
+</div>
+
+</body>
+
+
 <style media="screen" type="text/css">
 /* 'Open Sans' font from Google Fonts */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
@@ -156,9 +181,6 @@ div:hover {
 
 .modal-dialog {
 
-  /* other stuff we already covered */
-
-  /* cover the modal */
   position: relative;
   margin: auto;
   height:90%;
@@ -167,13 +189,6 @@ div:hover {
   top: 30%;
   transform: translateY(-30%);
 
-  /*
-  background-color:red;
-  border: 2px solid yellow;
-  display: block;
-
-  overflow:auto;
-*/
 }
 
 .modal-content {
@@ -203,6 +218,13 @@ div:hover {
   height: 100%;
 
 }
+
+.game-modal {
+  width:100%;
+  height:100%;
+}
+
+
 
 
 </style>
