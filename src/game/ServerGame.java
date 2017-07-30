@@ -1,10 +1,10 @@
-package com.test.chatserver;
+package game;
 
 import java.util.ArrayList;
 
 public class ServerGame {
-    private final int numPlayers;
-    private final ArrayList<String> players;
+    protected final int numPlayers;
+    protected final ArrayList<String> players;
     
     public ServerGame(int numPlayers, ArrayList<String> players) throws Exception {
         if (players.size() > numPlayers) {
@@ -12,6 +12,9 @@ public class ServerGame {
         }
         this.numPlayers = numPlayers;
         this.players = players;
+        
+        
+        
     }
     
     public ArrayList<String> players() {
@@ -21,5 +24,6 @@ public class ServerGame {
     public int numPlayers() {
         return numPlayers;
     }
+    
 
 }

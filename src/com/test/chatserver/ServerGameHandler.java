@@ -2,6 +2,7 @@ package com.test.chatserver;
 
 import java.util.Stack;
 
+import game.ServerGame;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
