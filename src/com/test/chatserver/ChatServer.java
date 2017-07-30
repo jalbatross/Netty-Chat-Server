@@ -60,12 +60,12 @@ public class ChatServer {
 	/**
 	 * the server should initialize with a channel group,allUsers,and pass this
 	 * channelGroup down to the appropriate pipelines so that they can reference and
-	 * alter it as they see fit. this should work because when a function in the pipeline
-	 * alters the set of allUsers all callers of allUsers should see the alteration i think.
+	 * alter it as they see fit.
 	 * 
 	 */
-	private ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	private List<NamedChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
+	private final ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+	private final List<NamedChannelGroup> games = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
+	private final List<NamedChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
 	private final Map<String, TimeChatMessage> sessionTicketDB = new ConcurrentHashMap<String,TimeChatMessage>();
 	
 	//static final int DEFAULT_PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
@@ -110,7 +110,8 @@ public class ChatServer {
                      
                      ch.pipeline().addFirst("corsHandler", new CorsHandler(config));
                      
-                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler(sessionTicketDB, lobbies, allChannels));
+                     ch.pipeline().addLast("protocolHandler", new ChatServerProtocolHandler(sessionTicketDB, 
+                             lobbies, allChannels, games));
                      ch.pipeline().addLast("authHandler", new ServerAuthHandler(sessionTicketDB));
                 	 
                      //ch.pipeline().addLast(new HTTPInitializer(sslCtx));

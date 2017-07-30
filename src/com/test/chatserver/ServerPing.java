@@ -19,7 +19,7 @@ public class ServerPing extends ChannelInboundHandlerAdapter {
     }
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("[ServerPing] Pinger added for: " + user);
+        //System.out.println("[ServerPing] Pinger added for: " + user);
         ctx.channel().writeAndFlush(new PingWebSocketFrame());
 
     }
@@ -34,18 +34,18 @@ public class ServerPing extends ChannelInboundHandlerAdapter {
                 ctx.channel().writeAndFlush(new PingWebSocketFrame());
             } 
             else if (e.state() == IdleState.ALL_IDLE) {
-                System.out.println("  [ServerPing] TIMEOUT for user: " + user +
-                        " at time: " + new Date(Instant.now().toEpochMilli()));
+               // System.out.println("  [ServerPing] TIMEOUT for user: " + user +
+               //         " at time: " + new Date(Instant.now().toEpochMilli()));
                 ctx.close();
             }
         }
         
-        System.out.println("***End userEventTriggered***\n");
+        //System.out.println("***End userEventTriggered***\n");
     }
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("[ServerPing] Reading for user " + user + " at " + new Date(Instant.now().toEpochMilli()) );
+        //System.out.println("[ServerPing] Reading for user " + user + " at " + new Date(Instant.now().toEpochMilli()) );
         if (!(msg instanceof PongWebSocketFrame)) {
             System.out.println("[ServerPing] Passing non-pong frame");
             ctx.fireChannelRead(msg);

@@ -43,6 +43,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	private ChannelGroup allChannels;
     private List<NamedChannelGroup> lobbies;
 	private Map<String,TimeChatMessage> ticketDB;
+    private List<NamedChannelGroup> gameLobbies;
 	
     public HttpServerHandler(Map<String, TimeChatMessage> ticketDB) {
         this.ticketDB = ticketDB;
@@ -53,6 +54,14 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
         this.ticketDB = ticketDB;
         this.allChannels = channels;
         this.lobbies = lobbies;
+    }
+
+    public HttpServerHandler(Map<String, TimeChatMessage> ticketDB, List<NamedChannelGroup> lobbies,
+            ChannelGroup channels, List<NamedChannelGroup> gameLobbies) {
+        this.ticketDB = ticketDB;
+        this.allChannels = channels;
+        this.lobbies = lobbies;
+        this.gameLobbies = gameLobbies;
     }
 
     @Override
@@ -139,7 +148,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                         
                         ctx.pipeline().addLast(new IdleStateHandler(PING_TIMER_SECONDS, PING_TIMER_SECONDS, PING_TIMEOUT_SECONDS));
                         ctx.pipeline().addLast( "serverPing", new ServerPing(username));
-                        ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels));
+                        ctx.pipeline().addLast("chatHandler", new ChatServerHandler(ctx, username, lobbies, allChannels, gameLobbies));
                     }
                 });
                 

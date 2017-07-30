@@ -20,19 +20,19 @@ import io.netty.util.concurrent.EventExecutor;
 public class NamedChannelGroup extends DefaultChannelGroup {
     
     protected Set<String> userSet = Collections.synchronizedSet(new HashSet<String>());
-    protected Map<String, Channel> channelMap;
+    protected Map<Channel, String> channelMap;
     public NamedChannelGroup(String name, EventExecutor executor) {
         super(name, executor);
-        channelMap = new ConcurrentHashMap<String, Channel>();
+        channelMap = new ConcurrentHashMap<Channel, String>();
     }
     
     public boolean addUser(String username, Channel aChannel) {
-        channelMap.put(username, aChannel);
+        channelMap.put(aChannel, username);
         return userSet.add(username);
     }
     
     public boolean removeUser(String username) {
-        channelMap.remove(username);
+        //clear channel too?
         return userSet.remove(username);
     }
     
@@ -43,8 +43,14 @@ public class NamedChannelGroup extends DefaultChannelGroup {
     public int numUsers() {
         return userSet.size();
     }
-    public Channel getChannel(String username) {
-        return channelMap.get(username);
+    public String getUsernameFromChannel(Channel channel) {
+        return channelMap.get(channel);
+    }
+    
+    public void clear() {
+        super.clear();
+        userSet.clear();
+        channelMap.clear();
     }
     
     

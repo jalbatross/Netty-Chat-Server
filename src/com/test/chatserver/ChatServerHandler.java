@@ -7,6 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
+import Schema.Chat;
+import Schema.Message;
+import game.RPS;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -51,6 +54,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private boolean init = false;
 
     private NamedChannelGroup currentLobby;
+    private List<NamedChannelGroup> gameLobbies;
     
     public ChatServerHandler(ChannelGroup group, String username) {
         channels = group;
@@ -67,6 +71,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         
     }
     
+    public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies,
+            ChannelGroup allChannels, List<NamedChannelGroup> gameLobbies) {
+        this.username = username;
+        this.lobbies = lobbies;
+        this.channels = allChannels;
+        this.ch = ctx.channel();
+        this.gameLobbies = gameLobbies;
+    }
+
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
@@ -78,7 +91,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     }
     
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) 
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception 
 	{
 		System.out.println("\n[ChatServerHandler] channelRead called!");
 		
@@ -222,12 +235,81 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    
 			    return;
 			}
-			else if (strMsg.startsWith("/play rps")) {
-			    String challenged = strMsg.substring(9);
-			    if (!currentLobby.containsUser(challenged)) {
+			else if (strMsg.contentEquals("rock") || strMsg.contentEquals("paper") || strMsg.contentEquals("scissors")) {
+			    ctx.fireChannelRead(msg);
+			    return;
+			}
+			else if (strMsg.startsWith("/play rps ")) {
+			    String gameLobbyName = strMsg.substring(10);
+			    if (gameLobbies.isEmpty()){
 			        return;
 			    }
-			    boolean challengeAccepted = sendChallenge(challenged, 5000);
+			    
+			    NamedChannelGroup gameLobby = null;
+			    for (int i = 0 ; i < gameLobbies.size(); i++) {
+			        if (gameLobbyName.contentEquals(gameLobbies.get(i).name())) {
+			            gameLobby = gameLobbies.get(i);
+			            break;
+			        }
+			    }
+			    if (gameLobby == null) {
+			        return;
+			    }
+			    
+			    gameLobby.add(ch);
+			    gameLobby.addUser(username, ch);
+			    ArrayList<String> players = gameLobby.getUsers();
+			    
+			    RPS rpsGame = null;
+			    try {
+			        rpsGame = new RPS(2, players);
+                }
+                catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return;
+                }
+			    
+			    System.out.println("[ChatServerHandler] Successfully created game lobby " + gameLobby.name());
+			    System.out.println("[ChatServerHandler] Users: " + gameLobby.getUsers());
+			    
+			    
+			    for (Channel chan : gameLobby) {
+			        chan.pipeline().addLast("gameHandler", new ServerGameHandler(rpsGame, gameLobby));
+			    }
+			    
+			    gameLobbies.remove(gameLobby);
+			    return;
+			    
+			}
+			else if (strMsg.contentEquals("/play rps")) {
+			    System.out.println("[ChatServerHandler] Received RPS request");
+			    NamedChannelGroup rpsLobby = new NamedChannelGroup("RPS", GlobalEventExecutor.INSTANCE);
+			    gameLobbies.add(rpsLobby);
+			 
+			    //add the person who made the game, their username, and channel map
+			    rpsLobby.add(ch);
+			    rpsLobby.addUser(username, ch);
+			    
+			    System.out.println("Made new game lobby for rps named: " + rpsLobby.name());
+			    System.out.println("People in lobby: " + rpsLobby.getUsers());
+			    
+			    return;
+			}
+			else if (strMsg.contentEquals("/games")) {
+			    // sends a String[] of all games in the server in the following format:
+                // lgameName,gameSize/gameCapacity
+			    int numGames = gameLobbies.size();
+                String[] gameList = new String[numGames];
+                for (int i = 0; i < numGames; i++) {
+                    gameList[i]=gameLobbies.get(i).name();
+                    gameList[i] += "," + gameLobbies.get(i).numUsers() + "/2";
+                }
+                ByteBuffer gameLobbyData = FlatBuffersCodec.listToByteBuffer("games", gameList);
+                ByteBuf gameBuf = Unpooled.copiedBuffer(gameLobbyData);
+                ch.writeAndFlush(new BinaryWebSocketFrame(gameBuf));
+                
+                return;
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
@@ -293,30 +375,21 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 	}
 	
-	/**
-	 * Sends an RPS challenge to a user in the currentLobby and awaits
-	 * their response. If they do not send a response within the
-	 * set amount of time, the challenge is considered not accepted.
-	 * 
-	 * If the handler receives a TextWebSocketFrame with the content
-	 * "/accept", the challenge is accepted and sendChallenge returns
-	 * true. Otherwise, returns false.
-	 * @param challenged   Player being challenged to play RPS
-	 * @param timeoutMs    Time in milliseconds to respond to 
-	 *                     the challenge
-	 * @return             True if challenged accepts, false otherwise.
-	 */
-    private boolean sendChallenge(String challenged, long timeoutMs) {
+    
+    /**
+     * Generates a Message containing RPS challenge info in a ByteBuf.
+     * @param chalenger    Person initiating RPS challenge
+     * @param challenged   Receiving RPS challenge
+     * @return             Challenge FlatBuffers Message in ByteBuf format
+     */
+    private ByteBuf makeChallengeMessageBuf(String challenger, String challenged) {
+        String challengeMessage = challenged + ", " + challenger + " wants to play"
+                + " Rock, Paper, Scissors!";
         
-        Channel challengedChannel = currentLobby.getChannel(challenged);
+        TimeChatMessage msg = new TimeChatMessage("Server", challengeMessage);
+        ByteBuffer buf = FlatBuffersCodec.chatToByteBuffer(msg);
         
-        ByteBuf buf = challengeMessage(this.username, challenged);
-        challengedChannel.writeAndFlush(buf);
-        
-        //Await response to challenge
-        //return true if they accept
-        //return false if they decline or timeout
-        return false;
+        return Unpooled.copiedBuffer(buf);
     }
 
     @Override

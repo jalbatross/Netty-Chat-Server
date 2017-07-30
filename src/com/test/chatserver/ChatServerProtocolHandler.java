@@ -61,6 +61,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
     
     private List<NamedChannelGroup> lobbies;
+    private List<NamedChannelGroup> gameLobbies;
     private Map<String,TimeChatMessage> ticketDB;
     private ChannelGroup allChannels;
     
@@ -81,6 +82,14 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
         this.allChannels = allChannels;
         
         // TODO Auto-generated constructor stub
+    }
+
+    public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB, List<NamedChannelGroup> lobbies,
+            ChannelGroup allChannels, List<NamedChannelGroup> games) {
+        this.ticketDB = sessionTicketDB;
+        this.lobbies = lobbies;
+        this.allChannels = allChannels;
+        this.gameLobbies = games;
     }
 
     @Override
@@ -112,7 +121,8 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
             ctx.channel().pipeline().remove("corsHandler");
             
             //replace with ws handshaker
-            ctx.channel().pipeline().replace(this, "wsHandler", new HTTPInitializer(ticketDB, lobbies, allChannels));
+            ctx.channel().pipeline().replace(this, "wsHandler", new HTTPInitializer(ticketDB, 
+                    lobbies, allChannels, gameLobbies));
         }
         else if (isOptions(magic1,magic2)) {
             System.out.println("got options; not supposed to happen");
