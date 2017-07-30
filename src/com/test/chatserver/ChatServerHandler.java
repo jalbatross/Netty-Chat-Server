@@ -91,7 +91,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	                !lobbies.get(i).contains(ch) &&
 	                !lobbies.get(i).containsUser(username)) {
 	                
-	                if (lobbies.get(i).add(ch) && lobbies.get(i).addUser(username)) {
+	                if (lobbies.get(i).add(ch) && lobbies.get(i).addUser(username, ch)) {
 	                    System.out.println("[ChatServerHandler] Add success");
 	                }
 	                
@@ -188,7 +188,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			            
 			            currentLobby = lobbies.get(i);
 			            currentLobby.add(ch);
-			            currentLobby.addUser(username);
+			            currentLobby.addUser(username, ch);
 			            
 			            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Switched to " + currentLobby.name());
 		                
@@ -221,6 +221,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    }
 			    
 			    return;
+			}
+			else if (strMsg.startsWith("/play rps")) {
+			    String challenged = strMsg.substring(9);
+			    if (!currentLobby.containsUser(challenged)) {
+			        return;
+			    }
+			    boolean challengeAccepted = sendChallenge(challenged, 5000);
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
@@ -286,6 +293,32 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 	}
 	
+	/**
+	 * Sends an RPS challenge to a user in the currentLobby and awaits
+	 * their response. If they do not send a response within the
+	 * set amount of time, the challenge is considered not accepted.
+	 * 
+	 * If the handler receives a TextWebSocketFrame with the content
+	 * "/accept", the challenge is accepted and sendChallenge returns
+	 * true. Otherwise, returns false.
+	 * @param challenged   Player being challenged to play RPS
+	 * @param timeoutMs    Time in milliseconds to respond to 
+	 *                     the challenge
+	 * @return             True if challenged accepts, false otherwise.
+	 */
+    private boolean sendChallenge(String challenged, long timeoutMs) {
+        
+        Channel challengedChannel = currentLobby.getChannel(challenged);
+        
+        ByteBuf buf = challengeMessage(this.username, challenged);
+        challengedChannel.writeAndFlush(buf);
+        
+        //Await response to challenge
+        //return true if they accept
+        //return false if they decline or timeout
+        return false;
+    }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
         // Close the connection when an exception is raised.
