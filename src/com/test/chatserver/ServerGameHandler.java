@@ -50,8 +50,8 @@ public class ServerGameHandler extends ChannelInboundHandlerAdapter {
         if (!command.contentEquals("rock") && !command.contentEquals("paper") && !command.contentEquals("scissors")) {
             return;
         }
-        System.out.println("[ServerGameHandler] Received command from: " + gameLobby.getUsernameFromChannel(ctx.channel()));
-        game.processChoice(command, gameLobby.getUsernameFromChannel(ctx.channel()));
+        System.out.println("[ServerGameHandler] Received command from: " + gameLobby.getUser(ctx.channel()));
+        game.processChoice(command, gameLobby.getUser(ctx.channel()));
         System.out.println("[ServerGameHandler] Processed game choice");
         
         if(game.readyToDeclare()) {
@@ -63,7 +63,7 @@ public class ServerGameHandler extends ChannelInboundHandlerAdapter {
                 ch.writeAndFlush(new BinaryWebSocketFrame(buf));
                 System.out.println("[ServerGameHandler] Sent message to channel: " + ch.id());
                 ch.pipeline().removeLast();
-                System.out.println("[ServerGameHandler] Removed " + gameLobby.getUsernameFromChannel(ch));
+                System.out.println("[ServerGameHandler] Removed " + gameLobby.getUser(ctx.channel()));
             }
             
         }

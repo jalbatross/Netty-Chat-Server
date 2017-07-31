@@ -48,25 +48,18 @@ import java.util.Stack;
 public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	
     private final List<NamedChannelGroup> lobbies;
-    private final ChannelGroup channels;
+    private final ChannelGroup globalChannelGroup;
     private final String username;
     private Channel ch;
     private boolean init = false;
 
     private NamedChannelGroup currentLobby;
     private List<NamedChannelGroup> gameLobbies;
-    
-    public ChatServerHandler(ChannelGroup group, String username) {
-        channels = group;
-        this.username = username;
-        lobbies = null;
-        ch = null;
-    }
-    
+        
     public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies, ChannelGroup channels) {
         this.username = username;
         this.lobbies = lobbies;
-        this.channels = channels;
+        this.globalChannelGroup = channels;
         this.ch = ctx.channel();
         
     }
@@ -75,7 +68,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             ChannelGroup allChannels, List<NamedChannelGroup> gameLobbies) {
         this.username = username;
         this.lobbies = lobbies;
-        this.channels = allChannels;
+        this.globalChannelGroup = allChannels;
         this.ch = ctx.channel();
         this.gameLobbies = gameLobbies;
     }
@@ -85,7 +78,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         super.channelInactive(ctx);
         System.out.println("[ChatServerHandler] Disconnecting user: " + username);
         //remove username from current channelGroup
-        currentLobby.removeUser(username);
+        currentLobby.remove(username);
         System.out.println("[ChatServerHandler] Num users in lobby: " + currentLobby.size());
         
     }
@@ -96,59 +89,17 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		System.out.println("\n[ChatServerHandler] channelRead called!");
 		
 		if (!init) {
-		    System.out.println("[ChatServerHandler] Added new instance of handler to " + username);
-	        this.channels.add(ch);
+		    //System.out.println("[ChatServerHandler] Added new instance of handler to " + username);
 	        
-	        for (int i = 0; i < lobbies.size(); i++) {
-	            if (lobbies.get(i).size() < ChatServer.LOBBY_SIZE &&
-	                !lobbies.get(i).contains(ch) &&
-	                !lobbies.get(i).containsUser(username)) {
-	                
-	                if (lobbies.get(i).add(ch) && lobbies.get(i).addUser(username, ch)) {
-	                    System.out.println("[ChatServerHandler] Add success");
-	                }
-	                
-	                currentLobby = lobbies.get(i);
-	                
-	                System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
-	                
-	                //server message on connect
-	                TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
-	                
-	                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-	                ByteBuf buf = Unpooled.copiedBuffer(data);
-	                
-	                ch.writeAndFlush(new BinaryWebSocketFrame(buf));
-	                    
-	                    
-	               
-	                
-	                
-	                //update user list
-	                //user list is prepended with lobby name for client
-	                ArrayList<String> users = currentLobby.getUsers();
-	                users.add(0, currentLobby.name());
-	                System.out.println(users.toString());
-	                String[] userList = users.toArray(new String[users.size()]);
-	                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
-	                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-	                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
-	                
-	                //update lobby list
-	                String[] lobbyList = new String[lobbies.size()];
-	                for (int j = 0; j < lobbies.size(); j++) {
-	                    lobbyList[j]=lobbies.get(j).name();
-	                    lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
-	                }
-	                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
-	                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-	                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
-	                init = true;
-	                return;
-	            }
+	        addChannelToGlobalGroup(this.ch);
+	        if (!addUserToFirstLobby(this.ch, username)) {
+	            //System.out.println("Failed to add user to lobby");
+	            ctx.close();
+	            return;
 	        }
-	        ctx.close();
-	        System.out.println("[ChatServerHandler] Server was full");
+	        
+	        init = true;	        
+	        return;
 		}
 		
 		if ((msg instanceof TextWebSocketFrame)) {
@@ -197,11 +148,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			            !lobbies.get(i).containsUser(username)) {
 			        
 			            currentLobby.remove(ch);
-			            currentLobby.removeUser(username);
 			            
 			            currentLobby = lobbies.get(i);
-			            currentLobby.add(ch);
-			            currentLobby.addUser(username, ch);
+			            currentLobby.add(ch, username);
 			            
 			            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Switched to " + currentLobby.name());
 		                
@@ -256,8 +205,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			        return;
 			    }
 			    
-			    gameLobby.add(ch);
-			    gameLobby.addUser(username, ch);
+			    gameLobby.add(ch, username);
+
 			    ArrayList<String> players = gameLobby.getUsers();
 			    
 			    RPS rpsGame = null;
@@ -288,8 +237,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    gameLobbies.add(rpsLobby);
 			 
 			    //add the person who made the game, their username, and channel map
-			    rpsLobby.add(ch);
-			    rpsLobby.addUser(username, ch);
+			    rpsLobby.add(ch, username);
 			    
 			    System.out.println("Made new game lobby for rps named: " + rpsLobby.name());
 			    System.out.println("People in lobby: " + rpsLobby.getUsers());
@@ -345,11 +293,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    //For now this is just broadcast to all users
 		    ByteBuf myBuf = Unpooled.copiedBuffer(slice);
             WebSocketFrame deltaArr = new BinaryWebSocketFrame(myBuf);
-            channels.writeAndFlush(deltaArr);
+            globalChannelGroup.writeAndFlush(deltaArr);
 		}
 		else if (msg instanceof CloseWebSocketFrame) {
 		    System.out.println("[ChatServerHandler] Received request to close connection");
-		    System.out.println("[ChatServerHandler] Channel grp before removal: " + channels.toString());
+		    System.out.println("[ChatServerHandler] Channel grp before removal: " + globalChannelGroup.toString());
 		    
 		    final String dcMsg = username + " disconnected";
 		    //try to close connection
@@ -375,7 +323,77 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 	}
 	
-    
+	/**
+	 * Attempts to add aChannel to the first NamedChannelGroup (lobby) that
+	 * it can find in lobbies. Returns true if aChannel and aUsername were
+	 * successfully placed in one of the lobbies, false otherwise.
+	 * 
+	 * @param aChannel   a Channel
+	 * @param aUsername  Username corresponding to aChannel
+	 * @return           True if aChannel and aUsername were placed in the same
+	 *                   NamedChannelGroup in lobbies, false otherwise
+	 */
+    private boolean addUserToFirstLobby(Channel aChannel, String aUsername) {
+        for (int i = 0; i < lobbies.size(); i++) {
+
+            if (lobbies.get(i).isFull() || lobbies.get(i).contains(aChannel) 
+                    || lobbies.get(i).contains(aUsername)){
+                continue;
+            }
+            
+            if (lobbies.get(i).add(ch, username)) {
+                System.out.println("[ChatServerHandler] Add success");
+            }
+
+            currentLobby = lobbies.get(i);
+
+            //System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
+
+            // Send user connect message
+            //TODO: Encapsulate in a function
+            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
+
+            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+            ByteBuf buf = Unpooled.copiedBuffer(data);
+
+            ch.writeAndFlush(new BinaryWebSocketFrame(buf));
+
+            // update user list
+            // user list is prepended with lobby name for client
+            //TODO: Encapsulate in a function
+            ArrayList<String> users = currentLobby.getUsers();
+            users.add(0, currentLobby.name());
+            System.out.println(users.toString());
+            String[] userList = users.toArray(new String[users.size()]);
+            ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
+            ByteBuf userBuf = Unpooled.copiedBuffer(userData);
+            currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
+
+            // update lobby list
+            //TODO: Encapsulate in a function
+            String[] lobbyList = new String[lobbies.size()];
+            for (int j = 0; j < lobbies.size(); j++) {
+                lobbyList[j] = lobbies.get(j).name();
+                lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE;
+            }
+            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
+            currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
+
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Adds user to the Global channel group
+     */
+    private void addChannelToGlobalGroup(Channel aChannel) {
+        globalChannelGroup.add(aChannel);
+        
+    }
+
     /**
      * Generates a Message containing RPS challenge info in a ByteBuf.
      * @param chalenger    Person initiating RPS challenge

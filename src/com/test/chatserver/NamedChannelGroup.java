@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
@@ -20,37 +25,63 @@ import io.netty.util.concurrent.EventExecutor;
 public class NamedChannelGroup extends DefaultChannelGroup {
     
     protected Set<String> userSet = Collections.synchronizedSet(new HashSet<String>());
-    protected Map<Channel, String> channelMap;
+    protected BiMap<String, Channel> channelMap;
     public NamedChannelGroup(String name, EventExecutor executor) {
         super(name, executor);
-        channelMap = new ConcurrentHashMap<Channel, String>();
+        
+        //initialize biMap
+        BiMap<String,Channel> userChannelMap = HashBiMap.create();
+        channelMap = Maps.synchronizedBiMap(userChannelMap);
     }
     
-    public boolean addUser(String username, Channel aChannel) {
-        channelMap.put(aChannel, username);
-        return userSet.add(username);
+    public boolean add(Channel channel, String username) {
+        if (super.add(channel)) {
+            channelMap.put(username, channel);
+            return true;
+        }
+        
+        return false;
     }
     
-    public boolean removeUser(String username) {
-        //clear channel too?
-        return userSet.remove(username);
+    public boolean remove(String username) {
+        //get channel corresponding to user
+        Channel theChannel = channelMap.get(username);
+        if (theChannel == null) {
+            return false;
+        }
+        super.remove(theChannel);
+        channelMap.remove(username);
+        
+        return true;
+    }
+    
+    public boolean remove(Channel aChannel) {
+        String username = channelMap.inverse().get(aChannel);
+        return remove(username);
     }
     
     public boolean containsUser(String username) {
-        return userSet.contains(username);
+        return channelMap.containsKey(username);
     }
     
     public int numUsers() {
-        return userSet.size();
+        return channelMap.size();
     }
-    public String getUsernameFromChannel(Channel channel) {
-        return channelMap.get(channel);
+
+    public String getUser(Channel channel) {
+        return channelMap.inverse().get(channel);
+    }
+    public Channel getChannel(String username) {
+        return channelMap.get(username);
     }
     
     public void clear() {
         super.clear();
-        userSet.clear();
         channelMap.clear();
+    }
+    
+    public boolean contains (String username) {
+        return channelMap.containsKey(username);
     }
     
     
@@ -60,16 +91,14 @@ public class NamedChannelGroup extends DefaultChannelGroup {
      * @return   ArrayList<String> of users
      */
     public ArrayList<String> getUsers() {
-        ArrayList<String> arr = new ArrayList<String>();
-        
-        synchronized(userSet) {
-            Iterator<String> i = userSet.iterator();
-            while (i.hasNext()) {
-                arr.add(i.next());
-            }
-        }
+        String[] usersArray = channelMap.keySet().toArray(new String[channelMap.size()]);
+        ArrayList<String> arr = new ArrayList<String>(Arrays.asList(usersArray));
         
         return arr;
+    }
+
+    public boolean isFull() {
+        return this.size() >= ChatServer.LOBBY_SIZE;
     }
 
 }
