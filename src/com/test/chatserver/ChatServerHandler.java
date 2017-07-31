@@ -89,14 +89,17 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		System.out.println("\n[ChatServerHandler] channelRead called!");
 		
 		if (!init) {
-		    //System.out.println("[ChatServerHandler] Added new instance of handler to " + username);
-	        
+		    
 	        addChannelToGlobalGroup(this.ch);
 	        if (!addUserToFirstLobby(this.ch, username)) {
-	            //System.out.println("Failed to add user to lobby");
 	            ctx.close();
 	            return;
 	        }
+	        
+            ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
+            currentLobby.write(new BinaryWebSocketFrame(lobbyUserList(currentLobby)));
+            currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
+	        
 	        
 	        init = true;	        
 	        return;
@@ -108,30 +111,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			
 			if (strMsg.equalsIgnoreCase("/lobbies")) {
 			    
-			    // sends a String[] of all lobbies in the server in the following format:
-			    // lobbyName,lobbySize/lobbyCapacity
-			    // for example, for the lobby myLobby with 2 users out of 10 capacity:
-			    // myLobby,2/10
-			    String[] lobbyList = new String[lobbies.size()];
-			    for (int i = 0; i < lobbies.size(); i++) {
-			        lobbyList[i]=lobbies.get(i).name();
-			        lobbyList[i] += "," + lobbies.get(i).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
-			    }
-	            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
-	            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-	            ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
-	            
+	            ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
+	          
 	            return;
 			}
 			if (strMsg.equalsIgnoreCase("/lobby")) {
 
-			    TimeChatMessage timeMessage = new TimeChatMessage("Server", currentLobby.name());
-	            
-	            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-	            ByteBuf buf = Unpooled.copiedBuffer(data);
-	            
-	            ch.writeAndFlush(new BinaryWebSocketFrame(buf));
-	            
+			    ch.writeAndFlush(lobbyConnectMessage());
 	            return;
 			}
 			if (strMsg.startsWith("/connect ")) {
@@ -140,48 +126,12 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    if (lobbyName.contentEquals(currentLobby.name())) {
 			        return;
 			    }
-			    //make sure it's valid
-			    for (int i = 0; i < lobbies.size(); i++) {
-			        if (lobbyName.equals(lobbies.get(i).name()) && 
-			            lobbies.get(i).size() < ChatServer.LOBBY_SIZE &&
-			            !lobbies.get(i).contains(ch) && 
-			            !lobbies.get(i).containsUser(username)) {
-			        
-			            currentLobby.remove(ch);
-			            
-			            currentLobby = lobbies.get(i);
-			            currentLobby.add(ch, username);
-			            
-			            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Switched to " + currentLobby.name());
-		                
-		                ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-		                ByteBuf buf = Unpooled.copiedBuffer(data);
-		                
-		                ch.writeAndFlush(new BinaryWebSocketFrame(buf));
-		                
-		                ArrayList<String> users = currentLobby.getUsers();
-	                    users.add(0, currentLobby.name());
-	                    System.out.println(users.toString());
-	                    String[] userList = users.toArray(new String[users.size()]);
-	                    
-	                    //update users for all people in lobby
-		                ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
-		                ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-		                currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
-		               
-		                String[] lobbyList = new String[lobbies.size()];
-		                for (int j = 0; j < lobbies.size(); j++) {
-		                    lobbyList[j]=lobbies.get(j).name();
-		                    lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE; 
-		                }
-		                ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
-		                ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-		                ch.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
-		                
-			            return;
-			        }
-			    }
 			    
+			    if (connectToLobby(lobbyName)) {
+                    ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
+                    currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbyUserList(currentLobby)));
+                    ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
+			    }
 			    return;
 			}
 			else if (strMsg.contentEquals("rock") || strMsg.contentEquals("paper") || strMsg.contentEquals("scissors")) {
@@ -341,49 +291,95 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 continue;
             }
             
-            if (lobbies.get(i).add(ch, username)) {
-                System.out.println("[ChatServerHandler] Add success");
+            if (!lobbies.get(i).add(ch, username)) {
+                return false;
             }
 
             currentLobby = lobbies.get(i);
-
-            //System.out.println("[ChatServerHandler] Added " + username + " to " + currentLobby.name());
-
-            // Send user connect message
-            //TODO: Encapsulate in a function
-            TimeChatMessage timeMessage = new TimeChatMessage("Server", "Connected to " + currentLobby.name());
-
-            ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-            ByteBuf buf = Unpooled.copiedBuffer(data);
-
-            ch.writeAndFlush(new BinaryWebSocketFrame(buf));
-
-            // update user list
-            // user list is prepended with lobby name for client
-            //TODO: Encapsulate in a function
-            ArrayList<String> users = currentLobby.getUsers();
-            users.add(0, currentLobby.name());
-            System.out.println(users.toString());
-            String[] userList = users.toArray(new String[users.size()]);
-            ByteBuffer userData = FlatBuffersCodec.listToByteBuffer("users", userList);
-            ByteBuf userBuf = Unpooled.copiedBuffer(userData);
-            currentLobby.writeAndFlush(new BinaryWebSocketFrame(userBuf));
-
-            // update lobby list
-            //TODO: Encapsulate in a function
-            String[] lobbyList = new String[lobbies.size()];
-            for (int j = 0; j < lobbies.size(); j++) {
-                lobbyList[j] = lobbies.get(j).name();
-                lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE;
-            }
-            ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
-            ByteBuf lobbyBuf = Unpooled.copiedBuffer(lobbyData);
-            currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbyBuf));
-
             return true;
         }
         
         return false;
+    }
+    
+    /**
+     * Attempts to place this channel and corresponding username into the
+     * NamedChannelGroup in lobbies indicated by lobbyName.
+     * 
+     * Returns false if the user is already in the lobby or if placement
+     * in the NamedChannelGroup fails for any other reason. Otherwise,
+     * the user is placed into the NamedChannelGroup with name lobbyName
+     * and returns true.
+     * 
+     * @param lobbyName Name of the lobby to connect to
+     * @return          True if the connection was successful, 
+     *                  false otherwise.
+     */
+    private boolean connectToLobby(String lobbyName) {
+        for (int i = 0; i < lobbies.size(); i++) {
+            if (lobbyName.equals(lobbies.get(i).name()) && 
+                !lobbies.get(i).isFull() &&
+                !lobbies.get(i).contains(ch) && 
+                !lobbies.get(i).contains(username)) {
+            
+                currentLobby.remove(ch);
+                
+                currentLobby = lobbies.get(i);
+                currentLobby.add(ch, username);
+                
+                return true;
+                
+
+                
+                
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns a ByteBuf of the list of server lobbies serialized with FlatBuffers.
+     * Each entry in the list is in the following format:
+     * lobbyName,numUserInLobby/lobbyCapacity
+     * 
+     * For example, the lobby MyLobby with 3 users connected out of a maximum of 10
+     * would be recorded in the list as;
+     * MyLobby,3/10
+     * 
+     * 
+     * 
+     * @see {@link Schema.List}
+     * 
+     * @return ByteBuf containing list of NamedChannelGroups in lobbies.
+     */
+    private ByteBuf lobbiesData() {
+        String[] lobbyList = new String[lobbies.size()];
+        
+        for (int j = 0; j < lobbies.size(); j++) {
+            lobbyList[j] = lobbies.get(j).name();
+            lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE;
+        }
+        
+        ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+        return Unpooled.copiedBuffer(lobbyData);
+    }
+
+    private ByteBuf lobbyConnectMessage() {
+        TimeChatMessage timeMessage = new TimeChatMessage("Server", "You are now connected to "
+                + currentLobby.name());
+        ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+        return Unpooled.copiedBuffer(data);
+    }
+
+    private ByteBuf lobbyUserList(NamedChannelGroup lobby) {
+        ArrayList<String> users = lobby.getUsers();
+        
+        //Prefix user list with lobby name
+        users.add(0, lobby.name());
+        
+        String[] userList = users.toArray(new String[users.size()]);
+        ByteBuffer buffer =  FlatBuffersCodec.listToByteBuffer("users", userList);
+        return Unpooled.copiedBuffer(buffer);
     }
 
     /**
