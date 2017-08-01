@@ -9,8 +9,9 @@ public final class Data {
   public static final byte Credentials = 2;
   public static final byte Auth = 3;
   public static final byte List = 4;
+  public static final byte GameLobby = 5;
 
-  public static final String[] names = { "NONE", "Chat", "Credentials", "Auth", "List", };
+  public static final String[] names = { "NONE", "Chat", "Credentials", "Auth", "List", "GameLobby", };
 
   public static String name(int e) { return names[e]; }
 }

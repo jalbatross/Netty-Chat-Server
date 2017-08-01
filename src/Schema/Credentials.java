@@ -31,15 +31,15 @@ public final class Credentials extends Table {
     return Credentials.endCredentials(builder);
   }
   
-  public static int createCredentials(FlatBufferBuilder builder,
-          int usernameOffset,
-          int passwordOffset) {
-        builder.startObject(3);
-        Credentials.addPassword(builder, passwordOffset);
-        Credentials.addUsername(builder, usernameOffset);
-        Credentials.addSignup(builder, false);
-        return Credentials.endCredentials(builder);
-      }
+  public static int createCredentials(FlatBufferBuilder builder, 
+          int usernameOffset, 
+          int passwordOffset) { 
+        builder.startObject(3); 
+        Credentials.addPassword(builder, passwordOffset); 
+        Credentials.addUsername(builder, usernameOffset); 
+        Credentials.addSignup(builder, false); 
+        return Credentials.endCredentials(builder); 
+      } 
 
   public static void startCredentials(FlatBufferBuilder builder) { builder.startObject(3); }
   public static void addUsername(FlatBufferBuilder builder, int usernameOffset) { builder.addOffset(0, usernameOffset, 0); }

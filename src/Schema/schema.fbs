@@ -2,7 +2,7 @@
 
 namespace Schema;
 
-union Data {Chat, Credentials, Auth, List} 
+union Data {Chat, Credentials, Auth, List, GameLobby} 
 
 table Chat {
   timestamp:ulong;
@@ -28,6 +28,13 @@ table Auth {
 table List {
   type:string (required);
   contents:[string];
+}
+
+table GameLobby {
+  name:string (required);
+  type:string (required);
+  capacity:int;
+  password:string;
 }
 
 table Message {
