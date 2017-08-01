@@ -54,18 +54,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private boolean init = false;
 
     private NamedChannelGroup currentLobby;
-    private List<NamedChannelGroup> gameLobbies;
-        
-    public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies, ChannelGroup channels) {
-        this.username = username;
-        this.lobbies = lobbies;
-        this.globalChannelGroup = channels;
-        this.ch = ctx.channel();
-        
-    }
-    
+    private List<GameLobby> gameLobbies;
+       
     public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies,
-            ChannelGroup allChannels, List<NamedChannelGroup> gameLobbies) {
+            ChannelGroup allChannels, List<GameLobby> gameLobbies) {
         this.username = username;
         this.lobbies = lobbies;
         this.globalChannelGroup = allChannels;
@@ -98,9 +90,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	        
             ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
             currentLobby.write(new BinaryWebSocketFrame(lobbyUserList(currentLobby)));
-            currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
-	        
-	        
+	                
 	        init = true;	        
 	        return;
 		}
@@ -183,7 +173,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			}
 			else if (strMsg.contentEquals("/play rps")) {
 			    System.out.println("[ChatServerHandler] Received RPS request");
-			    NamedChannelGroup rpsLobby = new NamedChannelGroup("RPS", GlobalEventExecutor.INSTANCE);
+			    GameLobby rpsLobby = new GameLobby("RPS", GlobalEventExecutor.INSTANCE, "rps");
 			    gameLobbies.add(rpsLobby);
 			 
 			    //add the person who made the game, their username, and channel map
@@ -195,17 +185,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    return;
 			}
 			else if (strMsg.contentEquals("/games")) {
-			    // sends a String[] of all games in the server in the following format:
-                // lgameName,gameSize/gameCapacity
-			    int numGames = gameLobbies.size();
-                String[] gameList = new String[numGames];
-                for (int i = 0; i < numGames; i++) {
-                    gameList[i]=gameLobbies.get(i).name();
-                    gameList[i] += "," + gameLobbies.get(i).numUsers() + "/2";
-                }
-                ByteBuffer gameLobbyData = FlatBuffersCodec.listToByteBuffer("games", gameList);
-                ByteBuf gameBuf = Unpooled.copiedBuffer(gameLobbyData);
-                ch.writeAndFlush(new BinaryWebSocketFrame(gameBuf));
+                ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
                 
                 return;
 			}
@@ -356,12 +336,23 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         String[] lobbyList = new String[lobbies.size()];
         
         for (int j = 0; j < lobbies.size(); j++) {
-            lobbyList[j] = lobbies.get(j).name();
-            lobbyList[j] += "," + lobbies.get(j).numUsers() + "/" + ChatServer.LOBBY_SIZE;
+            lobbyList[j] = lobbies.get(j).lobbyInfo();
         }
         
         ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
         return Unpooled.copiedBuffer(lobbyData);
+    }
+    
+    private ByteBuf gameLobbiesData() {
+        int numGameLobbies = gameLobbies.size();
+        String[] gameLobbyList = new String[numGameLobbies];
+        
+        for (int i = 0; i < numGameLobbies; i++) {
+            gameLobbyList[i] = gameLobbies.get(i).lobbyInfo();
+        }
+        
+        ByteBuffer gameLobbyData = FlatBuffersCodec.listToByteBuffer("games", gameLobbyList);
+        return Unpooled.copiedBuffer(gameLobbyData);
     }
 
     private ByteBuf lobbyConnectMessage() {

@@ -15,7 +15,7 @@ import io.netty.handler.ssl.SslContext;
 public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
 	private Map<String,TimeChatMessage> ticketDB;
 	private List<NamedChannelGroup> lobbies;
-	private List<NamedChannelGroup> gameLobbies;
+	private List<GameLobby> gameLobbies;
 	private ChannelGroup channels;
 	
 	private final SslContext sslCtx;
@@ -40,7 +40,7 @@ public class HTTPInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     public HTTPInitializer(Map<String, TimeChatMessage> ticketDB, List<NamedChannelGroup> lobbies,
-            ChannelGroup allChannels, List<NamedChannelGroup> gameLobbies) {
+            ChannelGroup allChannels, List<GameLobby> gameLobbies) {
         this.ticketDB = ticketDB;
         this.channels = allChannels;
         this.lobbies = lobbies;

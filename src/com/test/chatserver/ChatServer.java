@@ -64,7 +64,7 @@ public class ChatServer {
 	 * 
 	 */
 	private final ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	private final List<NamedChannelGroup> games = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
+	private final List<GameLobby> games = Collections.synchronizedList(new ArrayList<GameLobby>());
 	private final List<NamedChannelGroup> lobbies = Collections.synchronizedList(new ArrayList<NamedChannelGroup>());
 	private final Map<String, TimeChatMessage> sessionTicketDB = new ConcurrentHashMap<String,TimeChatMessage>();
 	

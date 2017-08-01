@@ -61,7 +61,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     private ByteBuf buf;
     
     private List<NamedChannelGroup> lobbies;
-    private List<NamedChannelGroup> gameLobbies;
+    private List<GameLobby> gameLobbies;
     private Map<String,TimeChatMessage> ticketDB;
     private ChannelGroup allChannels;
     
@@ -85,7 +85,7 @@ public class ChatServerProtocolHandler extends HttpRequestDecoder {
     }
 
     public ChatServerProtocolHandler(Map<String, TimeChatMessage> sessionTicketDB, List<NamedChannelGroup> lobbies,
-            ChannelGroup allChannels, List<NamedChannelGroup> games) {
+            ChannelGroup allChannels, List<GameLobby> games) {
         this.ticketDB = sessionTicketDB;
         this.lobbies = lobbies;
         this.allChannels = allChannels;

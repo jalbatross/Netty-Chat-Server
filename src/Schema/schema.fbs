@@ -22,7 +22,8 @@ table Auth {
 }
 
 /**
- * List of strings, type should be either usernames or lobbies
+ * List of strings
+ * Current supported types: lobbies, users, games
  */
 table List {
   type:string (required);

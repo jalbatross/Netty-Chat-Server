@@ -43,7 +43,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 	private ChannelGroup allChannels;
     private List<NamedChannelGroup> lobbies;
 	private Map<String,TimeChatMessage> ticketDB;
-    private List<NamedChannelGroup> gameLobbies;
+    private List<GameLobby> gameLobbies;
 	
     public HttpServerHandler(Map<String, TimeChatMessage> ticketDB) {
         this.ticketDB = ticketDB;
@@ -57,7 +57,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     public HttpServerHandler(Map<String, TimeChatMessage> ticketDB, List<NamedChannelGroup> lobbies,
-            ChannelGroup channels, List<NamedChannelGroup> gameLobbies) {
+            ChannelGroup channels, List<GameLobby> gameLobbies) {
         this.ticketDB = ticketDB;
         this.allChannels = channels;
         this.lobbies = lobbies;

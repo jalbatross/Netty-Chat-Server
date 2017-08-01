@@ -100,5 +100,9 @@ public class NamedChannelGroup extends DefaultChannelGroup {
     public boolean isFull() {
         return this.size() >= ChatServer.LOBBY_SIZE;
     }
+    
+    public String lobbyInfo() {
+        return this.name() + ","+this.size()+"/"+ChatServer.LOBBY_SIZE;
+    }
 
 }
