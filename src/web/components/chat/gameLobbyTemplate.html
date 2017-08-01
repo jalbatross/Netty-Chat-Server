@@ -1,0 +1,47 @@
+<div class="modal-content game-modal">
+  <div class="modal-header">
+    <h5 class="modal-title">Make a New Game</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+    <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+<form>
+<div class="form-group row">
+  <label class="col-xs-3 col-form-label">Name</label>
+  <div class="col-xs-5">
+    <input class="form-control" type="text" placeholder="Play RPS with me!!" ng-model="$parent.gameName" required>
+  </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-xs-3 col-form-label">Type</label>
+    <div class="col-xs-5">
+      <input class="form-control" type="text" placeholder="Rock Paper Scissors" ng-model="$parent.gameType" required
+        uib-typeahead="type for type in gameTypes | filter:$viewValue | limitTo:8" typeahead-editable = "false">
+    </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-xs-3 col-form-label">Capacity</label>
+  <div class = "col-xs-5">
+  <select class="custom-select" ng-model="$parent.gameCapacity" >
+    <option>2</option>
+  </select>
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-xs-3 col-form-label">Password</label>
+  <div class="col-xs-5">
+    <input class="form-control" type="password" placeholder="Password (optional)" ng-model="$parent.gamePassword">
+  </div>
+</div>
+</form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary" ng-click="createGameLobby()">Save changes</button>
+    <button type="button" class="btn btn-info" ng-click="showGameLobbiesDialog()">Back to Lobbies </button>
+  </div>
+</div>

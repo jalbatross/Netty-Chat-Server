@@ -19,8 +19,8 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
 
     /**
      * Converts a list of lobbies to a String
-     * @param  {FlatBuffers Message} msg [description]
-     * @return {[type]}     [description]
+     * @param  {FlatBuffers Message} msg A Flatbuffers Message
+     * @return {Lobby[]}                 Array of Lobby objects 
      */
     function lobbyListString(msg) {
         console.log("[LobbiesController] data type: " + msg.dataType());

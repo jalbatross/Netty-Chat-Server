@@ -2,6 +2,7 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
     console.log("hello");
 
     $scope.gameLobbies = [];
+    $scope.gameModalTemplate = "/components/chat/modalBody.html";
     var socket = websockets.getSocket();
 
     /**
@@ -21,7 +22,7 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
     /**
      * Converts a list of gamelobbies to a String
      * @param  {FlatBuffers Message} msg A FlatBuffers Message object
-     * @return {String}                  String containing list of Game Lobbies
+     * @return {GameLobby[]}             An array of GameLobby objects
      */
     function gameLobbyListString(msg) {
 
@@ -75,4 +76,35 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
     $scope.joinGame = function(lobbyName) {
         alert("tried to join game with name: " + lobbyName);
     }
+    $scope.showGameLobbyDialog = function() {
+        $scope.gameModalTemplate = "/components/chat/gameLobbyTemplate.html";
+    }
+    $scope.showGameLobbiesDialog = function() {
+        $scope.gameModalTemplate = "/components/chat/modalBody.html";
+    }
+
+    $scope.createGameLobby = function() {
+        var ret = "---Game Lobby Info: ---\n";
+        ret += "Name: " + $scope.gameName +"\n";
+        ret += "Type: " + $scope.gameType +"\n";
+        ret += "Capacity: " +$scope.gameCapacity +"\n";
+        if ($scope.gamePassword == null) {
+            $scope.gamePassword = "";
+        }
+        ret += "Password:" + $scope.gamePassword + "\n";
+        alert(ret);
+    }
+
+    var _selected;
+    $scope.gameType = undefined;
+    $scope.gameTypes = ['Rock Paper Scissors', 'Coup'];
+
+    $scope.ngModelOptionsSelected = function(value) {
+        if (arguments.length) {
+            _selected = value;
+        }
+        else {
+            return _selected;
+        }
+    };
 });

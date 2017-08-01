@@ -14,7 +14,8 @@ Schema.Data = {
   Chat: 1,
   Credentials: 2,
   Auth: 3,
-  List: 4
+  List: 4,
+  GameLobby: 5
 };
 
 /**
@@ -420,6 +421,126 @@ Schema.List.startContentsVector = function(builder, numElems) {
 Schema.List.endList = function(builder) {
   var offset = builder.endObject();
   builder.requiredField(offset, 4); // type
+  return offset;
+};
+
+/**
+ * @constructor
+ */
+Schema.GameLobby = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Schema.GameLobby}
+ */
+Schema.GameLobby.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Schema.GameLobby=} obj
+ * @returns {Schema.GameLobby}
+ */
+Schema.GameLobby.getRootAsGameLobby = function(bb, obj) {
+  return (obj || new Schema.GameLobby).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+Schema.GameLobby.prototype.name = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
+};
+
+/**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+Schema.GameLobby.prototype.type = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Schema.GameLobby.prototype.capacity = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.readInt32(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+Schema.GameLobby.prototype.password = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 10);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Schema.GameLobby.startGameLobby = function(builder) {
+  builder.startObject(4);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} nameOffset
+ */
+Schema.GameLobby.addName = function(builder, nameOffset) {
+  builder.addFieldOffset(0, nameOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} typeOffset
+ */
+Schema.GameLobby.addType = function(builder, typeOffset) {
+  builder.addFieldOffset(1, typeOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} capacity
+ */
+Schema.GameLobby.addCapacity = function(builder, capacity) {
+  builder.addFieldInt32(2, capacity, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} passwordOffset
+ */
+Schema.GameLobby.addPassword = function(builder, passwordOffset) {
+  builder.addFieldOffset(3, passwordOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Schema.GameLobby.endGameLobby = function(builder) {
+  var offset = builder.endObject();
+  builder.requiredField(offset, 4); // name
+  builder.requiredField(offset, 6); // type
   return offset;
 };
 

@@ -70,7 +70,7 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary">Save changes</button>
+      <button type="button" class="btn btn-primary" ng-click="createGameLobby()">Create New Lobby</button>
     </div>
   </div>
   
@@ -78,37 +78,8 @@
 </div>
 
 <div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content game-modal">
-    <div class="modal-header">
-      <h5 class="modal-title">Game Lobbies</h5>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
-      <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body" ng-controller = "ChatGameController">
-       <table class="table table-hover" >
-        <thead>
-          <tr>
-            <th>Game</th>
-            <th>Type</th>
-            <th>Capacity</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat = "x in gameLobbies" ng-click = "joinGame(x.name)">
-            <td>{{ x.name }}</td>
-            <td>{{ x.type }}</td>
-            <td>{{ x.capacity }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary">Save changes</button>
-    </div>
-  </div>
+<div class="modal-dialog" role="document" ng-controller = "ChatGameController">
+   <ng-include src = "gameModalTemplate"></ng-include>
 </div>
 </div>
 
@@ -207,8 +178,7 @@ div:hover {
 
 .modal-content {
   word-wrap: break-word;
-  white-space: pre-wrap;
-
+  
   position: absolute;
   top: 50%;
   left: 50%;
