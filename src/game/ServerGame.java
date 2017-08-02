@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ServerGame {
     protected final int numPlayers;

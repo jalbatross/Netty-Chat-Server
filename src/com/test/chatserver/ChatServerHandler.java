@@ -11,7 +11,7 @@ import Schema.Chat;
 import Schema.Data;
 import Schema.Message;
 import Schema.GameCreationRequest;
-
+import game.GameType;
 import game.RPS;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -215,6 +215,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		        
 		        GameCreationRequest request = (GameCreationRequest) fbMsg.data(new GameCreationRequest());
 		        
+		        if (!validGameRequest(request)) {
+		            ctx.close();
+		            System.out.println("[ChatServerHandler] User: " + username + " sent malformed"
+		                    + " game lobby request data, closed connection."); 
+		        }
 		        System.out.println("--Request info: ---");
 		        System.out.println("Name: " + request.name());
 		        System.out.println("Type:" + request.type());
@@ -280,6 +285,86 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	}
 	
 	/**
+	 * Checks if a GameCreationRequest has valid parameters. If 
+	 * any of the parameters are invalid, returns false. Otherwise
+	 * returns true.
+	 * 
+	 * @param request    A GameCreationRequest
+	 * @return           True if all parameters are valid, false 
+	 *                   otherwise.
+	 */
+	private boolean validGameRequest(GameCreationRequest request) {
+	    if (request == null) {
+	        return false;
+	    }
+	   
+        return validGameName(request.name()) 
+                && validGameType(request.type())
+                && validGameCapacity(request.type(), request.capacity())
+                && validGamePassword(request.password());
+    }
+	
+	/**
+	 * Returns true if the Game name is nonempty and at most 
+	 * GAME_NAME_MAX_LEN characters long, false otherwise.
+	 * 
+	 * @param name   Name of a Game
+	 * @return       True if name is valid, false otherwise
+	 */
+    private boolean validGameName(String name) {
+        return name.length() <= ChatServer.GAME_NAME_MAX_LEN
+                && name.length() > 0;
+    }
+    
+    /**
+     * Returns true if type exists, false otherwise.
+     * 
+     * @param type    A game type
+     * @return        True if the game type is recognized, false
+     *                otherwise
+     */
+    private boolean validGameType(String type) {
+        return GameType.typeExists(type);
+    }
+    
+    /**
+     * Returns true if capacity is valid for game type, false otherwise.
+     * 
+     * @param type      Game type
+     * @param capacity  Maximum game capacity 
+     * @return          True if capacity <= the maximum capacity of type.
+     */
+    private boolean validGameCapacity(String type, int capacity) {
+        switch (GameType.fromString(type)) {
+            case RPS:
+                return capacity == 2;
+            case COUP:
+                return capacity == 2;
+            default:
+                break;
+        }
+        return false;
+    }
+	
+    /**
+     * Returns true if the Game password is no longer than 
+     * GAME_PASSWORD_MAX_LEN chars long, 
+     * false otherwise.
+     * 
+     * @param password   A game password
+     * @return           True if password is of valid length
+     */
+    private boolean validGamePassword(String password) {
+        return password.length() <= ChatServer.GAME_PASSWORD_MAX_LEN;
+    }
+
+
+
+
+
+
+
+    /**
 	 * Attempts to add aChannel to the first NamedChannelGroup (lobby) that
 	 * it can find in lobbies. Returns true if aChannel and aUsername were
 	 * successfully placed in one of the lobbies, false otherwise.

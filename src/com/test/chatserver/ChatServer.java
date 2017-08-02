@@ -55,6 +55,10 @@ public class ChatServer {
     public static final long TICKET_EXPIRY_TIME_MS = 20000;
     public static final int LOBBY_SIZE = 16;
     public static final int NUM_LOBBIES = 10;
+    
+    public static final int GAME_NAME_MAX_LEN = 12;
+    public static final int GAME_PASSWORD_MAX_LEN = 10;
+    
 	static boolean SSL = false;
 	
 	/**
