@@ -1,3 +1,13 @@
+/**
+ * GameCreateController.js
+ *
+ * Controller responsible for the creation of a Game lobby. Sanitizes form info from the view
+ * and serializes it into a GameCreationRequest using Flatbuffers, then sends the request
+ * to the server for further handling.
+ *
+ * 
+ */
+
 angular.module("chatApp").controller("GameCreateController", function($scope, websockets) {
     var socket = websockets.getSocket();
 
@@ -93,6 +103,19 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
         var bufType = data.dataType();
 
         socket.send(reqBytes);
+
+        resetForms();
+
+        //don't do this, make service responsible for this.
+        $scope.showGameLobbyDialog();
+    }
+
+    function resetForms() {
+        $scope.gameLobbyForm.$setPristine();
+        $scope.gameName = undefined;
+        $scope.gameType = undefined;
+        $scope.gameCapcacity = 2;
+        $scope.gamePassword = undefined;
     }
 
 
