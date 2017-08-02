@@ -220,11 +220,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		            System.out.println("[ChatServerHandler] User: " + username + " sent malformed"
 		                    + " game lobby request data, closed connection."); 
 		        }
+		        
 		        System.out.println("--Request info: ---");
 		        System.out.println("Name: " + request.name());
 		        System.out.println("Type:" + request.type());
 		        System.out.println("Capacity: " + request.capacity());
+		        System.out.println("Capacity (binary): " + Integer.toBinaryString(request.capacity()));
 		        System.out.println("Password: " + request.password());
+		        
+		
 		    }
 		    else {
 		        System.out.println("[ChatServerHandler] Received unk binary data");

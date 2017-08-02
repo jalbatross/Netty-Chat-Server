@@ -482,7 +482,7 @@ Schema.GameCreationRequest.prototype.type = function(optionalEncoding) {
  */
 Schema.GameCreationRequest.prototype.capacity = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
-  return offset ? this.bb.readInt32(this.bb_pos + offset) : 0;
+  return offset ? this.bb.readInt16(this.bb_pos + offset) : 0;
 };
 
 /**
@@ -522,7 +522,7 @@ Schema.GameCreationRequest.addType = function(builder, typeOffset) {
  * @param {number} capacity
  */
 Schema.GameCreationRequest.addCapacity = function(builder, capacity) {
-  builder.addFieldInt32(2, capacity, 0);
+  builder.addFieldInt16(2, capacity, 0);
 };
 
 /**

@@ -159,6 +159,58 @@ public class FlatBuffersTesting {
             e.printStackTrace();
         }
         
+        //---Testing GameCreationRequest----
+        String gameCreateName = "TestName";
+        String gameTypeName = "rps";
+        short gameCapacity = 2;
+        String capacityString = Integer.toBinaryString(gameCapacity);
+        System.out.println("Capacity (binary): " + capacityString);
+        String gameCreatePw = "null";
+        
+        int gameCreateOffset = builder.createString(gameCreateName);
+        int gameTypeOffset = builder.createString(gameTypeName);
+        int gamePwOffset = builder.createString(gameCreatePw);
+        
+        int req = GameCreationRequest.createGameCreationRequest(builder, gameCreateOffset, gameTypeOffset, gameCapacity, gamePwOffset);
+        Message.startMessage(builder);
+        Message.addDataType(builder, Data.GameCreationRequest);
+        Message.addData(builder, req);
+        int finReq = Message.endMessage(builder);
+        builder.finish(finReq);
+        
+        buf = builder.dataBuffer();
+        
+        Message reqMessage = Message.getRootAsMessage(buf);
+        GameCreationRequest gcr = (GameCreationRequest) reqMessage.data(new GameCreationRequest());
+        System.out.println("---Game Creation Request info---");
+        if (gcr.name().contentEquals("TestName")) {
+            System.out.println("Name: TestName (succcess)" );
+        }
+        else {
+            System.out.println("GCR name test failed, val: " + gcr.name());
+        }
+        
+        if (gcr.type().contentEquals("rps")) {
+            System.out.println("Type: rps (success)");
+        }
+        else {
+            System.out.println("GCR type test failed, val: " + gcr.type());
+        }
+        
+        System.out.println("Capacity as stored: " + Integer.toBinaryString(gcr.capacity()));
+        if (gcr.capacity() == 2) {
+            System.out.println("Capacity: 2 (success)");
+        }
+        else {
+            System.out.println("GCR capacity test failed, val: " + gcr.capacity());
+        }
+        
+        if (gcr.password().contentEquals("null")) {
+            System.out.println("Password: null (success)");
+        }
+        else {
+            System.out.println("GCR password test failed, val: " + gcr.password());
+        }
 
         
     }

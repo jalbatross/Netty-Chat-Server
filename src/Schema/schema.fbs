@@ -33,7 +33,7 @@ table List {
 table GameCreationRequest {
   name:string (required);
   type:string (required);
-  capacity:int;
+  capacity:short;
   password:string;
 }
 

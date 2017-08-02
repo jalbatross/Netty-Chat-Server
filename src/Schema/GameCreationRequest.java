@@ -18,27 +18,27 @@ public final class GameCreationRequest extends Table {
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   public String type() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer typeAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
-  public int capacity() { int o = __offset(8); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
+  public short capacity() { int o = __offset(8); return o != 0 ? bb.getShort(o + bb_pos) : 0; }
   public String password() { int o = __offset(10); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer passwordAsByteBuffer() { return __vector_as_bytebuffer(10, 1); }
 
   public static int createGameCreationRequest(FlatBufferBuilder builder,
       int nameOffset,
       int typeOffset,
-      int capacity,
+      short capacity,
       int passwordOffset) {
     builder.startObject(4);
     GameCreationRequest.addPassword(builder, passwordOffset);
-    GameCreationRequest.addCapacity(builder, capacity);
     GameCreationRequest.addType(builder, typeOffset);
     GameCreationRequest.addName(builder, nameOffset);
+    GameCreationRequest.addCapacity(builder, capacity);
     return GameCreationRequest.endGameCreationRequest(builder);
   }
 
   public static void startGameCreationRequest(FlatBufferBuilder builder) { builder.startObject(4); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int typeOffset) { builder.addOffset(1, typeOffset, 0); }
-  public static void addCapacity(FlatBufferBuilder builder, int capacity) { builder.addInt(2, capacity, 0); }
+  public static void addCapacity(FlatBufferBuilder builder, short capacity) { builder.addShort(2, capacity, 0); }
   public static void addPassword(FlatBufferBuilder builder, int passwordOffset) { builder.addOffset(3, passwordOffset, 0); }
   public static int endGameCreationRequest(FlatBufferBuilder builder) {
     int o = builder.endObject();
