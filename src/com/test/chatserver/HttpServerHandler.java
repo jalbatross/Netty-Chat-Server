@@ -138,6 +138,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 ChannelFuture cf = handleHandshake(ctx, httpRequest);
                 if (cf == null) {
                     System.out.println("[HttpServerHandler] Couldn't handshake");
+                    //TODO: send error to client
+                    ctx.close();
                     return;
                 }
                 

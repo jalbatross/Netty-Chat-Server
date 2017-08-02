@@ -15,7 +15,7 @@ Schema.Data = {
   Credentials: 2,
   Auth: 3,
   List: 4,
-  GameLobby: 5
+  GameCreationRequest: 5
 };
 
 /**
@@ -427,7 +427,7 @@ Schema.List.endList = function(builder) {
 /**
  * @constructor
  */
-Schema.GameLobby = function() {
+Schema.GameCreationRequest = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
    */
@@ -442,9 +442,9 @@ Schema.GameLobby = function() {
 /**
  * @param {number} i
  * @param {flatbuffers.ByteBuffer} bb
- * @returns {Schema.GameLobby}
+ * @returns {Schema.GameCreationRequest}
  */
-Schema.GameLobby.prototype.__init = function(i, bb) {
+Schema.GameCreationRequest.prototype.__init = function(i, bb) {
   this.bb_pos = i;
   this.bb = bb;
   return this;
@@ -452,18 +452,18 @@ Schema.GameLobby.prototype.__init = function(i, bb) {
 
 /**
  * @param {flatbuffers.ByteBuffer} bb
- * @param {Schema.GameLobby=} obj
- * @returns {Schema.GameLobby}
+ * @param {Schema.GameCreationRequest=} obj
+ * @returns {Schema.GameCreationRequest}
  */
-Schema.GameLobby.getRootAsGameLobby = function(bb, obj) {
-  return (obj || new Schema.GameLobby).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+Schema.GameCreationRequest.getRootAsGameCreationRequest = function(bb, obj) {
+  return (obj || new Schema.GameCreationRequest).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 };
 
 /**
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Schema.GameLobby.prototype.name = function(optionalEncoding) {
+Schema.GameCreationRequest.prototype.name = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 4);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -472,7 +472,7 @@ Schema.GameLobby.prototype.name = function(optionalEncoding) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Schema.GameLobby.prototype.type = function(optionalEncoding) {
+Schema.GameCreationRequest.prototype.type = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 6);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -480,7 +480,7 @@ Schema.GameLobby.prototype.type = function(optionalEncoding) {
 /**
  * @returns {number}
  */
-Schema.GameLobby.prototype.capacity = function() {
+Schema.GameCreationRequest.prototype.capacity = function() {
   var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.readInt32(this.bb_pos + offset) : 0;
 };
@@ -489,7 +489,7 @@ Schema.GameLobby.prototype.capacity = function() {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-Schema.GameLobby.prototype.password = function(optionalEncoding) {
+Schema.GameCreationRequest.prototype.password = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
@@ -497,7 +497,7 @@ Schema.GameLobby.prototype.password = function(optionalEncoding) {
 /**
  * @param {flatbuffers.Builder} builder
  */
-Schema.GameLobby.startGameLobby = function(builder) {
+Schema.GameCreationRequest.startGameCreationRequest = function(builder) {
   builder.startObject(4);
 };
 
@@ -505,7 +505,7 @@ Schema.GameLobby.startGameLobby = function(builder) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} nameOffset
  */
-Schema.GameLobby.addName = function(builder, nameOffset) {
+Schema.GameCreationRequest.addName = function(builder, nameOffset) {
   builder.addFieldOffset(0, nameOffset, 0);
 };
 
@@ -513,7 +513,7 @@ Schema.GameLobby.addName = function(builder, nameOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} typeOffset
  */
-Schema.GameLobby.addType = function(builder, typeOffset) {
+Schema.GameCreationRequest.addType = function(builder, typeOffset) {
   builder.addFieldOffset(1, typeOffset, 0);
 };
 
@@ -521,7 +521,7 @@ Schema.GameLobby.addType = function(builder, typeOffset) {
  * @param {flatbuffers.Builder} builder
  * @param {number} capacity
  */
-Schema.GameLobby.addCapacity = function(builder, capacity) {
+Schema.GameCreationRequest.addCapacity = function(builder, capacity) {
   builder.addFieldInt32(2, capacity, 0);
 };
 
@@ -529,7 +529,7 @@ Schema.GameLobby.addCapacity = function(builder, capacity) {
  * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} passwordOffset
  */
-Schema.GameLobby.addPassword = function(builder, passwordOffset) {
+Schema.GameCreationRequest.addPassword = function(builder, passwordOffset) {
   builder.addFieldOffset(3, passwordOffset, 0);
 };
 
@@ -537,7 +537,7 @@ Schema.GameLobby.addPassword = function(builder, passwordOffset) {
  * @param {flatbuffers.Builder} builder
  * @returns {flatbuffers.Offset}
  */
-Schema.GameLobby.endGameLobby = function(builder) {
+Schema.GameCreationRequest.endGameCreationRequest = function(builder) {
   var offset = builder.endObject();
   builder.requiredField(offset, 4); // name
   builder.requiredField(offset, 6); // type

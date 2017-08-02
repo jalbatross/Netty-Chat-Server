@@ -8,11 +8,11 @@ import java.util.*;
 import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
-public final class GameLobby extends Table {
-  public static GameLobby getRootAsGameLobby(ByteBuffer _bb) { return getRootAsGameLobby(_bb, new GameLobby()); }
-  public static GameLobby getRootAsGameLobby(ByteBuffer _bb, GameLobby obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+public final class GameCreationRequest extends Table {
+  public static GameCreationRequest getRootAsGameCreationRequest(ByteBuffer _bb) { return getRootAsGameCreationRequest(_bb, new GameCreationRequest()); }
+  public static GameCreationRequest getRootAsGameCreationRequest(ByteBuffer _bb, GameCreationRequest obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
-  public GameLobby __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public GameCreationRequest __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
@@ -22,25 +22,25 @@ public final class GameLobby extends Table {
   public String password() { int o = __offset(10); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer passwordAsByteBuffer() { return __vector_as_bytebuffer(10, 1); }
 
-  public static int createGameLobby(FlatBufferBuilder builder,
+  public static int createGameCreationRequest(FlatBufferBuilder builder,
       int nameOffset,
       int typeOffset,
       int capacity,
       int passwordOffset) {
     builder.startObject(4);
-    GameLobby.addPassword(builder, passwordOffset);
-    GameLobby.addCapacity(builder, capacity);
-    GameLobby.addType(builder, typeOffset);
-    GameLobby.addName(builder, nameOffset);
-    return GameLobby.endGameLobby(builder);
+    GameCreationRequest.addPassword(builder, passwordOffset);
+    GameCreationRequest.addCapacity(builder, capacity);
+    GameCreationRequest.addType(builder, typeOffset);
+    GameCreationRequest.addName(builder, nameOffset);
+    return GameCreationRequest.endGameCreationRequest(builder);
   }
 
-  public static void startGameLobby(FlatBufferBuilder builder) { builder.startObject(4); }
+  public static void startGameCreationRequest(FlatBufferBuilder builder) { builder.startObject(4); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int typeOffset) { builder.addOffset(1, typeOffset, 0); }
   public static void addCapacity(FlatBufferBuilder builder, int capacity) { builder.addInt(2, capacity, 0); }
   public static void addPassword(FlatBufferBuilder builder, int passwordOffset) { builder.addOffset(3, passwordOffset, 0); }
-  public static int endGameLobby(FlatBufferBuilder builder) {
+  public static int endGameCreationRequest(FlatBufferBuilder builder) {
     int o = builder.endObject();
     builder.required(o, 4);  // name
     builder.required(o, 6);  // type

@@ -8,7 +8,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
 import Schema.Chat;
+import Schema.Data;
 import Schema.Message;
+import Schema.GameCreationRequest;
+
 import game.RPS;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,6 +44,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Stack;
+
+import javax.xml.validation.Schema;
 
 /**
  * Handles a server-side chat channel. Tail of the pipeline for incoming data.
@@ -83,6 +88,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		if (!init) {
 		    
 	        addChannelToGlobalGroup(this.ch);
+	        
 	        if (!addUserToFirstLobby(this.ch, username)) {
 	            ctx.close();
 	            return;
@@ -97,16 +103,14 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		
 		if ((msg instanceof TextWebSocketFrame)) {
 			System.out.println("[ChatServerHandler] received TextWebSocketFrame!\n------");	
+			
 			String strMsg = ((TextWebSocketFrame) msg).text();
 			
-			if (strMsg.equalsIgnoreCase("/lobbies")) {
-			    
+			if (strMsg.equalsIgnoreCase("/lobbies")) {    
 	            ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
-	          
 	            return;
 			}
 			if (strMsg.equalsIgnoreCase("/lobby")) {
-
 			    ch.writeAndFlush(lobbyConnectMessage());
 	            return;
 			}
@@ -199,6 +203,28 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             
             currentLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
             
+		}
+		else if (msg instanceof BinaryWebSocketFrame) {
+		    System.out.println("[ChatServerHandler] Received BinaryWebSocketFrame");
+		    BinaryWebSocketFrame data = (BinaryWebSocketFrame) msg;
+		    ByteBuf dataBuffer = data.content();
+		    
+		    Message fbMsg = Message.getRootAsMessage(dataBuffer.nioBuffer());
+		    if (fbMsg.dataType() == Data.GameCreationRequest) {
+		        System.out.println("[ChatServerHandler] Got game creation request");
+		        
+		        GameCreationRequest request = (GameCreationRequest) fbMsg.data(new GameCreationRequest());
+		        
+		        System.out.println("--Request info: ---");
+		        System.out.println("Name: " + request.name());
+		        System.out.println("Type:" + request.type());
+		        System.out.println("Capacity: " + request.capacity());
+		        System.out.println("Password: " + request.password());
+		    }
+		    else {
+		        System.out.println("[ChatServerHandler] Received unk binary data");
+		    }
+		    
 		}
 		else if (msg instanceof ByteBuf) {
 		    System.out.println("[ChatServerHandler] Received ByteBuf");

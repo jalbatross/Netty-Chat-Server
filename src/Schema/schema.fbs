@@ -2,7 +2,7 @@
 
 namespace Schema;
 
-union Data {Chat, Credentials, Auth, List, GameLobby} 
+union Data {Chat, Credentials, Auth, List, GameCreationRequest} 
 
 table Chat {
   timestamp:ulong;
@@ -30,7 +30,7 @@ table List {
   contents:[string];
 }
 
-table GameLobby {
+table GameCreationRequest {
   name:string (required);
   type:string (required);
   capacity:int;
