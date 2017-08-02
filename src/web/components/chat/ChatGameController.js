@@ -84,6 +84,11 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
     }
 
     $scope.createGameLobby = function() {
+        if ($scope.gameLobbyForm.$invalid) {
+            alert("invalid data");
+            return;
+        }
+
         var ret = "---Game Lobby Info: ---\n";
         ret += "Name: " + $scope.gameName +"\n";
         ret += "Type: " + $scope.gameType +"\n";
@@ -92,7 +97,32 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
             $scope.gamePassword = "";
         }
         ret += "Password:" + $scope.gamePassword + "\n";
-        alert(ret);
+
+        var builder = new flatbuffers.Builder(1024);
+
+        var nameData = builder.createString($scope.gameName);
+        var typeData = builder.createString($scope.gameType);
+        var capacityData = builder.createString($scope.gameCapacity);
+        var pwData = builder.createString($scope.gamePassword);
+
+        Schema.GameCreationRequest.startGameCreationRequest(builder);
+        Schema.GameCreationRequest.addName(builder, nameData);
+        Schema.GameCreationRequest.addType(builder, typeData);
+        Schema.GameCreationRequest.addCapacity(builder, capacityData);
+        Schema.GameCreationRequest.addPassword(builder, pwData);
+
+        var req = Schema.GameCreationRequest.endGameCreationRequest(builder);
+
+        Schema.Message.startMessage(builder);
+        Schema.Message.addDataType(builder, Schema.Data.GameCreationRequest);
+        Schema.Message.addData(builder, req);
+
+        var data = Schema.Message.endMessage(builder);
+        builder.finish(data);
+
+        var reqBytes = builder.asUint8Array();
+
+        socket.send(reqBytes);
     }
 
     var _selected;
