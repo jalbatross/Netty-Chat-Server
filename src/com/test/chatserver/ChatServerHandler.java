@@ -74,9 +74,31 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         System.out.println("[ChatServerHandler] Disconnecting user: " + username);
-        //remove username from current channelGroup
-        currentLobby.remove(username);
-        System.out.println("[ChatServerHandler] Num users in lobby: " + currentLobby.size());
+        
+        //Perform cleanup
+        for (NamedChannelGroup lobby : lobbies) {
+            if (lobby.contains(username)) {
+                
+                Channel closeCh = lobby.getChannel(username);
+                lobby.remove(username);
+                closeCh.close();
+                
+                if (!lobby.isEmpty()) {
+                    lobby.writeAndFlush(new BinaryWebSocketFrame(lobbyUserList(lobby)));
+                }
+                
+            }
+
+        }
+        
+        for (GameLobby gameLobby: gameLobbies) {
+            gameLobby.remove(username);
+            if (gameLobby.isEmpty()) {
+                gameLobbies.remove(gameLobby);
+            }
+        }
+        
+        
         
     }
     
@@ -175,6 +197,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    return;
 			    
 			}
+			/*
 			else if (strMsg.contentEquals("/play rps")) {
 			    System.out.println("[ChatServerHandler] Received RPS request");
 			    GameLobby rpsLobby = new GameLobby("RPS", GlobalEventExecutor.INSTANCE, "rps");
@@ -187,7 +210,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    System.out.println("People in lobby: " + rpsLobby.getUsers());
 			    
 			    return;
-			}
+			}*/
 			else if (strMsg.contentEquals("/games")) {
                 ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
                 
@@ -219,16 +242,25 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		            ctx.close();
 		            System.out.println("[ChatServerHandler] User: " + username + " sent malformed"
 		                    + " game lobby request data, closed connection."); 
+		            return;
 		        }
+		        GameLobby gameLobby = new GameLobby(request.name(), request.type(), request.capacity());
+		        gameLobby.setPassword(request.password());
+		        //System.out.println("[ChatServerHandler] Creating game lobby with info: " + gameLobby.lobbyInfo());
 		        
-		        System.out.println("--Request info: ---");
-		        System.out.println("Name: " + request.name());
-		        System.out.println("Type:" + request.type());
-		        System.out.println("Capacity: " + request.capacity());
-		        System.out.println("Capacity (binary): " + Integer.toBinaryString(request.capacity()));
-		        System.out.println("Password: " + request.password());
+		        //Add lobby host
+		        if (gameLobby.add(this.ch, this.username)) {
+		            System.out.println("successfully added user: " + username + " to gamelobby");
+		              
+	                gameLobbies.add(gameLobby);
+		        }
+		        else {
+		            return;
+		        }
+
+		        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
+		        return;
 		        
-		
 		    }
 		    else {
 		        System.out.println("[ChatServerHandler] Received unk binary data");
