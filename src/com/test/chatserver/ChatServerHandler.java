@@ -91,13 +91,21 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 
         }
         
-        for (GameLobby gameLobby: gameLobbies) {
-            gameLobby.remove(username);
-            if (gameLobby.isEmpty()) {
-                gameLobbies.remove(gameLobby);
+        synchronized (gameLobbies) {
+            Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
+
+            for (GameLobby gameLobby : gameLobbies) {
+                gameLobby.remove(username);
+                if (gameLobby.isEmpty()) {
+                    emptyLobbies.add(gameLobby);
+                }
+            }
+
+            // clean up
+            while (!emptyLobbies.isEmpty()) {
+                gameLobbies.remove(emptyLobbies.pop());
             }
         }
-        
         
         
     }
