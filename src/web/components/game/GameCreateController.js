@@ -8,7 +8,7 @@
  * 
  */
 
-angular.module("chatApp").controller("GameCreateController", function($scope, websockets) {
+angular.module("chatApp").controller("GameCreateController", function($scope, websockets, game) {
     var socket = websockets.getSocket();
 
     $scope.capacityOptions = [2, 3];
@@ -75,11 +75,13 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
         
         var builder = new flatbuffers.Builder(1024);
 
+        //prepare fields
         var nameData = builder.createString($scope.gameName);
         var typeData = builder.createString(typeFormatted);
         var capacityData = Number($scope.gameCapacity);
         var pwData = builder.createString($scope.gamePassword);
 
+        //create the GameCreationRequest object
         Schema.GameCreationRequest.startGameCreationRequest(builder);
         Schema.GameCreationRequest.addName(builder, nameData);
         Schema.GameCreationRequest.addType(builder, typeData);
@@ -88,6 +90,7 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
 
         var req = Schema.GameCreationRequest.endGameCreationRequest(builder);
 
+        //encapsulate in Message
         Schema.Message.startMessage(builder);
         Schema.Message.addDataType(builder, Schema.Data.GameCreationRequest);
         Schema.Message.addData(builder, req);

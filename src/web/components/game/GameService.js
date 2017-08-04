@@ -3,24 +3,37 @@
 
         var _inLobby = false;
         var _inGame = false;
-        var _socket = undefined;
+        var _socket = websockets.getSocket();
 
-        var gameName = undefined;
-        var gameType = undefined;
+        var _currentGameLobby = undefined;
+        _socket.addEventListener("message", function(event) {
+            var bytes = new Uint8Array(event.data);
 
-        this.isInLobby = function() {
+            var buf = new flatbuffers.ByteBuffer(bytes);
+            var msg = Schema.Message.getRootAsMessage(buf);
+
+            var dataType = msg.dataType();
+
+            if (dataType !== Schema.Data.GameCreationRequest) {
+                return;
+            }
+            _currentGameLobby = msg.data(new Schema.GameCreationRequest());
+            _inLobby = true;
+        })
+
+
+
+        this.inLobby = function() {
             return _inLobby;
         }
 
-        this.isInGame = function() {
+
+        this.currentLobby = function() {
+            return _currentGameLobby;
+        }
+
+        this.inGame = function() {
             return _inGame;
         }
 
-        this.inLobby = function(boolean) {
-            _inLobby = boolean;
-        }
-
-        this.inGame = function(boolean) {
-            _inGame = boolean;
-        }
     });

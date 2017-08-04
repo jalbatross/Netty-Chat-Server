@@ -7,7 +7,6 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
     }
     $scope.showGameLobbiesDialog = function() {
         $scope.gameModalTemplate = "/components/game/game-lobbies-modal.html";
-        websockets.getSocket().send('/games');
     }
 
     $scope.showGameLobbyDialog = function() {

@@ -205,20 +205,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    return;
 			    
 			}
-			/*
-			else if (strMsg.contentEquals("/play rps")) {
-			    System.out.println("[ChatServerHandler] Received RPS request");
-			    GameLobby rpsLobby = new GameLobby("RPS", GlobalEventExecutor.INSTANCE, "rps");
-			    gameLobbies.add(rpsLobby);
-			 
-			    //add the person who made the game, their username, and channel map
-			    rpsLobby.add(ch, username);
-			    
-			    System.out.println("Made new game lobby for rps named: " + rpsLobby.name());
-			    System.out.println("People in lobby: " + rpsLobby.getUsers());
-			    
-			    return;
-			}*/
 			else if (strMsg.contentEquals("/games")) {
                 ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
                 
@@ -267,6 +253,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		        }
 
 		        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
+		        
+		        //send back to client so that they know lobby creation was successful
+		        ch.writeAndFlush(data);
 		        return;
 		        
 		    }

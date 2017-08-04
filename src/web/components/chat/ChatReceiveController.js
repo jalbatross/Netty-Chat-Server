@@ -54,8 +54,8 @@ angular.module("chatApp").controller("ChatReceiveController", function($scope, w
         else {
             console.log("[ChatReceiveController] Received unknown, dataType ", dataType);
             console.log("[ChatReceiveController] Raw data: ", event.data);
-            var currentTime = new Date(Date.now());
-            ($scope.messages).push(new errorMessage(currentTime));
+            //var currentTime = new Date(Date.now());
+            //($scope.messages).push(new errorMessage(currentTime));
         }
 
         $scope.$apply();
