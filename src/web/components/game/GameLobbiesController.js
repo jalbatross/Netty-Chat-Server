@@ -3,7 +3,7 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
     $scope.gameLobbies = [];
 
     var socket = websockets.getSocket();
-
+    socket.send('/games');
     /**
      * Game lobby object
      * @param {String} name     Game lobby name

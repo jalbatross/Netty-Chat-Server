@@ -15,10 +15,10 @@
 
 <body>
   <div class="main-box">
-    <div id ="chat-toolbar" class = "btn-group" ng-controller = "ChatToolbarController">
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#lobbyModal" ng-click = "updateLobbies()">Lobbies</button>
+    <div id ="chat-toolbar" class = "btn-group">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#lobbyModal">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
-      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal" ng-click = "updateGames()">Games</button>
+      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal">Games</button>
     </div>
     
     <div id='user-list' ng-controller="ChatUsersController" >

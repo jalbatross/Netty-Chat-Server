@@ -9,6 +9,9 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
     }
 
     $scope.lobbies = [];
+    var socket = websockets.getSocket();
+    socket.send('/lobbies');
+    $scope.data = "";
 
     function Lobby(name, capacity) {
         this.name = name;
@@ -49,10 +52,6 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
 
         return ret;
     }
-
-    var socket = websockets.getSocket();
-
-    $scope.data = "";
 
     socket.addEventListener("message", function(event) {
         console.log("[LobbiesController] read message");

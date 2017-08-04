@@ -1,7 +1,9 @@
     angular.module("chatApp")
-    .service('game', function () {
+    .service('game', function (websockets) {
+
         var _inLobby = false;
         var _inGame = false;
+        var _socket = undefined;
 
         var gameName = undefined;
         var gameType = undefined;
