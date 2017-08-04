@@ -6,6 +6,9 @@ angular.module("chatApp").controller("ChatGameController", function($scope, webs
         $scope.gameModalTemplate = "/components/game/game-create-modal.html";
     }
     $scope.showGameLobbiesDialog = function() {
+        if (game.inLobby()) {
+            game.leaveGame();
+        }
         $scope.gameModalTemplate = "/components/game/game-lobbies-modal.html";
     }
 

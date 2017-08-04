@@ -210,6 +210,24 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 
                 return;
 			}
+			else if (strMsg.contentEquals("/leave")) {
+			    synchronized (gameLobbies) {
+			        Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
+
+		            for (GameLobby gameLobby : gameLobbies) {
+		                gameLobby.remove(username);
+		                if (gameLobby.isEmpty()) {
+		                    emptyLobbies.add(gameLobby);
+		                }
+		            }
+
+		            // clean up
+		            while (!emptyLobbies.isEmpty()) {
+		                gameLobbies.remove(emptyLobbies.pop());
+		            }
+			    }
+			    return;
+			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
             
