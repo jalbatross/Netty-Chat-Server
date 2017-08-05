@@ -8,6 +8,7 @@ public class GameLobby extends NamedChannelGroup {
     protected GameType type;
     protected int capacity;
     protected String password;
+    protected String host;
     
     public GameLobby(String name, String type, int capacity) {
         super(name, GlobalEventExecutor.INSTANCE);
@@ -26,9 +27,27 @@ public class GameLobby extends NamedChannelGroup {
         this.password = password;
     }
     
+    public void setHost(String hostUsername) {
+        this.host = hostUsername;
+    }
+    
+    public String host() {
+        return this.host;
+    }
+    
+    public void kick(String user) {
+        if (user.contentEquals(this.host)) {
+            return;
+        }
+        
+        super.remove(user);
+    }
+    
     public String getPassword() {
         return password;
     }
+    
+    
     
     @Override
     public String lobbyInfo() {

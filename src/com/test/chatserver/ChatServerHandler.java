@@ -58,7 +58,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private Channel ch;
     private boolean init = false;
 
-    private NamedChannelGroup currentLobby;
+    private NamedChannelGroup currentChatLobby;
+    private GameLobby currentGameLobby;
+    
     private List<GameLobby> gameLobbies;
        
     public ChatServerHandler(ChannelHandlerContext ctx, String username, List<NamedChannelGroup> lobbies,
@@ -125,7 +127,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	        }
 	        
             ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
-            currentLobby.write(new BinaryWebSocketFrame(lobbyUserList(currentLobby)));
+            currentChatLobby.write(new BinaryWebSocketFrame(lobbyUserList(currentChatLobby)));
 	                
 	        init = true;	        
 	        return;
@@ -147,13 +149,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			if (strMsg.startsWith("/connect ")) {
 			    //get lobby name
 			    String lobbyName = strMsg.substring(9);
-			    if (lobbyName.contentEquals(currentLobby.name())) {
+			    if (lobbyName.contentEquals(currentChatLobby.name())) {
 			        return;
 			    }
 			    
 			    if (connectToLobby(lobbyName)) {
                     ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
-                    currentLobby.writeAndFlush(new BinaryWebSocketFrame(lobbyUserList(currentLobby)));
+                    currentChatLobby.writeAndFlush(new BinaryWebSocketFrame(lobbyUserList(currentChatLobby)));
                     ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
 			    }
 			    return;
@@ -236,7 +238,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             
             
             
-            currentLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
+            currentChatLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
             
 		}
 		else if (msg instanceof BinaryWebSocketFrame) {
@@ -245,6 +247,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		    ByteBuf dataBuffer = data.content();
 		    
 		    Message fbMsg = Message.getRootAsMessage(dataBuffer.nioBuffer());
+		    
 		    if (fbMsg.dataType() == Data.GameCreationRequest) {
 		        System.out.println("[ChatServerHandler] Got game creation request");
 		        
@@ -263,17 +266,17 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		        //Add lobby host
 		        if (gameLobby.add(this.ch, this.username)) {
 		            System.out.println("successfully added user: " + username + " to gamelobby");
-		              
+		            gameLobby.setHost(this.username);
 	                gameLobbies.add(gameLobby);
+	                currentGameLobby = gameLobby;
 		        }
 		        else {
 		            return;
 		        }
-
-		        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
 		        
 		        //send back to client so that they know lobby creation was successful
-		        ch.writeAndFlush(data);
+		        ch.write(data);
+		        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
 		        return;
 		        
 		    }
@@ -437,7 +440,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 return false;
             }
 
-            currentLobby = lobbies.get(i);
+            currentChatLobby = lobbies.get(i);
             return true;
         }
         
@@ -464,10 +467,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 !lobbies.get(i).contains(ch) && 
                 !lobbies.get(i).contains(username)) {
             
-                currentLobby.remove(ch);
+                currentChatLobby.remove(ch);
                 
-                currentLobby = lobbies.get(i);
-                currentLobby.add(ch, username);
+                currentChatLobby = lobbies.get(i);
+                currentChatLobby.add(ch, username);
                 
                 return true;
                 
@@ -519,7 +522,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 
     private ByteBuf lobbyConnectMessage() {
         TimeChatMessage timeMessage = new TimeChatMessage("Server", "You are now connected to "
-                + currentLobby.name());
+                + currentChatLobby.name());
         ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
         return Unpooled.copiedBuffer(data);
     }
@@ -532,6 +535,23 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         
         String[] userList = users.toArray(new String[users.size()]);
         ByteBuffer buffer =  FlatBuffersCodec.listToByteBuffer("users", userList);
+        return Unpooled.copiedBuffer(buffer);
+    }
+    
+    private ByteBuf gameLobbyUserList(GameLobby gameLobby) {
+        ArrayList<String> users = gameLobby.getUsers();
+        
+        //mark the host 
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).contentEquals(gameLobby.host())) {
+                users.set(i, users.get(i) + ",host");
+                break;
+            }
+        }
+        
+        String[] userList = users.toArray(new String[users.size()]);
+        ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer("gameLobbyUsers", userList);
+        
         return Unpooled.copiedBuffer(buffer);
     }
 

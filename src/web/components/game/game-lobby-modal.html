@@ -1,20 +1,29 @@
 <div class="modal-content game-modal">
-<div ng-controller="GameLobbyController">
-  <div class="modal-header">
-    <h5 class="modal-title">{{gameLobby.name()}}</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
-    <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body" >
-  <p>{{gameLobby.type()}}</p>
-  <p>1/{{gameLobby.capacity()}} players in lobby</p>
-  </div>
+  <div ng-controller="GameLobbyController">
+    <div class="modal-header">
+      <h6 class="modal-title">{{gameLobby.name()}}</h6>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+      <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+     <table class="table table-hover" >
+        <thead>
+          <tr>
+            <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity()}}) </th>
+            <th>{{gameLobby.type()}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat = "x in gameLobbyUsers" ng-click = "">
+            <td>{{ x.name }}{{x.isHost ? '*': ''}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
     <button type="button" class="btn btn-primary" ng-click="showGameLobbiesDialog()">Back to Game Lobbies</button>
   </div>
 </div>
-
-

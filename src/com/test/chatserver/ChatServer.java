@@ -133,6 +133,9 @@ public class ChatServer {
 
                         @Override
                         public void run() {
+                            if (sessionTicketDB.isEmpty()) {
+                                return;
+                            }
                             System.out.println("cleaning ticket db");
                             for(String key : sessionTicketDB.keySet()) {
                                 if (Instant.now().toEpochMilli() - sessionTicketDB.get(key).getTime() 
