@@ -9,26 +9,17 @@
 angular.module("chatApp").controller("GameLobbyController", function($scope, websockets, $rootScope, game, $interval) {
 
     console.log("[GameLobbyController] started");
-    while (!game.dataReady()) {
-        console.log("nothing");
-    }
 
     $scope.gameLobby = game.currentLobby();
-    console.log("[GLC] gamelobby: ", $scope.gameLobby.name(), " type: ", $scope.gameLobby.type());
+    console.log("[GLC] gamelobby: ", $scope.gameLobby.name, " type: ", $scope.gameLobby.type);
     $scope.gameLobbyUsers = game.lobbyUserList();
-    $scope.selectedCapacity = $scope.gameLobby.capacity();
-    $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity(), $scope.gameLobby.type());
+    $scope.selectedCapacity = $scope.gameLobby.capacity;
+    $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity, $scope.gameLobby.type);
+
 
     var listener = $rootScope.$on('updateGame', function(){
-        console.log('[GameLobbyController] Udpating game now');
-        $scope.gameLobby = game.currentLobby();
-        $scope.gameLobbyUsers = game.lobbyUserList();
-        $scope.selectedCapacity = $scope.gameLobby.capacity();
-        $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity(), $scope.gameLobby.type());
-        console.log("[GameLobbyController] updated scope vars");
-        console.log("[GameLobbyController] gameLobby name: ", $scope.gameLobby.name());
-        console.log("[GameLobbyController] gameLobby type, capacity: ", $scope.gameLobby.type(), " ", $scope.gameLobby.capacity());
-        console.log("[GameLobbyController] Users: ", $scope.gameLobbyUsers );
+        $scope.selectedCapacity = $scope.gameLobby.capacity;
+        $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity, $scope.gameLobby.type);
         $scope.$apply();
 
     });
@@ -61,7 +52,7 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
     }
 
     $scope.$on('$destroy', function() {
-        alert('gone');
+        //remove listener
         listener();
     });
 

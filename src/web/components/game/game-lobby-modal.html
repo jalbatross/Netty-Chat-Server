@@ -1,7 +1,7 @@
 <div class="modal-content game-modal">
   <div ng-controller="GameLobbyController">
     <div class="modal-header">
-      <h2 class="modal-title">{{gameLobby.name()}} ({{gameLobby.type()}})</h2>
+      <h2 class="modal-title">{{gameLobby.name}} ({{gameLobby.type}})</h2>
       <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
       <span aria-hidden="true">&times;</span>
       </button>
@@ -11,7 +11,7 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity()}}) </th>
+              <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity}}) </th>
             </tr>
           </thead>
           <tbody>
@@ -46,7 +46,7 @@
           </thead>
         </table>
       </div>
-      <button type="button" class="btn btn-info" ng-click="startGame()" ng-disabled="selectedCapacity < gameLobbyUsers.length">Start Game {{selectedCapacity}} comp {{gameLobbyUsers.length}}</button>
+      <button type="button" class="btn btn-info" ng-click="startGame()" ng-disabled="selectedCapacity < gameLobbyUsers.length">Start Game!</button>
     </div>
 
   </div>

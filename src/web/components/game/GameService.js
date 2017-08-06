@@ -6,11 +6,11 @@
             var _socket = websockets.getSocket();
             var _lobbyUsers = [];
 
-            var _currentGameLobby = undefined;
+            var _currentGameLobby = new GameLobby(undefined, undefined, undefined);
             var _dataReady = false;
 
             _socket.addEventListener("message", function(event) {
-                console.log('[GameService] Updating lobby');
+                console.log('[GameService] Got message');
                 _dataReady = false;
                 var bytes = new Uint8Array(event.data);
 
@@ -20,22 +20,27 @@
                 var dataType = msg.dataType();
 
                 if (dataType === Schema.Data.GameCreationRequest) {
+                    console.log('[GameService] Updating lobby');
+                    var temp = msg.data(new Schema.GameCreationRequest());
 
+                    _currentGameLobby.name = temp.name();
+                    _currentGameLobby.type = temp.type();
+                    _currentGameLobby.capacity = temp.capacity();
 
-                    _currentGameLobby = msg.data(new Schema.GameCreationRequest());
                     _inLobby = true;
 
                     $rootScope.$emit('updateGame');
-                    console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name() );
-                    _dataReady = true;
+                    console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name);
                 } 
                 else if (dataType === Schema.Data.List && msg.data(new Schema.List()).type() === 'gameLobbyUsers') {
-                    console.log('[GameService] Got correct list type for conversion')
-                    _lobbyUsers = gameLobbyUsersArr(msg);
+                    console.log('[GameService] Updating lobby users');
+
+                    console.log('[GameService] Got correct list type for conversion');
+
+                    Array.prototype.push.apply(_lobbyUsers,gameLobbyUsersArr(msg));
 
                     $rootScope.$emit('updateGame');
-                    console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name() );
-                    _dataReady = true;
+                    console.log('[GameService] finished updating lobby USERS with name ', _currentGameLobby.name);
                 }
 
 
@@ -73,13 +78,23 @@
             resetFields = function() {
                 _inLobby = false;
                 _inGame = false;
-                _currentGameLobby = undefined;
-                _lobbyUsers = [];
+
+                _currentGameLobby.name = undefined;
+                _currentGameLobby.type = undefined;
+                _currentGameLobby.capacity = undefined;
+
+                _lobbyUsers.length = 0;
             }
 
             function GameLobbyUser(name, isHost) {
                 this.name = name;
                 this.isHost = isHost;
+            }
+
+            function GameLobby(name, type, capacity) {
+                this.name = name;
+                this.type = type;
+                this.capacity = capacity;
             }
 
             /**
