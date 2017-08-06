@@ -7,9 +7,11 @@
             var _lobbyUsers = [];
 
             var _currentGameLobby = undefined;
+            var _dataReady = false;
 
             _socket.addEventListener("message", function(event) {
                 console.log('[GameService] Updating lobby');
+                _dataReady = false;
                 var bytes = new Uint8Array(event.data);
 
                 var buf = new flatbuffers.ByteBuffer(bytes);
@@ -22,13 +24,21 @@
 
                     _currentGameLobby = msg.data(new Schema.GameCreationRequest());
                     _inLobby = true;
+
                     $rootScope.$emit('updateGame');
+                    console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name() );
+                    _dataReady = true;
                 } 
                 else if (dataType === Schema.Data.List && msg.data(new Schema.List()).type() === 'gameLobbyUsers') {
                     console.log('[GameService] Got correct list type for conversion')
                     _lobbyUsers = gameLobbyUsersArr(msg);
+
                     $rootScope.$emit('updateGame');
+                    console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name() );
+                    _dataReady = true;
                 }
+
+
             })
 
             this.inLobby = function() {
@@ -54,6 +64,10 @@
 
                 resetFields();
 
+            }
+
+            this.dataReady = function() {
+                return _dataReady;
             }
 
             resetFields = function() {
