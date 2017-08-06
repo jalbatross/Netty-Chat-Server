@@ -6,20 +6,32 @@
       <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <div class="modal-body">
-     <table class="table table-hover" >
-        <thead>
-          <tr>
-            <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity()}}) </th>
-            <th>{{gameLobby.type()}}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat = "x in gameLobbyUsers" ng-click = "">
-            <td>{{ x.name }}{{x.isHost ? '*': ''}}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="modal-body" style="text-align:left">
+      <div class="table-responsive col-xs-4">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity()}}) </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat = "x in gameLobbyUsers">
+              <td>{{ x.name }}{{x.isHost ? '*': ''}}<button type="button" class="close" aria-label="Close" ng-click="kickUser(x.name)">
+                <span aria-hidden="true">&times;</span>
+              </button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-responsive col-xs-4">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>{{gameLobby.type()}}</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
     </div>
   </div>
   <div class="modal-footer">

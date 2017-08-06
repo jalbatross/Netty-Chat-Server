@@ -22,4 +22,8 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
 
     });
 
+    $scope.kickUser = function(username) {
+        alert('kicked ' + username);
+    }
+
 });
