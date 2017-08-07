@@ -11,7 +11,7 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Users ({{gameLobbyUsers.length}}/{{gameLobby.capacity}}) </th>
+              <th>Users ({{gameLobbyUsers.length}}/{{selectedCapacity}}) </th>
             </tr>
           </thead>
           <tbody>
@@ -39,7 +39,7 @@
                 </select></td>
               </tr>
               <tr>
-                <td>Capacity: <select class="form-control input-sm" style="display:inline; width:auto;" ng-model="selectedCapacity" ng-options="capacity for capacity in generatedCapacities">
+                <td>Capacity: <select ng-disabled = "true" class="form-control input-sm" style="display:inline; width:auto;" ng-model="selectedCapacity" ng-options="capacity for capacity in generatedCapacities">
                 </select></td>
               </tr>
             </tbody>

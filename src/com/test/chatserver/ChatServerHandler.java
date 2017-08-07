@@ -58,8 +58,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private Channel ch;
     private boolean init = false;
 
-    private NamedChannelGroup currentChatLobby;
-    private GameLobby currentGameLobby;
+    private NamedChannelGroup currentChatLobby = null;
+    private GameLobby currentGameLobby = null;
     
     private List<GameLobby> gameLobbies;
        
@@ -97,7 +97,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
 
             for (GameLobby gameLobby : gameLobbies) {
-                gameLobby.remove(username);
+                if (gameLobby.remove(username) && !gameLobby.isEmpty()) {
+                    gameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(gameLobby)));
+                }
+                
                 if (gameLobby.isEmpty()) {
                     emptyLobbies.add(gameLobby);
                 }
@@ -217,7 +220,17 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			        Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
 
 		            for (GameLobby gameLobby : gameLobbies) {
-		                gameLobby.remove(username);
+		                if (gameLobby.contains(this.username) && gameLobby.host().contentEquals(this.username)) {
+		                    //send clients in the lobby an empty lobby list, signifying for them to leave
+		                    //the lobby
+		                    gameLobby.writeAndFlush(emptyLobbyUserList("gameLobbyUsers"));
+		                    gameLobby.clear();
+		                }
+		                
+		                if (gameLobby.remove(username) && !gameLobby.isEmpty()) {
+		                    gameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(gameLobby)));
+		                }
+		                
 		                if (gameLobby.isEmpty()) {
 		                    emptyLobbies.add(gameLobby);
 		                }
@@ -228,7 +241,30 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 		                gameLobbies.remove(emptyLobbies.pop());
 		            }
 			    }
+			    currentGameLobby = null;
 			    return;
+			}
+			else if (strMsg.startsWith("/join ")) {
+			    String gameLobbyName = strMsg.substring(6);
+			    
+			    if (currentGameLobby != null) {
+			        return;
+			    }
+			    
+			    synchronized(gameLobbies) {
+			        
+			        for (GameLobby lobby : gameLobbies) {
+			            if (lobby.name().contentEquals(gameLobbyName) 
+			                    && !lobby.isFull()) {
+			                currentGameLobby = lobby;
+			            }
+			        }
+			        
+			        currentGameLobby.add(this.ch, this.username);
+			    }
+			    currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+			    return;
+			    
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
@@ -539,6 +575,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     }
     
     private ByteBuf gameLobbyUserList(GameLobby gameLobby) {
+        
         ArrayList<String> users = gameLobby.getUsers();
         
         //mark the host 
@@ -553,6 +590,13 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer("gameLobbyUsers", userList);
         
         return Unpooled.copiedBuffer(buffer);
+    }
+    
+    private BinaryWebSocketFrame emptyLobbyUserList(String type) {
+        ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer(type, new String[0]);
+        ByteBuf buf = Unpooled.copiedBuffer(buffer);
+        
+        return new BinaryWebSocketFrame(buf);
     }
 
     /**

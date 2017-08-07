@@ -1,4 +1,4 @@
-angular.module("chatApp").controller("GameLobbiesController", function($scope, websockets) {
+angular.module("chatApp").controller("GameLobbiesController", function($scope, websockets, game) {
 
     $scope.gameLobbies = [];
 
@@ -72,8 +72,33 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
         $scope.$apply();
     });
 
-    $scope.joinGame = function(lobbyName) {
-        alert("tried to join game with name: " + lobbyName);
+    $scope.joinGame = function(name, type, capacityString) {
+        //Sanitize capacity string
+        var numPlayers = capacityString.split('/')[0];
+
+        game.setLobbyInfo(name, type,numPlayers);
+        socket.send('/join ' + name);
+
+        $scope.showGameLobbyDialog();
+
+        //send request to server to join the game
+        //initialize game lobby modal with params name, type, and capacity
+        //wait for the server to update the user list!
+    }
+
+    /**
+     * Parses capacityString which is in format "numPlayers/maxPlayers".
+     * Returns true if numPlayers < maxPlayers.
+     * 
+     * @param  {string}  capacityString Capacity string
+     * @return {Boolean}                True if numPlayers < maxPlayers
+     */
+    $scope.isFull = function(capacityString) {
+        var temp = capacityString.split('/');
+        var numPlayers = parseInt(temp[0]);
+        var maxPlayers = parseInt(temp[1]);
+
+        return numPlayers < maxPlayers;
     }
 
 });

@@ -37,7 +37,15 @@
 
                     console.log('[GameService] Got correct list type for conversion');
 
+                    //reset lobby list, then update
+                    _lobbyUsers.length = 0;
                     Array.prototype.push.apply(_lobbyUsers,gameLobbyUsersArr(msg));
+
+                    if (_lobbyUsers.length === 0) {
+                        console.log('[GameService] Got empty lobby, kicking');
+                        $rootScope.$emit('quitLobby');
+                        return;
+                    }
 
                     $rootScope.$emit('updateGame');
                     console.log('[GameService] finished updating lobby USERS with name ', _currentGameLobby.name);
@@ -73,6 +81,19 @@
 
             this.dataReady = function() {
                 return _dataReady;
+            }
+
+            /**
+             * Sets the parameters for the currently joined game lobby
+             * @param {string} name     A lobby name
+             * @param {string} type     Lobby type
+             * @param {number} capacity Max capacity of lobby
+             */
+            this.setLobbyInfo = function(name, type, capacity) {
+                _currentGameLobby.name = name;
+                _currentGameLobby.type = type;
+                _currentGameLobby.capacity = capacity;
+                _inLobby = true;
             }
 
             resetFields = function() {
