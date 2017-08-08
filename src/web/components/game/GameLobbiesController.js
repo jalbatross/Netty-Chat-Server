@@ -4,6 +4,15 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
 
     var socket = websockets.getSocket();
     socket.send('/games');
+
+    /**
+     * Refreshes game lobies list
+     */
+    $scope.refreshLobbies = function() {
+        console.log('*** CLICKED REF LOBBIES ***');
+        socket.send('/games');
+    }
+
     /**
      * Game lobby object
      * @param {String} name     Game lobby name
@@ -74,16 +83,14 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
 
     $scope.joinGame = function(name, type, capacityString) {
         //Sanitize capacity string
-        var numPlayers = capacityString.split('/')[0];
+        var numPlayers = parseInt(capacityString.split('/')[0]) + 1;
+        console.log('numPlayers: ' + numPlayers);
 
         game.setLobbyInfo(name, type,numPlayers);
         socket.send('/join ' + name);
 
         $scope.showGameLobbyDialog();
 
-        //send request to server to join the game
-        //initialize game lobby modal with params name, type, and capacity
-        //wait for the server to update the user list!
     }
 
     /**
