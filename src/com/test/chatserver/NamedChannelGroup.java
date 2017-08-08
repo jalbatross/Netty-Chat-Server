@@ -24,7 +24,6 @@ import io.netty.util.concurrent.EventExecutor;
 
 public class NamedChannelGroup extends DefaultChannelGroup {
     
-    protected Set<String> userSet = Collections.synchronizedSet(new HashSet<String>());
     protected BiMap<String, Channel> channelMap;
     public NamedChannelGroup(String name, EventExecutor executor) {
         super(name, executor);

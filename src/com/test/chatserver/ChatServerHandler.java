@@ -215,18 +215,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 
                 return;
 			}
-			else if (strMsg.contentEquals("/leave")) {
+			else if (strMsg.contentEquals("/leave")) {	   
 			    synchronized (gameLobbies) {
 			        Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
 
 		            for (GameLobby gameLobby : gameLobbies) {
-		                if (gameLobby.contains(this.username) && gameLobby.host().contentEquals(this.username)) {
-		                    //send clients in the lobby an empty lobby list, signifying for them to leave
-		                    //the lobby
-		                    gameLobby.writeAndFlush(emptyLobbyUserList("gameLobbyUsers"));
-		                    gameLobby.clear();
-		                }
-		                
 		                if (gameLobby.remove(username) && !gameLobby.isEmpty()) {
 		                    gameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(gameLobby)));
 		                }

@@ -43,10 +43,13 @@ public class GameLobby extends NamedChannelGroup {
         super.remove(user);
     }
     
-    public String getPassword() {
+    public String password() {
         return password;
     }
     
+    public int capacity() {
+        return capacity;
+    }
     
     
     @Override
@@ -54,6 +57,35 @@ public class GameLobby extends NamedChannelGroup {
         String ret = this.name() + "," + this.type.name() + "," + this.size() + "/"
                 + this.capacity;
         return ret;
+    }
+    
+    /**
+     * Assigns a new host that is not the current host
+     */
+    public void assignNewHost() {
+        if (this.size() <= 1 ) {
+            return;
+        }
+        
+        for (String username : this.channelMap.keySet()) {
+            if (username.contentEquals(host)) {
+                continue;
+            }
+            else {
+                host = username;
+                break;
+            }
+        }
+        
+    }
+    
+    @Override
+    public boolean remove(String username) {
+        if(username.contentEquals(this.host)) {
+            assignNewHost();
+        }
+        
+        return super.remove(username);
     }
 
 }
