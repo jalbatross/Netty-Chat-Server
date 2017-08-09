@@ -13,10 +13,24 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 
+<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">I'm a modal!</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+           Hello hello
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Cancel</button>
+        </div>
+</script>
+
 <body>
   <div class="main-box">
+
     <div id ="chat-toolbar" class = "btn-group">
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#lobbyModal">Lobbies</button>
+      <button type="button" class="btn btn-primary" ng-controller="ChatModalController as $ctrl" ng-click="$ctrl.openChatLobbies()">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal">Games</button>
     </div>
@@ -29,6 +43,7 @@
     <div id='messages' ng-controller="ChatReceiveController">
       <div ng-repeat ="x in messages track by $index"> <code>{{x}}</code> </div>
     </div>
+
     <div class="input-block-level" id='msg-sender'>
       <div class="input-group" ng-controller = "ChatSendController">
         <form ng-submit = "sendMessage()">
@@ -40,9 +55,9 @@
       </div>
     </div>
   </div>
-</div>
 
 <!-- Modal -->
+<!--
 <div class="modal fade" id="lobbyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 <div class="modal-dialog" role="document">
   <div class="modal-content">
@@ -77,11 +92,12 @@
 </div>
 </div>
 
-<div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 <div class="modal-dialog" role="document" ng-controller = "ChatGameController">
    <ng-include src = "gameModalTemplate"></ng-include>
 </div>
 </div>
+-->
 
 </body>
 
@@ -151,6 +167,7 @@ div:hover {
   position:absolute;
 }
 
+/*
 .modal {
   
   position:fixed;
@@ -208,6 +225,19 @@ div:hover {
   width:100%;
   height:100%;
   overflow:auto;
+}
+*/
+
+.modal-dialog {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  min-height: calc(100vh - 60px);
+}
+@media (max-width: 767px) {
+  .modal-dialog {
+    min-height: calc(100vh - 20px);
 }
 
 

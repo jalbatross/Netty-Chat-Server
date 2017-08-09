@@ -1,0 +1,26 @@
+<div class="modal-header">
+  <h5 class="modal-title">Lobbies</h5>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+  <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <table class="table table-hover" >
+    <thead>
+      <tr>
+        <th>Lobby</th>
+        <th>Capacity</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat = "x in lobbies" ng-click = "changeLobby(x.name)">
+        <td>{{ x.name }}</td>
+        <td>{{ x.capacity }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" ng-click="$ctrl.ok()">Close</button>
+  <button type="button" class="btn btn-primary" ng-click="createGameLobby()">Create New Lobby</button>
+</div>

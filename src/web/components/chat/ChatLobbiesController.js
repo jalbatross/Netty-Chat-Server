@@ -1,4 +1,15 @@
-angular.module("chatApp").controller("ChatLobbiesController", function ($scope, $state, websockets) {
+angular.module("chatApp").controller("ChatLobbiesController", function ($scope, $state, websockets, $uibModalInstance) {
+
+    var $ctrl = this;
+
+  $ctrl.ok = function () {
+    $uibModalInstance.close();
+  };
+
+  $ctrl.cancel = function () {
+    $uibModalInstance.dismiss('cancel');
+  };
+
     if (!websockets.isConnected()) {
         console.log("[LobbiesController] Not connected, exit");
         $state.go('/');
