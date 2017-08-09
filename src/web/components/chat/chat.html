@@ -13,26 +13,18 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 
-<script type="text/ng-template" id="myModalContent.html">
-        <div class="modal-header">
-            <h3 class="modal-title" id="modal-title">I'm a modal!</h3>
-        </div>
-        <div class="modal-body" id="modal-body">
-           Hello hello
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
-            <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Cancel</button>
-        </div>
-</script>
-
 <body>
   <div class="main-box">
 
-    <div id ="chat-toolbar" class = "btn-group">
-      <button type="button" class="btn btn-primary" ng-controller="ChatModalController as $ctrl" ng-click="$ctrl.openChatLobbies()">Lobbies</button>
+    <div id ="chat-toolbar" class = "btn-group" ng-controller="ChatModalController as $ctrl">
+
+      <button type="button" class="btn btn-primary"  ng-click="$ctrl.openChatLobbies()">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal">Games</button>
+      <button type="button" class="btn btn-success" ng-click="$ctrl.openGameModal()">Games2</button>
+
+
+
     </div>
     
     <div id='user-list' ng-controller="ChatUsersController" >
@@ -56,48 +48,12 @@
     </div>
   </div>
 
-<!-- Modal -->
-<!--
-<div class="modal fade" id="lobbyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title">Lobbies</h5>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
-      <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body" ng-controller="ChatLobbiesController">
-      <table class="table table-hover" >
-        <thead>
-          <tr>
-            <th>Lobby</th>
-            <th>Capacity</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat = "x in lobbies" ng-click = "changeLobby(x.name)">
-            <td>{{ x.name }}</td>
-            <td>{{ x.capacity }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary" ng-click="createGameLobby()">Create New Lobby</button>
-    </div>
-  </div>
-  
-</div>
-</div>
 
 <div class="modal" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 <div class="modal-dialog" role="document" ng-controller = "ChatGameController">
    <ng-include src = "gameModalTemplate"></ng-include>
 </div>
 </div>
--->
 
 </body>
 
@@ -167,80 +123,17 @@ div:hover {
   position:absolute;
 }
 
-/*
-.modal {
-  
-  position:fixed;
-
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  max-height:100%;
-  max-width:100%;
-
-  
-}
-
-.modal-dialog {
-
-  position: relative;
-  margin: auto;
-  height:90%;
-  width:100%;
-
-  top: 30%;
-  transform: translateY(-30%);
-
-}
-
-.modal-content {
-  word-wrap: break-word;
-  
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width:100%;
-  max-height:100%;
-
-  background-color: white;
-
-  overflow:auto;
-}
-
-
-
-.modal-open {
-  z-index:1000;
-    position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-}
-
-.game-modal {
-  width:100%;
-  height:100%;
-  overflow:auto;
-}
-*/
 
 .modal-dialog {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow-y: auto;
+  overflow:auto;
   min-height: calc(100vh - 60px);
 }
 @media (max-width: 767px) {
   .modal-dialog {
     min-height: calc(100vh - 20px);
 }
-
-
-
 
 </style>

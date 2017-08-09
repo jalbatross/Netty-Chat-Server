@@ -1,21 +1,20 @@
-angular.module("chatApp").controller("ChatLobbiesController", function ($scope, $state, websockets, $uibModalInstance) {
+angular.module("chatApp").controller("ChatLobbiesController", function($scope, $state, websockets, $uibModalInstance) {
 
     var $ctrl = this;
 
-  $ctrl.ok = function () {
-    $uibModalInstance.close();
-  };
+    $ctrl.ok = function() {
+        $uibModalInstance.close();
+    };
 
-  $ctrl.cancel = function () {
-    $uibModalInstance.dismiss('cancel');
-  };
+    $ctrl.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    };
 
     if (!websockets.isConnected()) {
         console.log("[LobbiesController] Not connected, exit");
         $state.go('/');
         return;
-    }
-    else {
+    } else {
         console.log('[LobbiesController] connected');
     }
 
@@ -39,7 +38,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
     function lobbyListString(msg) {
         console.log("[LobbiesController] data type: " + msg.dataType());
 
-        if (msg == null || msg.dataType() != Schema.Data.List){
+        if (msg == null || msg.dataType() != Schema.Data.List) {
             throw 'Invalid list';
         }
 
@@ -51,7 +50,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         }
 
         var ret = [];
-        var temp = ""; 
+        var temp = "";
 
         for (var i = 0; i < len; i++) {
             temp = msg.data(new Schema.List()).contents(i);
@@ -74,7 +73,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         var dataType = msg.dataType();
         console.log("[LobbiesController DataType: ", dataType);
 
-        if (dataType == Schema.Data.List){
+        if (dataType == Schema.Data.List) {
             console.log("[LobbiesController] got List");
             var listType = msg.data(new Schema.List()).type();
 
@@ -83,10 +82,10 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
                 return;
             }
             var ret = lobbyListString(msg);
-            
+
             $scope.lobbies = ret;
             console.log("[LobbiesController] data: ", $scope.lobbies);
-            
+
         }
         $scope.$apply();
     });
@@ -96,5 +95,6 @@ angular.module("chatApp").controller("ChatLobbiesController", function ($scope, 
         console.log("[LobbiesController] Param: ", lobbyName);
         socket.send("/connect " + lobbyName);
     }
-});
 
+    
+});
