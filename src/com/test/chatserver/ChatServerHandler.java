@@ -263,7 +263,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			else if (strMsg.startsWith("/kick ")) {
 
 			    String kickedUserName = strMsg.substring(6);
-	             System.out.println("[ChatServerHandler] " + this.username + " tried to kick "
+	            System.out.println("[ChatServerHandler] " + this.username + " tried to kick "
 	                        + kickedUserName);
 			    //check if it came from host or is malformed
 			    if (!this.username.contentEquals(currentGameLobby.host()) 
@@ -276,7 +276,10 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    
 			    //sends empty game lobby users to kicked client so that client
 			    //knows they are kicked
-			    currentGameLobby.getChannel(kickedUserName).writeAndFlush(emptyLobbyUserList(ListType.GAME_LOBBY_USERS));
+			    Channel kickedChannel = currentGameLobby.getChannel(kickedUserName);
+			    
+			    kickedChannel.pipeline().fireChannelRead(new TextWebSocketFrame("/leave"));
+			    kickedChannel.writeAndFlush(emptyLobbyUserList(ListType.GAME_LOBBY_USERS));
 			    
 			    //kick user and update other users in the lobby
 			    currentGameLobby.kick(kickedUserName);
