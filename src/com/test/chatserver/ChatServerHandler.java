@@ -11,6 +11,7 @@ import Schema.Chat;
 import Schema.Data;
 import Schema.Message;
 import Schema.GameCreationRequest;
+import Schema.ListType;
 import game.GameType;
 import game.RPS;
 import io.netty.buffer.ByteBuf;
@@ -239,7 +240,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			}
 			else if (strMsg.startsWith("/join ")) {
 			    String gameLobbyName = strMsg.substring(6);
-			    
+
 			    if (currentGameLobby != null) {
 			        return;
 			    }
@@ -258,6 +259,32 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
 			    return;
 			    
+			}
+			else if (strMsg.startsWith("/kick ")) {
+
+			    String kickedUserName = strMsg.substring(6);
+	             System.out.println("[ChatServerHandler] " + this.username + " tried to kick "
+	                        + kickedUserName);
+			    //check if it came from host or is malformed
+			    if (!this.username.contentEquals(currentGameLobby.host()) 
+			            || kickedUserName.length() > 10) {
+			        this.ch.close();
+			        
+			        currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+			        return;
+			    }
+			    
+			    //sends empty game lobby users to kicked client so that client
+			    //knows they are kicked
+			    currentGameLobby.getChannel(kickedUserName).writeAndFlush(emptyLobbyUserList(ListType.GAME_LOBBY_USERS));
+			    
+			    //kick user and update other users in the lobby
+			    currentGameLobby.kick(kickedUserName);
+			    
+			    //TODO: set currentGameLobby of kickedUserName to null
+			    
+			    currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+			    return;
 			}
             //Stamp message with current time
             TimeChatMessage timeMessage = new TimeChatMessage(username, strMsg);
@@ -532,8 +559,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         for (int j = 0; j < lobbies.size(); j++) {
             lobbyList[j] = lobbies.get(j).lobbyInfo();
         }
-        
-        ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer("lobbies", lobbyList);
+
+        ByteBuffer lobbyData = FlatBuffersCodec.listToByteBuffer(ListType.LOBBIES, lobbyList);
         return Unpooled.copiedBuffer(lobbyData);
     }
     
@@ -545,7 +572,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             gameLobbyList[i] = gameLobbies.get(i).lobbyInfo();
         }
         
-        ByteBuffer gameLobbyData = FlatBuffersCodec.listToByteBuffer("games", gameLobbyList);
+        ByteBuffer gameLobbyData = FlatBuffersCodec.listToByteBuffer(ListType.GAMES, gameLobbyList);
         return Unpooled.copiedBuffer(gameLobbyData);
     }
 
@@ -556,6 +583,16 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         return Unpooled.copiedBuffer(data);
     }
 
+    /**
+     * Returns a ByteBuf of a FlatBuffers serialized List object of a 
+     * NamedChannelGroup's users.
+     * 
+     * @see{@link Schema}
+     * 
+     * @param gameLobby   A NamedChannelGroup
+     * @return            ByteBuf containing the NamedChannelGroup's users in a 
+     *                    FlatBuffers serialized String[]
+     */
     private ByteBuf lobbyUserList(NamedChannelGroup lobby) {
         ArrayList<String> users = lobby.getUsers();
         
@@ -563,10 +600,20 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         users.add(0, lobby.name());
         
         String[] userList = users.toArray(new String[users.size()]);
-        ByteBuffer buffer =  FlatBuffersCodec.listToByteBuffer("users", userList);
+        ByteBuffer buffer =  FlatBuffersCodec.listToByteBuffer(ListType.USERS, userList);
         return Unpooled.copiedBuffer(buffer);
     }
     
+    /**
+     * Returns a ByteBuf of a FlatBuffers serialized List object of a 
+     * GameLobby's users.
+     * 
+     * @see{@link Schema}
+     * 
+     * @param gameLobby   A GameLobby
+     * @return            ByteBuf containing the GameLobby's users in a 
+     *                    FlatBuffers serialized String[]
+     */
     private ByteBuf gameLobbyUserList(GameLobby gameLobby) {
         
         ArrayList<String> users = gameLobby.getUsers();
@@ -580,11 +627,16 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         }
         
         String[] userList = users.toArray(new String[users.size()]);
-        ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer("gameLobbyUsers", userList);
+        ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer(ListType.GAME_LOBBY_USERS, userList);
         
         return Unpooled.copiedBuffer(buffer);
     }
     
+    /**
+     * An empty LobbyUserList.
+     * @param type  Type of lobby user list, i.e. games, gameUsers, users
+     * @return      BinaryWebSocketFrame of FlatBuffers serialized list
+     */
     private BinaryWebSocketFrame emptyLobbyUserList(String type) {
         ByteBuffer buffer = FlatBuffersCodec.listToByteBuffer(type, new String[0]);
         ByteBuf buf = Unpooled.copiedBuffer(buffer);
