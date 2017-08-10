@@ -11,7 +11,7 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
     console.log("[GameLobbyController] started");
 
     $scope.gameLobby = game.currentLobby();
-    console.log("[GLC] gamelobby: ", $scope.gameLobby.name, " type: ", $scope.gameLobby.type, " capacity: " , $scope.gameLobby.capacity);
+    //console.log("[GLC] gamelobby: ", $scope.gameLobby.name, " type: ", $scope.gameLobby.type, " capacity: " , $scope.gameLobby.capacity);
     $scope.gameLobbyUsers = game.lobbyUserList();
     $scope.selectedCapacity = $scope.gameLobby.capacity;
     $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity, $scope.gameLobby.type);
@@ -24,14 +24,9 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
 
     });
 
-    var kickedListener = $rootScope.$on('quitLobby', function() {
-        console.log('[GameLobbyController] Kicked from lobby');
-        $scope.showGameLobbiesDialog();
-        $scope.$apply();
-    })
-
     $scope.kickUser = function(username) {
         alert('kicked ' + username);
+        websockets.getSocket().send('/kick ' + username);
     }
 
     $scope.startGame= function() {
@@ -60,7 +55,6 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
     $scope.$on('$destroy', function() {
         //remove listener
         updateGameListener();
-        kickedListener();
     });
 
     $scope.$on('$viewContentLoaded', function() {

@@ -20,8 +20,7 @@
 
       <button type="button" class="btn btn-primary"  ng-click="$ctrl.openChatLobbies()">Lobbies</button>
       <button type="button" class="btn btn-info">Sign Out</button>
-      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#gameModal">Games</button>
-      <button type="button" class="btn btn-success" ng-click="$ctrl.openGameModal()">Games2</button>
+      <button type="button" class="btn btn-default" ng-click="$ctrl.openGames()">Games</button>
 
 
 
@@ -47,13 +46,6 @@
       </div>
     </div>
   </div>
-
-
-<div class="modal" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-<div class="modal-dialog" role="document" ng-controller = "ChatGameController">
-   <ng-include src = "gameModalTemplate"></ng-include>
-</div>
-</div>
 
 </body>
 

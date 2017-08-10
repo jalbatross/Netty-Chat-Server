@@ -44,6 +44,7 @@
                     if (_lobbyUsers.length === 0) {
                         console.log('[GameService] Got empty lobby, kicking');
                         $rootScope.$emit('quitLobby');
+                        resetFields();
                         return;
                     }
 
@@ -72,8 +73,6 @@
             }
 
             this.leaveGame = function() {
-                //send request to leave all lobbies
-                _socket.send('/leave');
 
                 resetFields();
 
@@ -96,7 +95,7 @@
                 _inLobby = true;
             }
 
-            resetFields = function() {
+            function resetFields() {
                 _inLobby = false;
                 _inGame = false;
 
@@ -157,4 +156,4 @@
             }
 
 
-        });
+});

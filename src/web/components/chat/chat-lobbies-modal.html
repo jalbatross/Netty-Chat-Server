@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title">Lobbies</h5>
-  <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "modal-close-icon">
+  <button type="button" class="close" ng-click="$ctrl.close()" id = "modal-close-icon">
   <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -21,6 +21,6 @@
   </table>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-default" ng-click="$ctrl.ok()">Close</button>
+  <button type="button" class="btn btn-default" ng-click="$ctrl.close()">Close</button>
   <button type="button" class="btn btn-primary" ng-click="createGameLobby()">Create New Lobby</button>
 </div>

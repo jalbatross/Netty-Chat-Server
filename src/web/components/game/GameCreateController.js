@@ -108,9 +108,6 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
         socket.send(reqBytes);
 
         resetForms();
-
-        //don't do this, make service responsible for this.
-        $scope.showGameLobbyDialog();
     }
 
     function resetForms() {

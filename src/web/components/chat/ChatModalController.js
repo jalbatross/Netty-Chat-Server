@@ -23,8 +23,21 @@ angular.module("chatApp").controller("ChatModalController", function($uibModal, 
 
     $ctrl.openGames = function() {
         if (game.inLobby() /*|| game.inGame()*/) {
-            
+            //no-op
         }
+        var modalInstance = $uibModal.open({
+            animation: $ctrl.animationsEnabled,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: '/components/chat/test-modal-template.html',
+            controller: 'ChatGameController',
+            controllerAs: '$ctrl',
+            size: 'md'
+        });
+
+        modalInstance.result.then(function () {
+            $log.info('TestModal modal dismissed at: ' + new Date());
+        });
 
     }
 });

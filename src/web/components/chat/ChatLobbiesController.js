@@ -2,7 +2,7 @@ angular.module("chatApp").controller("ChatLobbiesController", function($scope, $
 
     var $ctrl = this;
 
-    $ctrl.ok = function() {
+    $ctrl.close = function() {
         $uibModalInstance.close();
     };
 

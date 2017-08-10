@@ -88,9 +88,6 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
 
         game.setLobbyInfo(name, type,numPlayers);
         socket.send('/join ' + name);
-
-        $scope.showGameLobbyDialog();
-
     }
 
     /**
