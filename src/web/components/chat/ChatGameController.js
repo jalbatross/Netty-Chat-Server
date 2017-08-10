@@ -12,9 +12,20 @@
 
 angular.module("chatApp").controller("ChatGameController", function($rootScope, $scope, $uibModalInstance, websockets, game) {
 
+    //alert('ChatGameController instance started');
+
+    var gameLobbiesUrl = "components/game/game-lobbies-modal.html";
+    var createGameUrl = "components/game/game-create-modal.html";
+    var gameLobbyUrl = "components/game/game-lobby-modal.html";
+
     var $ctrl = this;
 
+    $ctrl.gameModalTemplate = gameLobbiesUrl;
+
     $ctrl.close = function() {
+        if (game.inLobby()) {
+            game.leaveGame();
+        }
         $uibModalInstance.close();
     };
 
@@ -22,24 +33,23 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
         $uibModalInstance.dismiss('cancel');
     };
 
-    $ctrl.gameModalTemplate = "/components/game/game-lobbies-modal.html";
-
     $ctrl.showCreateGameDialog = function() {
-        $ctrl.gameModalTemplate = "/components/game/game-create-modal.html";
-    }
+        $ctrl.gameModalTemplate = createGameUrl;
+    };
+
     $ctrl.showGameLobbiesDialog = function() {
         if (game.inLobby()) {
             game.leaveGame();
         }
-        $ctrl.gameModalTemplate = "/components/game/game-lobbies-modal.html";
-    }
+        $ctrl.gameModalTemplate = gameLobbiesUrl;
+    };
 
     $ctrl.showGameLobbyDialog = function() {
-        $ctrl.gameModalTemplate = "/components/game/game-lobby-modal.html";
-    }
+        $ctrl.gameModalTemplate = gameLobbyUrl;
+    };
 
     var updateGameListener = $rootScope.$on('updateGame', function() {
-        $ctrl.gameModalTemplate = "/components/game/game-lobby-modal.html";
+        $ctrl.showGameLobbyDialog();
         $scope.$apply();
 
     });
@@ -47,13 +57,19 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
     var kickedListener = $rootScope.$on('quitLobby', function() {
         console.log('[ChatGameController] Kicked from lobby');
         $ctrl.showGameLobbiesDialog();
-        
-        $scope.$apply();
-    })
 
-    $scope.$on('destroy', function() {
+        $scope.$apply();
+    });
+
+    $scope.$on('modal.closing', function() {
+        //alert('destroyed ChatGameController');
+
+        //Turn off listeners
+        kickedListener();
         updateGameListener();
+
+        //Get rid of scope vars
         $ctrl = {};
-    })
+    });
 
 });

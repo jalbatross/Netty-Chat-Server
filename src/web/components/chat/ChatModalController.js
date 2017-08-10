@@ -36,7 +36,7 @@ angular.module("chatApp").controller("ChatModalController", function($uibModal, 
         });
 
         modalInstance.result.then(function () {
-            $log.info('TestModal modal dismissed at: ' + new Date());
+            $log.info('Game modal dismissed at: ' + new Date());
         });
 
     }

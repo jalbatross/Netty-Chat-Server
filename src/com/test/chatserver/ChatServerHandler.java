@@ -284,8 +284,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    //kick user and update other users in the lobby
 			    currentGameLobby.kick(kickedUserName);
 			    
-			    //TODO: set currentGameLobby of kickedUserName to null
-			    
 			    currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
 			    return;
 			}

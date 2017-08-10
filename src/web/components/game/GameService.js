@@ -4,6 +4,7 @@
             var _inLobby = false;
             var _inGame = false;
             var _socket = websockets.getSocket();
+
             var _lobbyUsers = [];
 
             var _currentGameLobby = new GameLobby(undefined, undefined, undefined);
@@ -73,7 +74,7 @@
             }
 
             this.leaveGame = function() {
-
+                _socket.send('/leave');
                 resetFields();
 
             }
