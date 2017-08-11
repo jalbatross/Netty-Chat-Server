@@ -251,12 +251,16 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			            if (lobby.name().contentEquals(gameLobbyName) 
 			                    && !lobby.isFull()) {
 			                currentGameLobby = lobby;
+			                currentGameLobby.add(this.ch, this.username);
+			                currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+			                
+			                return;
 			            }
 			        }
 			        
-			        currentGameLobby.add(this.ch, this.username);
+			        
 			    }
-			    currentGameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+			    
 			    return;
 			    
 			}

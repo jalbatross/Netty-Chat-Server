@@ -82,6 +82,10 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
     });
 
     $scope.joinGame = function(name, type, capacityString) {
+        if (isFull(capacityString)) {
+            return;
+        }
+
         //Sanitize capacity string
         var numPlayers = parseInt(capacityString.split('/')[0]) + 1;
         console.log('numPlayers: ' + numPlayers);
@@ -95,14 +99,17 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
      * Returns true if numPlayers < maxPlayers.
      * 
      * @param  {string}  capacityString Capacity string
-     * @return {Boolean}                True if numPlayers < maxPlayers
+     * @return {Boolean}                True if the lobby is full, 
+     *                                  false otherwise
      */
-    $scope.isFull = function(capacityString) {
+    var isFull = function(capacityString) {
+
         var temp = capacityString.split('/');
-        var numPlayers = parseInt(temp[0]);
+
+        var currentNumPlayers = parseInt(temp[0]);
         var maxPlayers = parseInt(temp[1]);
 
-        return numPlayers < maxPlayers;
+        return currentNumPlayers >= maxPlayers;
     }
 
 });
