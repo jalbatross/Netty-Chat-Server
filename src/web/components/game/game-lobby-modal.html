@@ -1,12 +1,13 @@
 <div ng-controller="GameLobbyController">
-    <div class="modal-header">
-      <h2 class="modal-title">{{gameLobby.name}} ({{gameLobby.type}})</h2>
-      <button type="button" class="close" ng-click="$ctrl.close()" id = "modal-close-icon">
-      <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body" style="text-align:left">
-      <div class="col-xs-5">
+  <div class="modal-header">
+    <h2 class="modal-title">{{gameLobby.name}} ({{gameLobby.type}})</h2>
+    <button type="button" class="close" ng-click="$ctrl.close()" id = "modal-close-icon">
+    <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body container" style="text-align:left">
+    <div class="row">
+      <div class="col-5">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -22,7 +23,7 @@
           </tbody>
         </table>
       </div>
-      <div class="col-xs-5">
+      <div class="col-5">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -45,11 +46,11 @@
           </thead>
         </table>
       </div>
-      <button type="button" class="btn btn-info" ng-click="startGame()" ng-disabled="selectedCapacity > gameLobbyUsers.length">Start Game!</button>
     </div>
-
+    <button type="button" class="btn btn-info" ng-click="startGame()" ng-disabled="selectedCapacity > gameLobbyUsers.length">Start Game!</button>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-default" ng-click=$ctrl.close()>Exit Games</button>
-    <button type="button" class="btn btn-primary" ng-click="$ctrl.showGameLobbiesDialog()">Back to Game Lobbies</button>
-  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" ng-click=$ctrl.close()>Exit Games</button>
+  <button type="button" class="btn btn-primary" ng-click="$ctrl.showGameLobbiesDialog()">Back to Game Lobbies</button>
+</div>

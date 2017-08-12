@@ -3,3 +3,9 @@
 body {
   background:#456;
 }
+
+/*provides opacity to modal backdrop
+required for angular ui bootstrap + bootstrapv4*/
+.modal-backdrop {
+  opacity:0.5;
+}

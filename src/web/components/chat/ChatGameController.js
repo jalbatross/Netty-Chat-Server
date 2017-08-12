@@ -17,6 +17,7 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
     var gameLobbiesUrl = "components/game/game-lobbies-modal.html";
     var createGameUrl = "components/game/game-create-modal.html";
     var gameLobbyUrl = "components/game/game-lobby-modal.html";
+    var rpsGameUrl = "components/game/game-rps-modal.html";
 
     var $ctrl = this;
 
@@ -47,6 +48,10 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
     $ctrl.showGameLobbyDialog = function() {
         $ctrl.gameModalTemplate = gameLobbyUrl;
     };
+
+    $ctrl.showGameDialog = function() {
+        $ctrl.gameModalTemplate = rpsGameUrl;
+    }
 
     var updateGameListener = $rootScope.$on('updateGame', function() {
         $ctrl.showGameLobbyDialog();

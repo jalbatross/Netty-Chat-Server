@@ -7,8 +7,8 @@
   <div class="modal-body" ng-controller="GameCreateController">
     <form name="gameLobbyForm">
       <div class="form-group row">
-        <label class="col-xs-3 col-form-label">Name</label>
-        <div class="col-xs-5">
+        <label class="col-3 col-form-label">Name</label>
+        <div class="col-5">
           <input
           class="form-control"
           name="gameNameInput"
@@ -33,8 +33,8 @@
       </div>
       
       <div class="form-group row">
-        <label class="col-xs-3 col-form-label">Type</label>
-        <div class="col-xs-5">
+        <label class="col-3 col-form-label">Type</label>
+        <div class="col-5">
           <input
           class="form-control"
           name="gameTypeInput"
@@ -49,14 +49,14 @@
         </div>
         <div
           ng-if="gameLobbyForm.gameTypeInput.$invalid && gameLobbyForm.gameTypeInput.$dirty"
-          class="col-xs-4 alert alert-danger"
+          class="col-4 alert alert-danger"
           style="padding: 0; margin: auto;">
             <span>This field is required</span>
         </div>
       </div>
       <div class="form-group row">
-        <label class="col-xs-3 col-form-label">Capacity</label>
-        <div class = "col-xs-2">
+        <label class="col-3 col-form-label">Capacity</label>
+        <div class = "col-2">
           <select 
           class="custom-select" 
           ng-disabled = "gameLobbyForm.gameTypeInput.$invalid || gameLobbyForm.gameTypeInput.$pristine"
@@ -64,14 +64,14 @@
           ng-options="option as option for option in capacityOptions">
           </select>
         </div>
-      <div class ="alert alert-warning col-xs-5" ng-show="gameLobbyForm.gameTypeInput.$pristine || gameLobbyForm.gameTypeInput.$invalid" style ="padding:0; ">
+      <div class ="alert alert-warning col-5" ng-show="gameLobbyForm.gameTypeInput.$pristine || gameLobbyForm.gameTypeInput.$invalid" style ="padding:0; ">
         Select a game type to enable
       </div>
       </div>
 
       <div class="form-group row">
-        <label class="col-xs-3 col-form-label">Password</label>
-        <div class="col-xs-5">
+        <label class="col-3 col-form-label">Password</label>
+        <div class="col-5">
           <input class="form-control"
           name="gamePwInput"
           type="password"
@@ -82,7 +82,7 @@
         </div>
         <div 
         ng-if="(gameLobbyForm.gamePwInput.$dirty && gameLobbyForm.gamePwInput.$invalid) || gamePassword.length == 10"
-        class="col-xs-4 alert"
+        class="col-4 alert"
         ng-class = "{'alert-danger': gameLobbyForm.gamePwInput.$invalid, 'alert-warning' : !gameLobbyForm.gamePwInput.$invalid}"
         style ="padding: 0; margin: auto;">
           <span ng-show="gameLobbyForm.gamePwInput.$error.maxlength">Exceeded max length (10)!</span>

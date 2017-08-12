@@ -6,7 +6,7 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
     socket.send('/games');
 
     /**
-     * Refreshes game lobies list
+     * Refreshes game lobbies list
      */
     $scope.refreshLobbies = function() {
         console.log('*** CLICKED REF LOBBIES ***');
