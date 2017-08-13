@@ -31,8 +31,12 @@
             <tr><th><button type="button" class="btn btn-success">Paper</button></th></tr>
             <tr><th><button type="button" class="btn btn-info">Scissors</button></th></tr>
           </thead>
-        </div>
-      </table>
+        </table>
+      </div>
+      
+      <div class="col myBox" style="text-align:center;">
+        <timer interval="1000" countdown="5" finish-callback="$rps.countdownFinished()"><h1>TIME LEFT:</h1>{{countdown}}</timer>
+      </div>
       <div class="col">
         <table style="float:right;">
           <thead>
@@ -40,8 +44,9 @@
             <tr><th><button type="button" class="btn btn-success">Paper</button></th></tr>
             <tr><th><button type="button" class="btn btn-info">Scissors</button></th></tr>
           </thead>
-        </div>
-      </table>
+        </table>
+      </div>
+      
     </div>
   </div>
 </div>
@@ -50,3 +55,8 @@
   <button type="button" class="btn btn-primary" ng-click="$ctrl.showGameLobbiesDialog()">Game Lobbies</button>
 </div>
 </div>
+<style>
+.myBox {
+border:1px solid;
+}
+</style>

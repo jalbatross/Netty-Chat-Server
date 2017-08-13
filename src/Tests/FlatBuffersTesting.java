@@ -211,7 +211,74 @@ public class FlatBuffersTesting {
         else {
             System.out.println("GCR password test failed, val: " + gcr.password());
         }
-
         
+        //--end tests for GameCreationRequest---
+        
+        //---Begin tests for Game, GameType, GameUpdate----
+        
+        //Schema.Game tests
+        byte gameType = Schema.GameType.RPS;
+        byte[] gameDataBytes = {1, 2, -33, 4, 5};
+        short bestOf = 5;
+        boolean completed = false;
+       
+        int gameDataOffset = builder.createByteVector(gameDataBytes);
+        
+        int gameOffset = Game.createGame(builder, gameType, gameDataOffset, bestOf, completed);
+        Message.startMessage(builder);
+        Message.addDataType(builder, Data.Game);
+        Message.addData(builder, gameOffset);
+        int finGame = Message.endMessage(builder);
+        
+        builder.finish(finGame);
+        
+        buf = builder.dataBuffer();
+        
+        Message gameMessage = Message.getRootAsMessage(buf);
+        Game myGame = (Game) gameMessage.data(new Game());
+        
+        System.out.println("\n\n--- Game Info----");
+        System.out.println("Type: " + GameType.name(myGame.type()) + ", expected RPS");
+        System.out.print("Bytes: [");
+        for (int i = 0; i < myGame.gameDataLength(); i++) {
+            System.out.print((byte) myGame.gameData(i) + " ");
+        }
+        System.out.println("], expected [1 2 -33 4 5]");
+        
+        System.out.println("best of: " + myGame.bestOf() + ", expected 5");
+        if (myGame.completed()) {
+            System.out.println("Game completed (error)");
+        }
+        else {
+            System.out.println("game not completed (expected)");
+        }
+        
+        //---end Schema.Game tests
+        
+        //----begin GameUpdate tests
+        byte[] gameUpdateBytes = {0, -18, 127, -127, 10, 5, 1};
+        
+        int updateBytesOffset = builder.createByteVector(gameUpdateBytes);
+        int gameUpdateOffset = GameUpdate.createGameUpdate(builder, updateBytesOffset);
+        
+        Message.startMessage(builder);
+        Message.addDataType(builder, Data.GameUpdate);
+        Message.addData(builder, gameUpdateOffset);
+        int finGameUpdate = Message.endMessage(builder);
+        
+        builder.finish(finGameUpdate);
+        
+        buf = builder.dataBuffer();
+        
+        Message gameUpdateMessage = Message.getRootAsMessage(buf);
+        GameUpdate myGameUpdate = (GameUpdate) gameUpdateMessage.data(new GameUpdate());
+        System.out.println("\n---Game Update Info----");
+        System.out.print("Game update bytes: [");
+        for (int i = 0; i < myGameUpdate.updateLength(); i++) {
+            System.out.print((byte) myGameUpdate.update(i) + " ");
+        }
+        System.out.println("], expected: [0, -18, 127, -127, 10, 5, 1}]");
+        
+        //--End GameUpdate Tests----
     }
 }
