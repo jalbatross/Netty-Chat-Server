@@ -2,7 +2,9 @@
 
 namespace Schema;
 
-union Data {Chat, Credentials, Auth, List, GameCreationRequest} 
+union Data {Chat, Credentials, Auth, List, GameCreationRequest, Game, GameUpdate} 
+
+enum GameType : byte {RPS, COUP,}
 
 table Chat {
   timestamp:ulong;
@@ -23,7 +25,11 @@ table Auth {
 
 /**
  * List of strings
- * Current supported types: lobbies, users, games
+ * Current supported types: 
+ * lobbies: chat lobbies
+ * users: usernames
+ * games: game lobbies
+ * TODO: enum this when we're done
  */
 table List {
   type:string (required);
@@ -35,6 +41,18 @@ table GameCreationRequest {
   type:string (required);
   capacity:short;
   password:string;
+}
+
+table Game {
+  type: GameType;
+  gameData: [byte];
+  bestOf: short;
+  completed: bool;
+}
+
+
+table GameUpdate {
+  update: [byte]; 
 }
 
 table Message {

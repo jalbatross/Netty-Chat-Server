@@ -10,8 +10,10 @@ public final class Data {
   public static final byte Auth = 3;
   public static final byte List = 4;
   public static final byte GameCreationRequest = 5;
+  public static final byte Game = 6;
+  public static final byte GameUpdate = 7;
 
-  public static final String[] names = { "NONE", "Chat", "Credentials", "Auth", "List", "GameCreationRequest", };
+  public static final String[] names = { "NONE", "Chat", "Credentials", "Auth", "List", "GameCreationRequest", "Game", "GameUpdate", };
 
   public static String name(int e) { return names[e]; }
 }
