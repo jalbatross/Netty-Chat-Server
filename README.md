@@ -71,3 +71,7 @@ Simple netty chat server &amp; client
  ### July 17, 2017: Version 0.25
  - A picture is worth a thousand words! ui-router shenanigans.
  ![Alt text](https://thumbs.gfycat.com/NegligiblePowerfulGartersnake-size_restricted.gif "ui-router")
+ 
+ ### Aug 12, 2017: Version 0.4
+ - Very depressed to learn that the project is labeled as Javascript. My code base has been overtaken by JS! Mostly due to the inclusion of the js libraries, I think.
+ - Been a while since I had an update. Will update this with a webm to show exactly what we've got so far.
