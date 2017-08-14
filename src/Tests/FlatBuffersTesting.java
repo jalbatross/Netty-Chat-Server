@@ -219,12 +219,15 @@ public class FlatBuffersTesting {
         //Schema.Game tests
         byte gameType = Schema.GameType.RPS;
         byte[] gameDataBytes = {1, 2, -33, 4, 5};
+        int[] playersData = {builder.createString("Alice"), builder.createString("Bob"),
+                builder.createString("Cody")};
         short bestOf = 5;
         boolean completed = false;
        
         int gameDataOffset = builder.createByteVector(gameDataBytes);
+        int playersOffset = Game.createPlayersVector(builder, playersData);
         
-        int gameOffset = Game.createGame(builder, gameType, gameDataOffset, bestOf, completed);
+        int gameOffset = Game.createGame(builder, gameType, gameDataOffset, playersOffset, bestOf, completed);
         Message.startMessage(builder);
         Message.addDataType(builder, Data.Game);
         Message.addData(builder, gameOffset);
@@ -239,6 +242,11 @@ public class FlatBuffersTesting {
         
         System.out.println("\n\n--- Game Info----");
         System.out.println("Type: " + GameType.name(myGame.type()) + ", expected RPS");
+        System.out.print("Players: [");
+        for (int i = 0; i < myGame.playersLength(); i++) {
+            System.out.print(myGame.players(i) +  " ");
+        }
+        System.out.println("], expected [ Alice, Bob, Cody]");
         System.out.print("Bytes: [");
         for (int i = 0; i < myGame.gameDataLength(); i++) {
             System.out.print((byte) myGame.gameData(i) + " ");

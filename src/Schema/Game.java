@@ -18,15 +18,19 @@ public final class Game extends Table {
   public byte gameData(int j) { int o = __offset(6); return o != 0 ? bb.get(__vector(o) + j * 1) : 0; }
   public int gameDataLength() { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; }
   public ByteBuffer gameDataAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
-  public short bestOf() { int o = __offset(8); return o != 0 ? bb.getShort(o + bb_pos) : 0; }
-  public boolean completed() { int o = __offset(10); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public String players(int j) { int o = __offset(8); return o != 0 ? __string(__vector(o) + j * 4) : null; }
+  public int playersLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
+  public short bestOf() { int o = __offset(10); return o != 0 ? bb.getShort(o + bb_pos) : 0; }
+  public boolean completed() { int o = __offset(12); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createGame(FlatBufferBuilder builder,
       byte type,
       int gameDataOffset,
+      int playersOffset,
       short bestOf,
       boolean completed) {
-    builder.startObject(4);
+    builder.startObject(5);
+    Game.addPlayers(builder, playersOffset);
     Game.addGameData(builder, gameDataOffset);
     Game.addBestOf(builder, bestOf);
     Game.addCompleted(builder, completed);
@@ -34,13 +38,16 @@ public final class Game extends Table {
     return Game.endGame(builder);
   }
 
-  public static void startGame(FlatBufferBuilder builder) { builder.startObject(4); }
+  public static void startGame(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addType(FlatBufferBuilder builder, byte type) { builder.addByte(0, type, 0); }
   public static void addGameData(FlatBufferBuilder builder, int gameDataOffset) { builder.addOffset(1, gameDataOffset, 0); }
   public static int createGameDataVector(FlatBufferBuilder builder, byte[] data) { builder.startVector(1, data.length, 1); for (int i = data.length - 1; i >= 0; i--) builder.addByte(data[i]); return builder.endVector(); }
   public static void startGameDataVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
-  public static void addBestOf(FlatBufferBuilder builder, short bestOf) { builder.addShort(2, bestOf, 0); }
-  public static void addCompleted(FlatBufferBuilder builder, boolean completed) { builder.addBoolean(3, completed, false); }
+  public static void addPlayers(FlatBufferBuilder builder, int playersOffset) { builder.addOffset(2, playersOffset, 0); }
+  public static int createPlayersVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
+  public static void startPlayersVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
+  public static void addBestOf(FlatBufferBuilder builder, short bestOf) { builder.addShort(3, bestOf, 0); }
+  public static void addCompleted(FlatBufferBuilder builder, boolean completed) { builder.addBoolean(4, completed, false); }
   public static int endGame(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

@@ -46,6 +46,7 @@ table GameCreationRequest {
 table Game {
   type: GameType;
   gameData: [byte];
+  players: [string];
   bestOf: short;
   completed: bool;
 }

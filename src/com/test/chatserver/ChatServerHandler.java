@@ -12,7 +12,6 @@ import Schema.Data;
 import Schema.Message;
 import Schema.GameCreationRequest;
 import Schema.ListType;
-import game.GameType;
 import game.RPS;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -167,49 +166,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			else if (strMsg.contentEquals("rock") || strMsg.contentEquals("paper") || strMsg.contentEquals("scissors")) {
 			    ctx.fireChannelRead(msg);
 			    return;
-			}
-			else if (strMsg.startsWith("/play rps ")) {
-			    String gameLobbyName = strMsg.substring(10);
-			    if (gameLobbies.isEmpty()){
-			        return;
-			    }
-			    
-			    NamedChannelGroup gameLobby = null;
-			    for (int i = 0 ; i < gameLobbies.size(); i++) {
-			        if (gameLobbyName.contentEquals(gameLobbies.get(i).name())) {
-			            gameLobby = gameLobbies.get(i);
-			            break;
-			        }
-			    }
-			    if (gameLobby == null) {
-			        return;
-			    }
-			    
-			    gameLobby.add(ch, username);
-
-			    ArrayList<String> players = gameLobby.getUsers();
-			    
-			    RPS rpsGame = null;
-			    try {
-			        rpsGame = new RPS(2, players);
-                }
-                catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    return;
-                }
-			    
-			    System.out.println("[ChatServerHandler] Successfully created game lobby " + gameLobby.name());
-			    System.out.println("[ChatServerHandler] Users: " + gameLobby.getUsers());
-			    
-			    
-			    for (Channel chan : gameLobby) {
-			        chan.pipeline().addLast("gameHandler", new ServerGameHandler(rpsGame, gameLobby));
-			    }
-			    
-			    gameLobbies.remove(gameLobby);
-			    return;
-			    
 			}
 			else if (strMsg.contentEquals("/games")) {
                 ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
@@ -439,7 +395,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
      *                otherwise
      */
     private boolean validGameType(String type) {
-        return GameType.typeExists(type);
+        return true;
     }
     
     /**
@@ -450,14 +406,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
      * @return          True if capacity <= the maximum capacity of type.
      */
     private boolean validGameCapacity(String type, int capacity) {
-        switch (GameType.fromString(type)) {
-            case RPS:
-                return capacity == 2;
-            case COUP:
-                return capacity == 2;
-            default:
-                break;
-        }
         return false;
     }
 	
