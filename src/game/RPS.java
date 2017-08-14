@@ -26,6 +26,7 @@ public class RPS extends ServerGame {
     
     private String player1;
     private String player2;
+    private byte winner = -1;
     private boolean gameCompleted = false;
     private boolean player1Submitted = false;
     private boolean player2Submitted = false;
@@ -109,6 +110,7 @@ public class RPS extends ServerGame {
             return "ERROR";
         }
         gameCompleted = true;
+        
         if (playerChoices[0] == ROCK && playerChoices[1] == SCISSORS) {
             return player1 + " won!";
         }
@@ -153,14 +155,16 @@ public class RPS extends ServerGame {
      * 
      * winner is a single byte corresponding to the player index starting
      * from 0 of the RPS game's winner. In the case of a draw, winner is
-     * -1.
-     * @return
+     * 2. winner is -1 if there is an error.
+     * 
+     * @return byte[3] of player1's choice, player2's choice, and the 
+     *         game result.
      */
     public byte[] result() {
         byte[] result = new byte[3];
         result[0] = playerChoices[0];
         result[1] = playerChoices[1];
-        result[2] = -1;
+        result[2] = winnerByte();
         
         return result;
     }
@@ -200,6 +204,29 @@ public class RPS extends ServerGame {
             ret += "Game in progress\n";
         }
         return ret;
+    }
+    
+    private byte winnerByte() {
+        if (!readyToDeclare()) {
+            return -1;
+        }
+        else {
+            //Draw
+            if (playerChoices[0] == playerChoices[1]) {
+                return 3;
+            }
+            
+            /**
+             * In other words, given any of the three choices, adding two
+             * to that choice and taking the result modulo 3 gives you
+             * the option that loses to the choice we started with.
+             * 
+             * For example, starting with scissors (2), adding 2 to this 
+             * gives us 4, and taking the result modulo 3 is 1, which is
+             * paper. Scissors beats paper as expected.
+             */
+            return (playerChoices[0] == ( (playerChoices[1] + 2) % 3) ) ? (byte)1: (byte)0;
+        }
     }
     
     public boolean readyToDeclare() {
