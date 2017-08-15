@@ -42,19 +42,35 @@ public class NamedChannelGroup extends DefaultChannelGroup {
         return false;
     }
     
-    public boolean remove(String username) {
+    @Override
+    public boolean remove(Object o){
+        if (o instanceof String) {
+            return remove((String) o);
+        }
+        else if (o instanceof Channel) {
+            return remove((Channel) o);
+        }
+        
+        return false;
+    }
+    
+    private boolean remove(String username) {
         //get channel corresponding to user
         Channel theChannel = channelMap.get(username);
         if (theChannel == null) {
             return false;
         }
-        super.remove(theChannel);
-        channelMap.remove(username);
         
-        return true;
+        //Remove the channel from the DefaultChannelGroup
+        boolean channelRemoved = super.remove(theChannel);
+        
+        //Remove the username/channel mapping
+        boolean mappingRemoved = channelMap.remove(username) == null ? false: true;
+        
+        return (channelRemoved && mappingRemoved);
     }
     
-    public boolean remove(Channel aChannel) {
+    private boolean remove(Channel aChannel) {
         String username = channelMap.inverse().get(aChannel);
         return remove(username);
     }

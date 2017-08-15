@@ -26,7 +26,7 @@ public abstract class ServerGame {
         if (players == null) {
             throw new Exception("Invalid Game Data Received");
         }
-        if (players.size() <= minPlayers() || players.size() > maxPlayers()) {
+        if (players.size() < minPlayers() || players.size() > maxPlayers()) {
             throw new Exception("Invalid num players for Game");
         }
         

@@ -12,6 +12,7 @@ import Schema.Data;
 import Schema.Message;
 import Schema.GameCreationRequest;
 import Schema.ListType;
+import game.GameType;
 import game.RPS;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -258,50 +259,77 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             currentChatLobby.writeAndFlush(new BinaryWebSocketFrame(buf));
             
 		}
-		else if (msg instanceof BinaryWebSocketFrame) {
-		    System.out.println("[ChatServerHandler] Received BinaryWebSocketFrame");
-		    BinaryWebSocketFrame data = (BinaryWebSocketFrame) msg;
-		    ByteBuf dataBuffer = data.content();
-		    
-		    Message fbMsg = Message.getRootAsMessage(dataBuffer.nioBuffer());
-		    
-		    if (fbMsg.dataType() == Data.GameCreationRequest) {
-		        System.out.println("[ChatServerHandler] Got game creation request");
-		        
-		        GameCreationRequest request = (GameCreationRequest) fbMsg.data(new GameCreationRequest());
-		        
-		        if (!validGameRequest(request)) {
-		            ctx.close();
-		            System.out.println("[ChatServerHandler] User: " + username + " sent malformed"
-		                    + " game lobby request data, closed connection."); 
-		            return;
-		        }
-		        GameLobby gameLobby = new GameLobby(request.name(), request.type(), request.capacity());
-		        gameLobby.setPassword(request.password());
-		        //System.out.println("[ChatServerHandler] Creating game lobby with info: " + gameLobby.lobbyInfo());
-		        
-		        //Add lobby host
-		        if (gameLobby.add(this.ch, this.username)) {
-		            System.out.println("successfully added user: " + username + " to gamelobby");
-		            gameLobby.setHost(this.username);
-	                gameLobbies.add(gameLobby);
-	                currentGameLobby = gameLobby;
-		        }
-		        else {
-		            return;
-		        }
-		        
-		        //send back to client so that they know lobby creation was successful
-		        ch.write(data);
-		        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
-		        return;
-		        
-		    }
-		    else {
-		        System.out.println("[ChatServerHandler] Received unk binary data");
-		    }
-		    
-		}
+        else if (msg instanceof BinaryWebSocketFrame) {
+            System.out.println("[ChatServerHandler] Received BinaryWebSocketFrame");
+            BinaryWebSocketFrame data = (BinaryWebSocketFrame) msg;
+            ByteBuf dataBuffer = data.content();
+
+            Message fbMsg = Message.getRootAsMessage(dataBuffer.nioBuffer());
+
+            if (fbMsg.dataType() == Data.GameCreationRequest) {
+                // If user is not currently in a Game Lobby, create a new game 
+                // lobby with them as the host
+                if (currentGameLobby == null) {
+                    System.out.println("[ChatServerHandler] Got game creation request");
+
+                    GameCreationRequest request = (GameCreationRequest) fbMsg.data(new GameCreationRequest());
+
+                    if (!validGameRequest(request)) {
+                        ctx.close();
+                        System.out.println("[ChatServerHandler] User: " + username + " sent malformed"
+                                + " game lobby request data, closed connection.");
+                        return;
+                    }
+                    GameLobby gameLobby = new GameLobby(request.name(), request.type(), request.capacity());
+                    gameLobby.setPassword(request.password());
+
+                    // Add lobby host
+                    if (gameLobby.add(this.ch, this.username)) {
+                        System.out.println("successfully added user: " + username + " to gamelobby");
+                        gameLobby.setHost(this.username);
+                        gameLobbies.add(gameLobby);
+                        currentGameLobby = gameLobby;
+                    }
+                    else {
+                        return;
+                    }
+
+                    // send back to client so that they know lobby creation was
+                    // successful
+                    ch.write(data);
+                    ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+                    return;
+
+                }
+                // User is in a game lobby already. Create the game if possible.
+                else {
+                    //Do nothing if there are not enough users to start
+                    //Only hosts can start game
+                    if (currentGameLobby.size() < 2 || !currentGameLobby.isHost(this.username)) {
+                        return;
+                    }
+                    
+                    //Remove this game lobby from the lobby list (prevent joiners)
+                    gameLobbies.remove(currentGameLobby);
+                    
+                    //Create the game
+                    RPS newGame = new RPS(currentGameLobby.getUsers());
+                    
+                    //Assign each lobby user the game's handler server side
+                    for (Channel user : currentGameLobby.channelMap.values()) {
+                        user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby));
+                        
+                    }
+                    
+                    //currentGameLobby = null;
+                    
+                }
+            }
+            else {
+                System.out.println("[ChatServerHandler] Received unk binary data");
+            }
+
+        }
 		else if (msg instanceof ByteBuf) {
 		    System.out.println("[ChatServerHandler] Received ByteBuf");
 		    ByteBuf buf = (ByteBuf) msg;
@@ -395,7 +423,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
      *                otherwise
      */
     private boolean validGameType(String type) {
-        return true;
+        return GameType.typeExists(type);
     }
     
     /**
@@ -406,7 +434,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
      * @return          True if capacity <= the maximum capacity of type.
      */
     private boolean validGameCapacity(String type, int capacity) {
-        return false;
+        switch (GameType.fromString(type)) {
+            case RPS:
+                return capacity == 2;
+            case COUP:
+                return capacity == 2;
+            default:
+                break;
+        }
+        return false; 
     }
 	
     /**

@@ -1,5 +1,6 @@
 package com.test.chatserver;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Stack;
 
@@ -21,12 +22,15 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final RPS game;
     private final GameLobby lobby;
     
-    public ServerRPSHandler(RPS game, GameLobby lobby, GameType type) 
-            throws Exception {
-        if (lobby.size() == 0 || game == null || type == null) {
+    public ServerRPSHandler(RPS game, GameLobby lobby) throws Exception {
+        if (game == null || lobby == null) {
             throw new NullPointerException();
         }
-        
+        System.out.println("Lobby size: " + lobby.size());
+        System.out.println("Users in lobby: " + lobby.getUsers());
+        if (lobby.size() > RPS.MAX_PLAYERS || lobby.size() < RPS.MIN_PLAYERS) {
+            throw new IndexOutOfBoundsException();
+        }
         
         this.game = game;
         this.lobby = lobby;
@@ -36,9 +40,16 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         //TODO: Notify connected users that handler was added
+        TimeChatMessage timeMessage = new TimeChatMessage("admin", "Got in RPS Game");
+        
+        ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
+        ByteBuf buf = Unpooled.copiedBuffer(data);
+        ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
         //TODO: Send each connected user an instance of FlatBuffers serialized
         //      RPS Game
+        
+        
         //TODO: Set timer for RPS to emit decision after N seconds.
     }
     

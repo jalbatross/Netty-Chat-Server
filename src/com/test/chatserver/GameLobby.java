@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import game.GameType;
+import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
@@ -33,6 +34,10 @@ public class GameLobby extends NamedChannelGroup {
     
     public String host() {
         return this.host;
+    }
+    
+    public boolean isHost(String username) {
+        return username.contentEquals(host);
     }
     
     public void kick(String user) {
@@ -80,12 +85,29 @@ public class GameLobby extends NamedChannelGroup {
     }
     
     @Override
-    public boolean remove(String username) {
-        if(username.contentEquals(this.host)) {
+    public boolean remove(Object o) {
+        String usernameToRemove = null;
+        if (o instanceof String) {
+            usernameToRemove = (String) o;
+        }
+        else if (o instanceof Channel) {
+            usernameToRemove = getUser((Channel) o);
+        }
+        else {
+            return false;
+        }
+        
+        if (usernameToRemove == null || usernameToRemove.isEmpty()) {
+            return false;
+        }
+        
+        if(usernameToRemove.contentEquals(this.host)) {
             assignNewHost();
         }
         
-        return super.remove(username);
+        return super.remove(usernameToRemove);
     }
+    
+    
 
 }
