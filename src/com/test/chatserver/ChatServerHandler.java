@@ -10,6 +10,8 @@ import com.google.gson.JsonParser;
 import Schema.Chat;
 import Schema.Data;
 import Schema.Message;
+import Schema.Request;
+import Schema.RequestType;
 import Schema.GameCreationRequest;
 import Schema.ListType;
 import game.GameType;
@@ -142,14 +144,6 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			
 			String strMsg = ((TextWebSocketFrame) msg).text();
 			
-			if (strMsg.equalsIgnoreCase("/lobbies")) {    
-	            ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
-	            return;
-			}
-			if (strMsg.equalsIgnoreCase("/lobby")) {
-			    ch.writeAndFlush(lobbyConnectMessage());
-	            return;
-			}
 			if (strMsg.startsWith("/connect ")) {
 			    //get lobby name
 			    String lobbyName = strMsg.substring(9);
@@ -164,37 +158,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 			    }
 			    return;
 			}
-			else if (strMsg.contentEquals("rock") || strMsg.contentEquals("paper") || strMsg.contentEquals("scissors")) {
-			    ctx.fireChannelRead(msg);
-			    return;
-			}
-			else if (strMsg.contentEquals("/games")) {
-                ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
-                
-                return;
-			}
-			else if (strMsg.contentEquals("/leave")) {	   
-			    synchronized (gameLobbies) {
-			        Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
-
-		            for (GameLobby gameLobby : gameLobbies) {
-		                if (gameLobby.remove(username) && !gameLobby.isEmpty()) {
-		                    gameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(gameLobby)));
-		                }
-		                
-		                if (gameLobby.isEmpty()) {
-		                    emptyLobbies.add(gameLobby);
-		                }
-		            }
-
-		            // clean up
-		            while (!emptyLobbies.isEmpty()) {
-		                gameLobbies.remove(emptyLobbies.pop());
-		            }
-			    }
-			    currentGameLobby = null;
-			    return;
-			}
+			
 			else if (strMsg.startsWith("/join ")) {
 			    String gameLobbyName = strMsg.substring(6);
 
@@ -301,28 +265,66 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                     return;
 
                 }
-                // User is in a game lobby already. Create the game if possible.
-                else {
-                    //Do nothing if there are not enough users to start
-                    //Only hosts can start game
-                    if (currentGameLobby.size() < 2 || !currentGameLobby.isHost(this.username)) {
+            }
+            else if (fbMsg.dataType() == Data.Request) {
+                Request request = (Request) fbMsg.data(new Request());
+                switch(request.type()) {
+                    case RequestType.CHAT_LOBBIES:
+                        ch.writeAndFlush(new BinaryWebSocketFrame(lobbiesData()));
                         return;
-                    }
-                    
-                    //Remove this game lobby from the lobby list (prevent joiners)
-                    gameLobbies.remove(currentGameLobby);
-                    
-                    //Create the game
-                    RPS newGame = new RPS(currentGameLobby.getUsers());
-                    
-                    //Assign each lobby user the game's handler server side
-                    for (Channel user : currentGameLobby.channelMap.values()) {
-                        user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby));
+                    case RequestType.CURRENT_CHAT_LOBBY_INFO:
+                        ch.writeAndFlush(lobbyConnectMessage());
+                        return;
+                    case RequestType.GAME_LOBBIES:
+                        ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbiesData()));
+                        return;
+                    case RequestType.LEAVE_GAME:
+                        synchronized (gameLobbies) {
+                            Stack<GameLobby> emptyLobbies = new Stack<GameLobby>();
+
+                            for (GameLobby gameLobby : gameLobbies) {
+                                if (gameLobby.remove(username) && !gameLobby.isEmpty()) {
+                                    gameLobby.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(gameLobby)));
+                                }
+                                
+                                if (gameLobby.isEmpty()) {
+                                    emptyLobbies.add(gameLobby);
+                                }
+                            }
+
+                            // clean up
+                            while (!emptyLobbies.isEmpty()) {
+                                gameLobbies.remove(emptyLobbies.pop());
+                            }
+                        }
+                        currentGameLobby = null;
+                        return;
+                    case RequestType.START_GAME:
+                        //Do nothing if there are not enough users to start
+                        //Only hosts can start game
+                        if (currentGameLobby.size() < 2 || !currentGameLobby.isHost(this.username)) {
+                            return;
+                        }
                         
-                    }
-                    
-                    //currentGameLobby = null;
-                    
+                        //Remove this game lobby from the lobby list (prevent joiners)
+                        gameLobbies.remove(currentGameLobby);
+                        
+                        //Create the game
+                        RPS newGame = new RPS(currentGameLobby.getUsers());
+                        
+                        //Assign each lobby user the game's handler server side
+                        for (Channel user : currentGameLobby.channelMap.values()) {
+                            user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby));
+                            
+                        }
+                        
+                        //currentGameLobby = null;
+                        return;
+                    default: 
+                        System.out.println("ERROR: Unk RequestType received");
+                        ctx.close();
+                        return;
+              
                 }
             }
             else {

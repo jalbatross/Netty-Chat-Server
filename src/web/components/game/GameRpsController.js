@@ -14,16 +14,30 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     $rps.player2.name = "Bob";
 
     $rps.countdownFinished = function() {
-        var randomNumber = Math.floor(Math.random() * 1000);
-        //Choose random winner
-        if (randomNumber % 2 === 0) {
-            $rps.win();
-        } 
-        else {
-            $rps.lose();
+        //Choose random choice if user has not sent in a choice yet
+        if (!$rps.sentChoice) {
+            var randomNumber = Math.floor(Math.random() * 1000) % 3;
+            switch (randomNumber) {
+                case 0:
+                  //rock
+                  break;
+                case 1:
+                  //paper
+                  break;
+                case 2:
+                  //scissors
+                  break;
+                default:
+                  alert('error');
+            }
+
+            sendChoice($rps.choice);
+            $rps.sentChoice = true;
         }
+
+
         if (!$rps.gameOver) {
-            $scope.$broadcast('timer-set-countdown', 5);
+            $scope.$broadcast('timer-set-countdown', 10);
             $scope.$broadcast('timer-start');
         }
     }
@@ -59,8 +73,6 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
             }
         }
     }
-
-
 
     $scope.$on('$destroy', function() {
         alert('destroyed rps');

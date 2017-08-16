@@ -18,9 +18,37 @@ angular.module("chatApp").controller("ChatLobbiesController", function($scope, $
         console.log('[LobbiesController] connected');
     }
 
+    /**
+     * Returns the bytes of a Flatbuffers serialized Message object
+     * containing a Schema.Request object of RequestType type.
+     * 
+     * @param  {Schema.RequestType} type   Type of request
+     * @return {Uint8Array}                bytes of Flatbuffers Message
+     *                          
+     */
+    //TODO: pass in a builder as the builder is expensive
+    function makeFlatbuffersRequest(type) {
+        let builder = new flatbuffers.Builder(1024);
+        Schema.Request.startRequest(builder);
+        Schema.Request.addType(builder, type);
+        let req = Schema.Request.endRequest(builder);
+
+        Schema.Message.startMessage(builder);
+        Schema.Message.addDataType(builder, Schema.Data.Request);
+        Schema.Message.addData(builder, req);
+
+        let data = Schema.Message.endMessage(builder);
+
+        builder.finish(data);
+
+        return builder.asUint8Array();
+    }
+
     $scope.lobbies = [];
     var socket = websockets.getSocket();
-    socket.send('/lobbies');
+
+    var lobbiesRequestBytes = makeFlatbuffersRequest(Schema.RequestType.CHAT_LOBBIES);
+    socket.send(lobbiesRequestBytes);
     $scope.data = "";
 
     function Lobby(name, capacity) {
@@ -96,5 +124,5 @@ angular.module("chatApp").controller("ChatLobbiesController", function($scope, $
         socket.send("/connect " + lobbyName);
     }
 
-    
+
 });

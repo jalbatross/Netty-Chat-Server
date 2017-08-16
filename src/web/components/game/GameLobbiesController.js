@@ -3,14 +3,39 @@ angular.module("chatApp").controller("GameLobbiesController", function($scope, w
     $scope.gameLobbies = [];
 
     var socket = websockets.getSocket();
-    socket.send('/games');
+    socket.send(makeFlatbuffersRequest(Schema.RequestType.GAME_LOBBIES));
+
+    /**
+     * Returns the bytes of a Flatbuffers serialized Message object
+     * containing a Schema.Request object of RequestType type.
+     * 
+     * @param  {Schema.RequestType} type   Type of request
+     * @return {Uint8Array}                bytes of Flatbuffers Message
+     *                          
+     */
+    function makeFlatbuffersRequest(type) {
+        let builder = new flatbuffers.Builder(1024);
+        Schema.Request.startRequest(builder);
+        Schema.Request.addType(builder, type);
+        let req = Schema.Request.endRequest(builder);
+
+        Schema.Message.startMessage(builder);
+        Schema.Message.addDataType(builder, Schema.Data.Request);
+        Schema.Message.addData(builder, req);
+
+        let data = Schema.Message.endMessage(builder);
+
+        builder.finish(data);
+
+        return builder.asUint8Array();
+    }
 
     /**
      * Refreshes game lobbies list
      */
     $scope.refreshLobbies = function() {
         console.log('*** CLICKED REF LOBBIES ***');
-        socket.send('/games');
+        socket.send(makeFlatbuffersRequest(Schema.RequestType.GAME_LOBBIES));
     }
 
     /**

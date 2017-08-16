@@ -15,7 +15,29 @@ Schema.Data = {
   Credentials: 2,
   Auth: 3,
   List: 4,
-  GameCreationRequest: 5
+  GameCreationRequest: 5,
+  Game: 6,
+  GameUpdate: 7,
+  Request: 8
+};
+
+/**
+ * @enum
+ */
+Schema.GameType = {
+  RPS: 0,
+  COUP: 1
+};
+
+/**
+ * @enum
+ */
+Schema.RequestType = {
+  CHAT_LOBBIES: 0,
+  CURRENT_CHAT_LOBBY_INFO: 1,
+  GAME_LOBBIES: 2,
+  START_GAME: 3,
+  LEAVE_GAME: 4
 };
 
 /**
@@ -541,6 +563,378 @@ Schema.GameCreationRequest.endGameCreationRequest = function(builder) {
   var offset = builder.endObject();
   builder.requiredField(offset, 4); // name
   builder.requiredField(offset, 6); // type
+  return offset;
+};
+
+/**
+ * @constructor
+ */
+Schema.Game = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Schema.Game}
+ */
+Schema.Game.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Schema.Game=} obj
+ * @returns {Schema.Game}
+ */
+Schema.Game.getRootAsGame = function(bb, obj) {
+  return (obj || new Schema.Game).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @returns {Schema.GameType}
+ */
+Schema.Game.prototype.type = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? /** @type {Schema.GameType} */ (this.bb.readInt8(this.bb_pos + offset)) : Schema.GameType.RPS;
+};
+
+/**
+ * @param {number} index
+ * @returns {number}
+ */
+Schema.Game.prototype.gameData = function(index) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.readInt8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
+};
+
+/**
+ * @returns {number}
+ */
+Schema.Game.prototype.gameDataLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {Int8Array}
+ */
+Schema.Game.prototype.gameDataArray = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? new Int8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
+};
+
+/**
+ * @param {number} index
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array}
+ */
+Schema.Game.prototype.players = function(index, optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.__string(this.bb.__vector(this.bb_pos + offset) + index * 4, optionalEncoding) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Schema.Game.prototype.playersLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 8);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {number}
+ */
+Schema.Game.prototype.bestOf = function() {
+  var offset = this.bb.__offset(this.bb_pos, 10);
+  return offset ? this.bb.readInt16(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {boolean}
+ */
+Schema.Game.prototype.completed = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+  return offset ? !!this.bb.readInt8(this.bb_pos + offset) : false;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Schema.Game.startGame = function(builder) {
+  builder.startObject(5);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Schema.GameType} type
+ */
+Schema.Game.addType = function(builder, type) {
+  builder.addFieldInt8(0, type, Schema.GameType.RPS);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} gameDataOffset
+ */
+Schema.Game.addGameData = function(builder, gameDataOffset) {
+  builder.addFieldOffset(1, gameDataOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<number>} data
+ * @returns {flatbuffers.Offset}
+ */
+Schema.Game.createGameDataVector = function(builder, data) {
+  builder.startVector(1, data.length, 1);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addInt8(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Schema.Game.startGameDataVector = function(builder, numElems) {
+  builder.startVector(1, numElems, 1);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} playersOffset
+ */
+Schema.Game.addPlayers = function(builder, playersOffset) {
+  builder.addFieldOffset(2, playersOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Schema.Game.createPlayersVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Schema.Game.startPlayersVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} bestOf
+ */
+Schema.Game.addBestOf = function(builder, bestOf) {
+  builder.addFieldInt16(3, bestOf, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {boolean} completed
+ */
+Schema.Game.addCompleted = function(builder, completed) {
+  builder.addFieldInt8(4, +completed, +false);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Schema.Game.endGame = function(builder) {
+  var offset = builder.endObject();
+  return offset;
+};
+
+/**
+ * @constructor
+ */
+Schema.GameUpdate = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Schema.GameUpdate}
+ */
+Schema.GameUpdate.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Schema.GameUpdate=} obj
+ * @returns {Schema.GameUpdate}
+ */
+Schema.GameUpdate.getRootAsGameUpdate = function(bb, obj) {
+  return (obj || new Schema.GameUpdate).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @param {number} index
+ * @returns {number}
+ */
+Schema.GameUpdate.prototype.update = function(index) {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.readInt8(this.bb.__vector(this.bb_pos + offset) + index) : 0;
+};
+
+/**
+ * @returns {number}
+ */
+Schema.GameUpdate.prototype.updateLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {Int8Array}
+ */
+Schema.GameUpdate.prototype.updateArray = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? new Int8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Schema.GameUpdate.startGameUpdate = function(builder) {
+  builder.startObject(1);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} updateOffset
+ */
+Schema.GameUpdate.addUpdate = function(builder, updateOffset) {
+  builder.addFieldOffset(0, updateOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<number>} data
+ * @returns {flatbuffers.Offset}
+ */
+Schema.GameUpdate.createUpdateVector = function(builder, data) {
+  builder.startVector(1, data.length, 1);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addInt8(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Schema.GameUpdate.startUpdateVector = function(builder, numElems) {
+  builder.startVector(1, numElems, 1);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Schema.GameUpdate.endGameUpdate = function(builder) {
+  var offset = builder.endObject();
+  return offset;
+};
+
+/**
+ * @constructor
+ */
+Schema.Request = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Schema.Request}
+ */
+Schema.Request.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Schema.Request=} obj
+ * @returns {Schema.Request}
+ */
+Schema.Request.getRootAsRequest = function(bb, obj) {
+  return (obj || new Schema.Request).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @returns {Schema.RequestType}
+ */
+Schema.Request.prototype.type = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? /** @type {Schema.RequestType} */ (this.bb.readInt8(this.bb_pos + offset)) : Schema.RequestType.CHAT_LOBBIES;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Schema.Request.startRequest = function(builder) {
+  builder.startObject(1);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Schema.RequestType} type
+ */
+Schema.Request.addType = function(builder, type) {
+  builder.addFieldInt8(0, type, Schema.RequestType.CHAT_LOBBIES);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Schema.Request.endRequest = function(builder) {
+  var offset = builder.endObject();
   return offset;
 };
 

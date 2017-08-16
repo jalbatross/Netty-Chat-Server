@@ -2,9 +2,18 @@
 
 namespace Schema;
 
-union Data {Chat, Credentials, Auth, List, GameCreationRequest, Game, GameUpdate} 
+union Data {Chat, Credentials, Auth, List, GameCreationRequest, Game, GameUpdate, 
+            Request} 
 
-enum GameType : byte {RPS, COUP,}
+enum GameType : byte {RPS, COUP}
+
+enum RequestType : byte {
+  CHAT_LOBBIES = 0,
+  CURRENT_CHAT_LOBBY_INFO = 1,
+  GAME_LOBBIES = 2,
+  START_GAME = 3,
+  LEAVE_GAME = 4
+}
 
 table Chat {
   timestamp:ulong;
@@ -54,6 +63,10 @@ table Game {
 
 table GameUpdate {
   update: [byte]; 
+}
+
+table Request {
+  type: RequestType;
 }
 
 table Message {
