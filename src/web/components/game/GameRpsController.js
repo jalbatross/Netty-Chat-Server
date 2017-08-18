@@ -1,8 +1,10 @@
 angular.module("chatApp").controller("GameRpsController", function($scope, websockets, game) {
     var $rps = this;
 
-    $rps.bestOf = 5;
-    $rps.gameOver = false;
+    $rps.game = game.currentGame();
+
+    $rps.bestOf = $rps.game.bestOf;
+    $rps.gameOver = $rps.game.completed;
 
     $rps.p1Wins = new Array(($rps.bestOf + 1) / 2).fill(false);
     $rps.p2Wins = new Array(($rps.bestOf + 1) / 2).fill(false);
@@ -10,9 +12,10 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     $rps.player1 = {};
     $rps.player2 = {};
 
-    $rps.player1.name = "Alice";
-    $rps.player2.name = "Bob";
+    $rps.player1.name = $rps.game.players[0];
+    $rps.player2.name = $rps.game.players[1];
 
+    //TODO: implement send choice
     $rps.countdownFinished = function() {
         //Choose random choice if user has not sent in a choice yet
         if (!$rps.sentChoice) {

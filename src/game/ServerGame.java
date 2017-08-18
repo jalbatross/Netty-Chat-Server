@@ -87,14 +87,27 @@ public abstract class ServerGame {
     
     /**
      * Minimum number of players required to play the ServerGame.
+     * Specify as a class constant.
      * 
      */
     public abstract int minPlayers();
     
     /**
      * Maximum number of players allowed to play the ServerGame.
+     * Specify as a class constant.
      */
     public abstract int maxPlayers();
+    
+    /**
+     * Returns the maximum number of games to be played.
+     */
+    public abstract short bestOf();
+    
+    /**
+     * Type of ServerGame. 
+     * Specify as a class constant.
+     */
+    public abstract GameType type();
     
     /**
      * A function that processes a series of bytes as a particular player's
@@ -106,6 +119,13 @@ public abstract class ServerGame {
      * @throws Exception       Throw exception if player is not in the Game.
      */
     public abstract void processAction(byte[] turnAction, String player) throws Exception;
+    
+    /**
+     * Specifies the current gamestate as a byte[].
+     * 
+     * @return
+     */
+    public abstract byte[] gameState();
     
     /**
      * Indicates whether or not the ServerGame is completed.

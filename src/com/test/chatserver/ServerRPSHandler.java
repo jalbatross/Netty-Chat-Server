@@ -38,16 +38,13 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     }
     
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-        //TODO: Notify connected users that handler was added
-        TimeChatMessage timeMessage = new TimeChatMessage("admin", "Got in RPS Game");
-        
-        ByteBuffer data = FlatBuffersCodec.chatToByteBuffer(timeMessage);
-        ByteBuf buf = Unpooled.copiedBuffer(data);
-        ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
-        
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         //TODO: Send each connected user an instance of FlatBuffers serialized
         //      RPS Game
+        ByteBuffer data = FlatBuffersCodec.gameToByteBuffer(game);
+        ByteBuf buf = Unpooled.copiedBuffer(data);
+        
+        ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
         
         //TODO: Set timer for RPS to emit decision after N seconds.

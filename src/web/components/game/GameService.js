@@ -8,21 +8,22 @@
             var _lobbyUsers = [];
 
             var _currentGameLobby = new GameLobby(undefined, undefined, undefined);
+            var _currentGame = new Game(undefined, undefined, undefined, undefined, undefined);
             var _dataReady = false;
 
             _socket.addEventListener("message", function(event) {
                 console.log('[GameService] Got message');
                 _dataReady = false;
-                var bytes = new Uint8Array(event.data);
+                let bytes = new Uint8Array(event.data);
 
-                var buf = new flatbuffers.ByteBuffer(bytes);
-                var msg = Schema.Message.getRootAsMessage(buf);
+                let buf = new flatbuffers.ByteBuffer(bytes);
+                let msg = Schema.Message.getRootAsMessage(buf);
 
-                var dataType = msg.dataType();
+                let dataType = msg.dataType();
 
                 if (dataType === Schema.Data.GameCreationRequest) {
                     console.log('[GameService] Updating lobby');
-                    var temp = msg.data(new Schema.GameCreationRequest());
+                    let temp = msg.data(new Schema.GameCreationRequest());
 
                     _currentGameLobby.name = temp.name();
                     _currentGameLobby.type = temp.type();
@@ -30,7 +31,7 @@
 
                     _inLobby = true;
 
-                    $rootScope.$emit('updateGame');
+                    $rootScope.$emit('updateGameLobby');
                     console.log('[GameService] finished updating lobby with name ', _currentGameLobby.name);
                 } 
                 else if (dataType === Schema.Data.List && msg.data(new Schema.List()).type() === 'gameLobbyUsers') {
@@ -49,8 +50,31 @@
                         return;
                     }
 
-                    $rootScope.$emit('updateGame');
+                    $rootScope.$emit('updateGameLobby');
                     console.log('[GameService] finished updating lobby USERS with name ', _currentGameLobby.name);
+                }
+                else if (dataType == Schema.Data.Game) {
+                    console.log('[GameService] Retrieved Game from server');
+
+                    let temp = msg.data(new Schema.Game());
+
+                    _currentGame.type = temp.type();
+                    _currentGame.data = temp.gameDataArray();
+                    _currentGame.players = [];
+                    for (let i = 0; i < temp.playersLength(); i++) {
+                        _currentGame.players[i] = temp.players(i);
+                    }
+                    _currentGame.bestOf = temp.bestOf();
+                    _currentGame.completed = temp.completed();
+
+                    console.log('[GameService] Got Game from server with data: \n',
+                        'type: ', _currentGame.type, '\n',
+                        'data: ', _currentGame.data, '\n',
+                        'players ', _currentGame.players, '\n',
+                        'bestOf ', _currentGame.bestOf, '\n',
+                        'completed ', _currentGame.completed, '\n');
+
+                    $rootScope.$emit('updateGame');
                 }
 
 
@@ -63,6 +87,10 @@
 
             this.currentLobby = function() {
                 return _currentGameLobby;
+            }
+
+            this.currentGame = function() {
+                return _currentGame;
             }
 
             this.lobbyUserList = function() {
@@ -104,6 +132,8 @@
                 _currentGameLobby.type = undefined;
                 _currentGameLobby.capacity = undefined;
 
+                //TODO: Do for _currentGame
+
                 _lobbyUsers.length = 0;
             }
 
@@ -116,6 +146,14 @@
                 this.name = name;
                 this.type = type;
                 this.capacity = capacity;
+            }
+
+            function Game(type, data, players, bestOf, completed) {
+                this.type = type;
+                this.data = data;
+                this.players = players;
+                this.bestOf = bestOf;
+                this.completed = completed;
             }
 
             /**

@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import Schema.*;
+import game.ServerGame;
 
 import java.nio.ByteBuffer;
 
@@ -15,7 +16,7 @@ import com.google.flatbuffers.Table;
  * Takes ByteBufs or byte arrays and converts them to
  * appropriate type of Message data and vice versa
  * 
- * @see Schema
+ * @see {@link Schema}
  * 
  * @author jalbatross (Joey Albano)
  *
@@ -154,6 +155,56 @@ public class FlatBuffersCodec {
         Message.startMessage(fbb);
         Message.addDataType(fbb, Data.List);
         Message.addData(fbb, listFinal);
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+    }
+    
+    static public ByteBuffer gameToByteBuffer(ServerGame game) throws Exception {
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        byte gameType = '\0';
+        int gameData;
+        int[] playerNamesData = new int[game.players().size()];
+        int playerNamesVect = 0 ;
+        short bestOf = 0;
+        boolean completed = false;
+        
+        //Get game type
+        switch (game.type()) {
+            case RPS:
+                gameType = Schema.GameType.RPS;
+                break;
+            case COUP:
+                gameType = Schema.GameType.COUP;
+                break;
+            default:
+                throw new Exception("Invalid game type for FlatBuffers game");
+                
+        }
+        
+        //Get gamestate
+        gameData = fbb.createByteVector(game.gameState());
+        
+        //Create player names offset
+        for (int i = 0; i < game.players().size(); i++ ) {
+            playerNamesData[i] = fbb.createString(game.players().get(i));
+        }
+        playerNamesVect = Game.createPlayersVector(fbb, playerNamesData);
+        
+        //Get bestof data
+        bestOf = game.bestOf();
+        
+        //Get gameover
+        completed = game.gameOver();
+        
+        int fbGame = Game.createGame(fbb, gameType, gameData, playerNamesVect, bestOf, completed);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.Game);
+        Message.addData(fbb, fbGame);
         
         int finishedMsg = Message.endMessage(fbb);
         fbb.finish(finishedMsg);

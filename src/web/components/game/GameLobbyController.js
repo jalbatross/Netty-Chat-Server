@@ -17,7 +17,7 @@ angular.module("chatApp").controller("GameLobbyController", function($scope, web
     $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity, $scope.gameLobby.type);
 
 
-    var updateGameListener = $rootScope.$on('updateGame', function(){
+    var updateGameListener = $rootScope.$on('updateGameLobby', function(){
         $scope.selectedCapacity = $scope.gameLobby.capacity;
         $scope.generatedCapacities = generateCapacities($scope.gameLobby.capacity, $scope.gameLobby.type);
         $scope.$apply();

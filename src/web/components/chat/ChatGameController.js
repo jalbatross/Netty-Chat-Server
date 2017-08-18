@@ -53,10 +53,15 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
         $ctrl.gameModalTemplate = rpsGameUrl;
     }
 
-    var updateGameListener = $rootScope.$on('updateGame', function() {
+    var gameLobbyListener = $rootScope.$on('updateGameLobby', function() {
         $ctrl.showGameLobbyDialog();
         $scope.$apply();
 
+    });
+
+    var gameListener = $rootScope.$on('updateGame', function() {
+        $ctrl.showGameDialog();
+        $scope.$apply();
     });
 
     var kickedListener = $rootScope.$on('quitLobby', function() {

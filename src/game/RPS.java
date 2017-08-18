@@ -16,6 +16,7 @@ public class RPS extends ServerGame {
     //byte[1] contains player2's choice
     private byte[] playerChoices = new byte[2];
     
+    public static final byte NO_DATA = -1;
     public static final byte ROCK = 0;
     public static final byte PAPER = 1;
     public static final byte SCISSORS = 2;
@@ -26,13 +27,14 @@ public class RPS extends ServerGame {
     
     private String player1;
     private String player2;
-    private byte winner = -1;
+    
     private boolean gameCompleted = false;
     private boolean player1Submitted = false;
     private boolean player2Submitted = false;
     
     public RPS(ArrayList<String> players) throws Exception {
         super(players);
+        playerChoices[0] = playerChoices[1] = NO_DATA;
     }
    
     
@@ -45,6 +47,17 @@ public class RPS extends ServerGame {
     @Override
     public int maxPlayers() {
         return MAX_PLAYERS;
+    }
+    
+    //TODO: Implement in constructor
+    @Override
+    public short bestOf() {
+        return 1;
+    }
+    
+    @Override
+    public GameType type() {
+        return TYPE;
     }
 
     
@@ -143,24 +156,28 @@ public class RPS extends ServerGame {
     }
     
     /**
-     * Returns the result of the game in a size 3 byte array.
+     * Returns the state of the game in a size 3 byte array.
      * result =  [player1Choice, player2Choice, winner]
      * 
-     * player1Choice and player2Choice are single bytes between 0 and
+     * player1Choice and player2Choice are single bytes between -1 and
      * 2 inclusive.
      * 
+     * NO_DATA: -1 (the player has not submitted a choice yet)
      * ROCK: 0
      * PAPER: 1
      * SCISSORS: 2
      * 
      * winner is a single byte corresponding to the player index starting
-     * from 0 of the RPS game's winner. In the case of a draw, winner is
-     * 2. winner is -1 if there is an error.
+     * from 0 of the RPS game's winner. 
+     * NO_DATA: -1 (the game is not over yet)
+     * P1 WIN: 0
+     * P2 WIN: 1
+     * DRAW: 2
      * 
      * @return byte[3] of player1's choice, player2's choice, and the 
-     *         game result.
+     *         game's winner.
      */
-    public byte[] result() {
+    public byte[] gameState() {
         byte[] result = new byte[3];
         result[0] = playerChoices[0];
         result[1] = playerChoices[1];
@@ -191,7 +208,7 @@ public class RPS extends ServerGame {
         return -1;
     }
     
-    public String gameState() {
+    public String gameStateString() {
         String ret = new String();
         ret += "--- Players ---\n" + 
         "Player 1: " + player1 + ", Choice: " + playerChoices[0] + "\n" +
@@ -208,12 +225,13 @@ public class RPS extends ServerGame {
     
     private byte winnerByte() {
         if (!readyToDeclare()) {
-            return -1;
+            return NO_DATA;
         }
         else {
+            gameCompleted = true;
             //Draw
             if (playerChoices[0] == playerChoices[1]) {
-                return 3;
+                return 2;
             }
             
             /**
