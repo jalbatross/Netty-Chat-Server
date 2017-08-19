@@ -12,7 +12,7 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
 
         var nameData = builder.createString($scope.username);
         var pwData = builder.createString($scope.password);
-        $scope.username = "";
+
         $scope.password = "";
 
 
@@ -64,7 +64,11 @@ angular.module("chatApp").controller("LoginController", function($scope,$state, 
                 console.log("got unknown stuff, here it is: ", response.data);
             }
             websockets.setTicket(ticket);
+
             websockets.connect();
+
+            websockets.setUsername($scope.username);
+            $scope.username = "";
 
             var socket = websockets.getSocket();
             

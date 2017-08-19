@@ -2,6 +2,7 @@
     .service('websockets', function () {
         var _socket = undefined;
         var _ticket = undefined;
+        var _username = undefined;
 
         var baseUri = "ws://localhost:8080/websocket?ticket=";
         var uri = "ws://localhost:8080/websocket?ticket=";
@@ -59,6 +60,14 @@
 
         this.isConnected = function() {
             return connected;
+        }
+
+        this.setUsername = function(name) {
+            _username = name;
+        }
+
+        this.getUsername = function() {
+            return _username;
         }
 
 

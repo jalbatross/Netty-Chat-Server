@@ -12,8 +12,15 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     $rps.player1 = {};
     $rps.player2 = {};
 
-    $rps.player1.name = $rps.game.players[0];
-    $rps.player2.name = $rps.game.players[1];
+    //Get player name
+    if (websockets.getUsername() === $rps.game.players[0]) {
+        $rps.player1.name = $rps.game.players[0];
+        $rps.player2.name = $rps.game.players[1];
+    }
+    else {
+        $rps.player1.name = $rps.game.players[1];
+        $rps.player2.name = $rps.game.players[0];
+    }
 
     //TODO: implement send choice
     $rps.countdownFinished = function() {

@@ -6,7 +6,7 @@
             var _socket = websockets.getSocket();
 
             var _lobbyUsers = [];
-
+            
             var _currentGameLobby = new GameLobby(undefined, undefined, undefined);
             var _currentGame = new Game(undefined, undefined, undefined, undefined, undefined);
             var _dataReady = false;
@@ -97,6 +97,10 @@
                 return _lobbyUsers;
             }
 
+            this.username = function() {
+                return _username;
+            }
+
             this.inGame = function() {
                 return _inGame;
             }
@@ -122,6 +126,14 @@
                 _currentGameLobby.type = type;
                 _currentGameLobby.capacity = capacity;
                 _inLobby = true;
+            }
+            
+            /**
+             * Sets username
+             * @param {string} name 
+             */
+            this.setUsername = function(name) {
+                _username = name;
             }
 
             function resetFields() {
