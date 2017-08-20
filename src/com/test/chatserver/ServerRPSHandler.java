@@ -21,8 +21,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final RPS game;
     private final GameLobby lobby;
+    private final String username;
     
-    public ServerRPSHandler(RPS game, GameLobby lobby) throws Exception {
+    public ServerRPSHandler(RPS game, GameLobby lobby, String user) throws Exception {
         if (game == null || lobby == null) {
             throw new NullPointerException();
         }
@@ -34,20 +35,16 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         
         this.game = game;
         this.lobby = lobby;
-        
+        this.username = user;
     }
     
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        //TODO: Send each connected user an instance of FlatBuffers serialized
-        //      RPS Game
         ByteBuffer data = FlatBuffersCodec.gameToByteBuffer(game);
         ByteBuf buf = Unpooled.copiedBuffer(data);
         
         ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
-        
-        //TODO: Set timer for RPS to emit decision after N seconds.
     }
     
     @Override
@@ -57,6 +54,14 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         }
         //TODO: Process GameUpdate from Channel. Pass the byte[] into RPS processAction
         //      method, update the RPS game accordingly.
+        Schema.GameUpdate update = (Schema.GameUpdate) msg;
+        
+        byte[] updateBytes = new byte[update.updateLength()];
+        for (int i = 0; i < updateBytes.length; i++) {
+            updateBytes[i] = update.update(i);
+        }
+        
+        game.processAction(updateBytes, username);
         //TODO: Close connection on exception - malformed data
         
     }

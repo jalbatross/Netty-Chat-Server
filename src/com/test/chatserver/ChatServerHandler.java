@@ -310,11 +310,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                         gameLobbies.remove(currentGameLobby);
                         
                         //Create the game
-                        RPS newGame = new RPS(currentGameLobby.getUsers());
+                        RPS newGame = new RPS(currentGameLobby.getUsers(), (short) 3);
                         
                         //Assign each lobby user the game's handler server side
                         for (Channel user : currentGameLobby.channelMap.values()) {
-                            user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby));
+                            user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby, this.username));
                             
                         }
                         
@@ -326,6 +326,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                         return;
               
                 }
+            }
+            else if (fbMsg.dataType() == Data.GameUpdate) {
+                ctx.fireChannelRead(fbMsg);
             }
             else {
                 System.out.println("[ChatServerHandler] Received unk binary data");

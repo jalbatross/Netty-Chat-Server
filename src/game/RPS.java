@@ -29,12 +29,22 @@ public class RPS extends ServerGame {
     private String player2;
     
     private boolean gameCompleted = false;
+    
+    private int p1Wins = 0;
+    private int p2Wins = 0;
+    
     private boolean player1Submitted = false;
     private boolean player2Submitted = false;
     
-    public RPS(ArrayList<String> players) throws Exception {
+    private short bestOf;
+    
+    public RPS(ArrayList<String> players, short bestOf) throws Exception {
         super(players);
         playerChoices[0] = playerChoices[1] = NO_DATA;
+        if (bestOf > 7 || bestOf < 0) {
+            bestOf = 3;
+        }
+        this.bestOf = bestOf;
     }
    
     
@@ -52,7 +62,7 @@ public class RPS extends ServerGame {
     //TODO: Implement in constructor
     @Override
     public short bestOf() {
-        return 1;
+        return bestOf;
     }
     
     @Override
@@ -182,6 +192,18 @@ public class RPS extends ServerGame {
         result[0] = playerChoices[0];
         result[1] = playerChoices[1];
         result[2] = winnerByte();
+        
+        if (result[2] == 0) {
+            p1Wins++;
+        }
+        else if (result[2] == 1) {
+            p2Wins++;
+        }
+        
+        if (p1Wins == ((bestOf + 1) / 2) || p2Wins == ((bestOf + 1) / 2)) {
+            gameCompleted = true;
+        }
+                
         
         return result;
     }
