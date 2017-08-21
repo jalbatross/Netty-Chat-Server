@@ -13,6 +13,7 @@ import Schema.Message;
 import Schema.Request;
 import Schema.RequestType;
 import Schema.GameCreationRequest;
+import Schema.GameUpdate;
 import Schema.ListType;
 import game.GameType;
 import game.RPS;
@@ -229,7 +230,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             ByteBuf dataBuffer = data.content();
 
             Message fbMsg = Message.getRootAsMessage(dataBuffer.nioBuffer());
-
+            System.out.println("[ChatServerHandler]Data type: " + fbMsg.dataType());
             if (fbMsg.dataType() == Data.GameCreationRequest) {
                 // If user is not currently in a Game Lobby, create a new game 
                 // lobby with them as the host
@@ -328,7 +329,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                 }
             }
             else if (fbMsg.dataType() == Data.GameUpdate) {
-                ctx.fireChannelRead(fbMsg);
+                System.out.println("[ChatServerHandler] Received game update");
+                ctx.fireChannelRead((GameUpdate) fbMsg.data(new GameUpdate()));
             }
             else {
                 System.out.println("[ChatServerHandler] Received unk binary data");

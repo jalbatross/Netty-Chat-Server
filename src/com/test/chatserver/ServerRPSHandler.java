@@ -52,15 +52,21 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         if (!(msg instanceof Schema.GameUpdate)) {
             return;
         }
+        System.out.println("[ServerRPSHandler] Got game action");
         //TODO: Process GameUpdate from Channel. Pass the byte[] into RPS processAction
         //      method, update the RPS game accordingly.
         Schema.GameUpdate update = (Schema.GameUpdate) msg;
         
+        System.out.println("update bytes len: " + update.updateLength());
         byte[] updateBytes = new byte[update.updateLength()];
+        System.out.println("---bytes----");
         for (int i = 0; i < updateBytes.length; i++) {
             updateBytes[i] = update.update(i);
+            System.out.print(updateBytes[i]);
         }
+        System.out.println();
         
+        System.out.println("[ServerRPSHandler] Processing bytes: " + updateBytes.toString());
         game.processAction(updateBytes, username);
         //TODO: Close connection on exception - malformed data
         
