@@ -59,7 +59,7 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
 
     });
 
-    var gameListener = $rootScope.$on('updateGame', function() {
+    var gameListener = $rootScope.$on('initGame', function() {
         $ctrl.showGameDialog();
         $scope.$apply();
     });

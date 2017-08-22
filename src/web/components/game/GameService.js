@@ -9,6 +9,7 @@
             
             var _currentGameLobby = new GameLobby(undefined, undefined, undefined);
             var _currentGame = new Game(undefined, undefined, undefined, undefined, undefined);
+            var _gameUpdateBytes = undefined;
             var _dataReady = false;
 
             _socket.addEventListener("message", function(event) {
@@ -74,6 +75,14 @@
                         'bestOf ', _currentGame.bestOf, '\n',
                         'completed ', _currentGame.completed, '\n');
 
+                    $rootScope.$emit('initGame');
+                }
+                else if (dataType == Schema.Data.GameUpdate) {
+                    console.log('[GameService] Retrieved update byets from server');
+
+                    let temp = msg.data(new Schema.GameUpdate());
+                    gameUpdateBytes = temp.updateArray();
+
                     $rootScope.$emit('updateGame');
                 }
 
@@ -91,6 +100,10 @@
 
             this.currentGame = function() {
                 return _currentGame;
+            }
+
+            this.gameUpdate = function() {
+                return _gameUpdateBytes;
             }
 
             this.lobbyUserList = function() {
@@ -144,8 +157,11 @@
                 _currentGameLobby.type = undefined;
                 _currentGameLobby.capacity = undefined;
 
-                //TODO: Do for _currentGame
-
+                _currentGame.name = undefined;
+                _currentGame.type = undefined;
+                _currentGame.capacity = undefined;
+                
+                _gameUpdateBytes = undefined;
                 _lobbyUsers.length = 0;
             }
 

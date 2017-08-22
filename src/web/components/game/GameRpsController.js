@@ -14,6 +14,26 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
 
     $rps.choice = "rock";
     $rps.sentChoice = false;
+
+    /**
+     * Listens for RPS Game Update byte[]
+     * Contains [player1choice,player2choice,winner]
+     * 
+     * CHOICES:
+     * Rock: 0
+     * Paper: 1
+     * Scissors: 2
+     *
+     * Winner:
+     * Player 1: 0
+     * Player 2: 1
+     * Draw: 2
+     * 
+     */
+    $rps.updateListener = $rootScope.$on('updateGame', function() {
+        //TODO: implement
+        $scope.$apply();
+    });
     //Get player name
     if (websockets.getUsername() === $rps.game.players[0]) {
         $rps.player1.name = $rps.game.players[0];
