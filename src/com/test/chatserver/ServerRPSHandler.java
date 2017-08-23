@@ -3,6 +3,7 @@ package com.test.chatserver;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 import game.GameType;
 import game.RPS;
@@ -44,6 +45,8 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buf = Unpooled.copiedBuffer(data);
         
         ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
+        
+        ctx.channel().eventLoop().schedule(new ServerGameUpdateTask(game, ctx.channel()), 1000, TimeUnit.MILLISECONDS);
         
     }
     
