@@ -40,6 +40,16 @@ public class RPS extends ServerGame {
     
     private int numUpdates = 0;
     
+    /**
+     * Constructor for RPS object, requires an ArrayList of players and
+     * a short corresponding to the 'best of' amount of amount for a player
+     * to win a match. 
+     * 
+     * @param players    ArrayList<String> of player IDs
+     * @param bestOf     Double the number of games - 1 the winning player must
+     *                   win
+     * @throws Exception    NullPointerException if players is null or empty   
+     */
     public RPS(ArrayList<String> players, short bestOf) throws Exception {
         super(players);
         playerChoices[0] = playerChoices[1] = NO_DATA;
@@ -61,7 +71,6 @@ public class RPS extends ServerGame {
         return MAX_PLAYERS;
     }
     
-    //TODO: Implement in constructor
     @Override
     public short bestOf() {
         return bestOf;
@@ -225,7 +234,12 @@ public class RPS extends ServerGame {
         return result;
     }
     
-    public void updateWins() {
+    /**
+     * Updates the number of wins for one of the players based on the
+     * winnerByte(). If winnerByte is 0, player 1's wins are incremented.
+     * If winnerByte is 1, player 2's wins are incremented.
+     */
+    private void updateWins() {
         if (winnerByte() == 0) {
             p1Wins++;
         }
@@ -262,7 +276,15 @@ public class RPS extends ServerGame {
         return -1;
     }
     
-    public String gameStateString() {
+    /**
+     * Returns the game state as a String in the following format
+     * ---Players----
+     * Player 1: player1Name, Choice: player1Choice
+     * Player 2: player2Name, Choice: player2Choice
+     * 
+     * Game completed (if game is completed), Game in progress otherwise
+     */
+    public String toString() {
         String ret = new String();
         ret += "--- Players ---\n" + 
         "Player 1: " + player1 + ", Choice: " + playerChoices[0] + "\n" +
@@ -277,6 +299,18 @@ public class RPS extends ServerGame {
         return ret;
     }
     
+    /**
+     * Determines the winner of the game as a byte based on playerChoices[].
+     * Returns -1 if both players have not submitted their choices
+     * yet.
+     * 
+     * 0 corresponds to p1 winning, 1 corresponds to p2 winning, and 
+     * 2 corresponds to a draw.
+     * 
+     * Winner is determined corresponding to the rules of RPS.
+     * 
+     * @return   byte     0 if p1win, 1 if p2win, 2 if draw, -1 otherwise
+     */
     private byte winnerByte() {
         if (!readyToDeclare()) {
             return NO_DATA;
@@ -300,14 +334,28 @@ public class RPS extends ServerGame {
         }
     }
     
+    /**
+     * Number of times gameState() has been called before being reset.
+     * @return        
+     */
     public int numUpdates() {
         return numUpdates;
     }
     
-    public boolean readyToDeclare() {
+    /**
+     * RPS game is prepared to declare a winner.
+     * @return  True if both players have submitted their choices for the round,
+     *          false otherwise.
+     */
+    private boolean readyToDeclare() {
         return player1Submitted && player2Submitted;
     }
     
+    /**
+     * Resets the state of the game by setting player1Submitted and player2Sumitted
+     * to false, clearing the player choices and the number of times gameState has
+     * been called (numUpdates).
+     */
     public void resetState() {
         player1Submitted = false;
         player2Submitted = false;

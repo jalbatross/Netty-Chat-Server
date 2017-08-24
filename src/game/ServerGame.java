@@ -22,6 +22,14 @@ public abstract class ServerGame {
 
     protected final ArrayList<String> players;
     
+    /**
+     * Every ServerGame object must contain an ArrayList<String> of the
+     * players in the game corresponding to player usernames in the server.
+     * 
+     * @param players       ArrayList<String> of usernames.
+     * @throws Exception    NullPointerException for null players and
+     *                      exception for invalid size of players ArrayList
+     */
     public ServerGame(ArrayList<String> players) throws Exception {
         if (players == null) {
             throw new Exception("Invalid Game Data Received");
