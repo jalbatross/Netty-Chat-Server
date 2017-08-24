@@ -315,7 +315,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                         
                         //Assign each lobby user the game's handler server side
                         for (Channel user : currentGameLobby.channelMap.values()) {
-                            user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby, this.username));
+                            user.pipeline().addLast("rpsGame", new ServerRPSHandler(newGame, currentGameLobby, currentGameLobby.getUser(user)));
                             
                         }
                         

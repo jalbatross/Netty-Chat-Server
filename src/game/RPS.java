@@ -104,6 +104,7 @@ public class RPS extends ServerGame {
         int index = players.get(0).contentEquals(player) ? 0 : 1;
         byte action = turnAction[0];
         
+        System.out.println("[RPS] Processing action : " + action + " for " + player + " and index is " + index); 
         if (action > 3|| action < 0) {
             action = 0;
         }
@@ -192,18 +193,24 @@ public class RPS extends ServerGame {
         result[0] = playerChoices[0];
         result[1] = playerChoices[1];
         result[2] = winnerByte();
+        System.out.println("[RPS] gameState called: ");
+        for (int i = 0; i < result.length; i++) {
+            System.out.print(result[i] + " ");
+        }
         
         if (result[2] == 0) {
             p1Wins++;
+            System.out.println("[RPS] Player 1 won.");
         }
         else if (result[2] == 1) {
+            System.out.println("[RPS] Player 2 won.");
             p2Wins++;
         }
         
         if (p1Wins == ((bestOf + 1) / 2) || p2Wins == ((bestOf + 1) / 2)) {
             gameCompleted = true;
         }
-                
+        
         
         return result;
     }
@@ -271,6 +278,15 @@ public class RPS extends ServerGame {
     
     public boolean readyToDeclare() {
         return player1Submitted && player2Submitted;
+    }
+    
+    public void resetState() {
+        player1Submitted = false;
+        player2Submitted = false;
+        
+        playerChoices[0] = playerChoices[1] = -1;
+        
+        
     }
 
 

@@ -1,4 +1,4 @@
-angular.module("chatApp").controller("GameRpsController", function($scope, websockets, game) {
+angular.module("chatApp").controller("GameRpsController", function($scope, websockets, game, $rootScope) {
     var $rps = this;
 
     $rps.game = game.currentGame();
@@ -11,8 +11,13 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
 
     $rps.player1 = {};
     $rps.player2 = {};
+    $rps.playerId = -1;
+    $rps.opponentId = -1;
 
-    $rps.choice = "rock";
+    $rps.p1Choice = -1;
+    $rps.p2Choice = -1;
+
+
     $rps.sentChoice = false;
 
     /**
@@ -30,21 +35,45 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
      * Draw: 2
      * 
      */
-    $rps.updateListener = $rootScope.$on('updateGame', function() {
-        //TODO: implement
-        $scope.$apply();
-    });
     //Get player name
     if (websockets.getUsername() === $rps.game.players[0]) {
         $rps.player1.name = $rps.game.players[0];
         $rps.player2.name = $rps.game.players[1];
+        $rps.playerId = 0;
+        $rps.opponentId = 1;
     }
     else {
         $rps.player1.name = $rps.game.players[1];
         $rps.player2.name = $rps.game.players[0];
+        $rps.playerId = 1;
+        $rps.opponentId = 0;
     }
 
-    //TODO: implement send choice
+    /**
+     * Listens for update from server
+     * @param  {[type]} ) {                   
+     * @return {[type]}   [description]
+     */
+    $rps.updateListener = $rootScope.$on('updateGame', function() {
+        let updateArr = game.gameUpdate();
+
+        $rps.p1Choice = updateArr[$rps.playerId];
+        $rps.p2Choice = updateArr[$rps.opponentId];
+
+        console.log('[GameRpsController] Winner byte was: ', updateArr[2]);
+        if (updateArr[2] === $rps.playerId) {
+            $rps.win();
+        }
+        else if (updateArr[2] === $rps.opponentId) {
+            $rps.lose();
+        }
+        else {
+            $rps.win();
+            $rps.lose();
+        }
+
+        $scope.$apply();
+    });
     
     /** Sends RPS command 
     *
@@ -52,18 +81,23 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     */
     $rps.sendCommand = function(command) {
         var byte = -1;
+
         switch(command) {
             case 'rock':
               byte = 0;
+              $rps.p1Choice = 0;
               break;
             case 'paper':
               byte = 1;
+              $rps.p1Choice = 1;
               break;
             case 'scissors':
               byte = 2;
+              $rps.p1Choice = 2;
               break;
             default:
               byte = 0;
+              $rps.p1Choice = 0;
               console.log('[GameRpsController] error with command, set sendbyte to rock');
         }
         var byteArr = [];
@@ -72,7 +106,10 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
         let data = makeGameUpdate(byteArr);
         websockets.getSocket().send(data);
         console.log('[GameRpsController] sent command with byte: ', byte);
+
+        $rps.sentChoice = true;
     }
+
     $rps.countdownFinished = function() {
         //Choose random choice if user has not sent in a choice yet
         if (!$rps.sentChoice) {
@@ -91,13 +128,14 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
                   alert('error');
             }
 
-            sendCommand($rps.choice);
-            $rps.sentChoice = true;
+            $rps.sendCommand($rps.choice);
         }
+
+        $rps.sentChoice = false;
 
 
         if (!$rps.gameOver) {
-            $scope.$broadcast('timer-set-countdown', 10);
+            $scope.$broadcast('timer-set-countdown', 4);
             $scope.$broadcast('timer-start');
         }
     }

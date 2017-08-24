@@ -3,6 +3,7 @@ package com.test.chatserver;
 import java.nio.ByteBuffer;
 import java.util.TimerTask;
 
+import game.RPS;
 import game.ServerGame;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,6 +42,11 @@ public class ServerGameUpdateTask extends TimerTask {
         
         ByteBuf buf = Unpooled.copiedBuffer(updateBuf);
         ch.writeAndFlush(new BinaryWebSocketFrame(buf));
+        System.out.println("[GameTask] sent update to channel: " + ch.toString());
+        if (game instanceof RPS) {
+            RPS rpsGame = (RPS) game;
+            rpsGame.resetState();
+        }
           
     }
 

@@ -78,10 +78,10 @@
                     $rootScope.$emit('initGame');
                 }
                 else if (dataType == Schema.Data.GameUpdate) {
-                    console.log('[GameService] Retrieved update byets from server');
+                    console.log('[GameService] Retrieved update bytes from server');
 
                     let temp = msg.data(new Schema.GameUpdate());
-                    gameUpdateBytes = temp.updateArray();
+                    _gameUpdateBytes = temp.updateArray();
 
                     $rootScope.$emit('updateGame');
                 }

@@ -18,11 +18,14 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.concurrent.ScheduledFuture;
 
 public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final RPS game;
     private final GameLobby lobby;
     private final String username;
+    
+    private ScheduledFuture<?> t;
     
     public ServerRPSHandler(RPS game, GameLobby lobby, String user) throws Exception {
         if (game == null || lobby == null) {
@@ -41,12 +44,16 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        super.handlerAdded(ctx);
         ByteBuffer data = FlatBuffersCodec.gameToByteBuffer(game);
         ByteBuf buf = Unpooled.copiedBuffer(data);
         
         ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
-        ctx.channel().eventLoop().schedule(new ServerGameUpdateTask(game, ctx.channel()), 1000, TimeUnit.MILLISECONDS);
+        t = ctx.channel().eventLoop().scheduleAtFixedRate(new ServerGameUpdateTask(game, ctx.channel()), 
+                5000, 
+                5000, 
+                TimeUnit.MILLISECONDS);
         
     }
     
@@ -74,5 +81,12 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         //TODO: Close connection on exception - malformed data
         
     }
+    
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        t.cancel(false);
+    }
+    
     
 }
