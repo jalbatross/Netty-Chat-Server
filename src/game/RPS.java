@@ -38,6 +38,8 @@ public class RPS extends ServerGame {
     
     private short bestOf;
     
+    private int numUpdates = 0;
+    
     public RPS(ArrayList<String> players, short bestOf) throws Exception {
         super(players);
         playerChoices[0] = playerChoices[1] = NO_DATA;
@@ -97,7 +99,9 @@ public class RPS extends ServerGame {
             throw new Exception("Player: " + player + " sent bad turnAction data");
             
         }
-        if (gameCompleted) {
+        
+        //Don't allow inputs if game is done or winner has been decided for round
+        if (gameCompleted || readyToDeclare()) {
             return;
         }
         
@@ -116,6 +120,11 @@ public class RPS extends ServerGame {
         }
         else {
             player2Submitted = true;
+        }
+        
+        //Update wins if both players submitted
+        if (readyToDeclare()) {
+            updateWins();
         }
     }
 
@@ -185,6 +194,8 @@ public class RPS extends ServerGame {
      * P2 WIN: 1
      * DRAW: 2
      * 
+     * Increments numUpdates by 1 every time gameState is called.
+     * 
      * @return byte[3] of player1's choice, player2's choice, and the 
      *         game's winner.
      */
@@ -199,20 +210,34 @@ public class RPS extends ServerGame {
         }
         
         if (result[2] == 0) {
-            p1Wins++;
             System.out.println("[RPS] Player 1 won.");
         }
         else if (result[2] == 1) {
             System.out.println("[RPS] Player 2 won.");
-            p2Wins++;
         }
         
         if (p1Wins == ((bestOf + 1) / 2) || p2Wins == ((bestOf + 1) / 2)) {
             gameCompleted = true;
         }
         
+        numUpdates++;
         
         return result;
+    }
+    
+    public void updateWins() {
+        if (winnerByte() == 0) {
+            p1Wins++;
+        }
+        else if (winnerByte() == 1) {
+            p2Wins++;
+        }
+        else if (winnerByte() == 2) {
+            System.out.println("[RPS] Draw");
+        }
+        else {
+            System.out.println("[RPS] ERROR: Bad winner byte while updating wins.");
+        }
     }
     
     /**
@@ -257,7 +282,6 @@ public class RPS extends ServerGame {
             return NO_DATA;
         }
         else {
-            gameCompleted = true;
             //Draw
             if (playerChoices[0] == playerChoices[1]) {
                 return 2;
@@ -276,6 +300,10 @@ public class RPS extends ServerGame {
         }
     }
     
+    public int numUpdates() {
+        return numUpdates;
+    }
+    
     public boolean readyToDeclare() {
         return player1Submitted && player2Submitted;
     }
@@ -286,7 +314,7 @@ public class RPS extends ServerGame {
         
         playerChoices[0] = playerChoices[1] = -1;
         
-        
+        numUpdates = 0;
     }
 
 

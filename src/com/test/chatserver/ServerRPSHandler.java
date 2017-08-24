@@ -50,11 +50,10 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         
         ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
-        t = ctx.channel().eventLoop().scheduleAtFixedRate(new ServerGameUpdateTask(game, ctx.channel()), 
+        t = ctx.channel().eventLoop().scheduleAtFixedRate(new ServerGameUpdateTask(game, ctx.channel(), this), 
                 5000, 
                 5000, 
                 TimeUnit.MILLISECONDS);
-        
     }
     
     @Override
@@ -84,8 +83,16 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
         t.cancel(false);
+        super.channelInactive(ctx);
+        
+    }
+    
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        t.cancel(false);
+        super.handlerRemoved(ctx);
+        
     }
     
     

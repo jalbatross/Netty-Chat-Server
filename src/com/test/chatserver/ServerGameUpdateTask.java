@@ -8,19 +8,22 @@ import game.ServerGame;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 
 public class ServerGameUpdateTask extends TimerTask {
     
     private final ServerGame game;
     private final Channel ch;
+    private final ChannelInboundHandlerAdapter handler;
     
-    public ServerGameUpdateTask(ServerGame game, Channel ch) {
+    public ServerGameUpdateTask(ServerGame game, Channel ch, ChannelInboundHandlerAdapter handler) {
         if (game == null || ch == null) {
             throw new NullPointerException();
         }
         this.game = game;
         this.ch = ch;
+        this.handler = handler;
     }
 
     @Override
@@ -45,7 +48,14 @@ public class ServerGameUpdateTask extends TimerTask {
         System.out.println("[GameTask] sent update to channel: " + ch.toString());
         if (game instanceof RPS) {
             RPS rpsGame = (RPS) game;
-            rpsGame.resetState();
+            if (rpsGame.numUpdates() >= rpsGame.numPlayers()) {
+                rpsGame.resetState();
+            }
+        }
+        
+        if (game.gameOver()) {
+            System.out.println("[GameTask] Game over.");
+            ch.pipeline().remove(handler);
         }
           
     }

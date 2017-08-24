@@ -150,6 +150,7 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
                 $scope.$apply();
                 if (i === $rps.p1Wins.length - 1) {
                     $rps.gameOver = true;
+                    console.log('[RpsController] Game over, we won!');
                 }
                 return;
             }
@@ -165,6 +166,7 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
                 $rps.p2Wins[i] = true;
                 $scope.$apply();
                 if (i === 0) {
+                    console.log('[RpsController] Game over, we lost');
                     $rps.gameOver = true;
                 }
                 return;
