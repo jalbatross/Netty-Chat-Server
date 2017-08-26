@@ -55,6 +55,19 @@ public class ServerGameUpdateTask extends TimerTask {
         
         if (game.gameOver()) {
             System.out.println("[GameTask] Game over.");
+            //Send completed game to clients so that they know the game is over
+            //Client handles game overs according to their whim
+            try {
+                ByteBuffer completedGameData = FlatBuffersCodec.gameToByteBuffer(game);
+                ByteBuf gameBuf = Unpooled.copiedBuffer(completedGameData);
+                ch.writeAndFlush(new BinaryWebSocketFrame(gameBuf));
+            }
+            catch (Exception e) {
+                System.out.println("[GameTask (rps)] Couldn't create game over game to send to clients.");
+                e.printStackTrace();
+            }
+            
+            //Remove the server game handler from the pipeline since the game is completed
             ch.pipeline().remove(handler);
         }
           

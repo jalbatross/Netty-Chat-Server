@@ -75,7 +75,12 @@
                         'bestOf ', _currentGame.bestOf, '\n',
                         'completed ', _currentGame.completed, '\n');
 
+                    if (_currentGame.completed === true) {
+                        $rootScope.$emit('closeGame');
+                    }
+                    else {
                     $rootScope.$emit('initGame');
+                    }
                 }
                 else if (dataType == Schema.Data.GameUpdate) {
                     console.log('[GameService] Retrieved update bytes from server');

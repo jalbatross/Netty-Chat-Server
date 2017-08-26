@@ -59,10 +59,15 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
 
     });
 
-    var gameListener = $rootScope.$on('initGame', function() {
+    var startGameListener = $rootScope.$on('initGame', function() {
         $ctrl.showGameDialog();
         $scope.$apply();
     });
+
+    var closeGameListener = $rootScope.$on('closeGame', function() {
+        $ctrl.showGameLobbiesDialog();
+        $scope.$apply();
+    })
 
     var kickedListener = $rootScope.$on('quitLobby', function() {
         console.log('[ChatGameController] Kicked from lobby');
@@ -77,6 +82,9 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
         //Turn off listeners
         kickedListener();
         updateGameListener();
+        gameLobbyListener();
+        startGameListener();
+        closeGameListener();
 
         //Get rid of scope vars
         $ctrl = {};
