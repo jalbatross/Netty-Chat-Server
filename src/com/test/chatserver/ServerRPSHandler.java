@@ -20,10 +20,32 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.ScheduledFuture;
 
+/**
+ * ServerRPSHandler is a ChannelInboundHandlerAdapter designed to 
+ * appropriately handle a user's interaction during an RPS game with
+ * another user.
+ * 
+ * It requires a reference to the RPS game, the gameLobby of all the
+ * users who wanted to play in the RPS game, and a String username
+ * which corresponds to the channel that ServerRPSHandler will be
+ * directly interacting with. Its main purpose is handling each user's
+ * choice of rock, paper, or scissors during the game and updating the
+ * game object accordingly.
+ * 
+ * In this implementation, when the handler is added it creates a
+ * scheduled update task which periodically sends updates to each connected
+ * client at UPDATE_INTERVAL millisecond intervals. 
+ * 
+ * @author jalbatross (Joey Alabno)
+ *
+ */
+
 public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final RPS game;
     private final GameLobby lobby;
     private final String username;
+    
+    public static final int UPDATE_INTERVAL = 5000;
     
     private ScheduledFuture<?> t;
     
@@ -51,8 +73,8 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().writeAndFlush(new BinaryWebSocketFrame(buf));
         
         t = ctx.channel().eventLoop().scheduleAtFixedRate(new ServerGameUpdateTask(game, ctx.channel(), this), 
-                5000, 
-                5000, 
+                UPDATE_INTERVAL, 
+                UPDATE_INTERVAL, 
                 TimeUnit.MILLISECONDS);
     }
     

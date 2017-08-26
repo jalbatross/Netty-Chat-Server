@@ -22,6 +22,21 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.EventExecutor;
 
+/**
+ * NamedChannelGroup
+ * 
+ * An extension of the DefaultChannelGroup class provided by Netty
+ * which adds usernames to each channel added using a Bidirectional 
+ * Map (BiMap) from Google's Guava library.
+ * 
+ * Functionally it is identical to DefaultChannelGroup except for the
+ * fact that each channel added to the NamedChannelGroup must have
+ * a unique corresponding username associated with it.
+ * 
+ * @author jalbatross (Joey Albano)
+ *
+ */
+
 public class NamedChannelGroup extends DefaultChannelGroup {
     
     protected BiMap<String, Channel> channelMap;
@@ -75,6 +90,12 @@ public class NamedChannelGroup extends DefaultChannelGroup {
         return remove(username);
     }
     
+    /**
+     * 
+     * @param username   a username
+     * @return true if the username is found in the NamedChannelGroup,
+     *         false otherwise
+     */
     public boolean containsUser(String username) {
         return channelMap.containsKey(username);
     }
@@ -83,9 +104,33 @@ public class NamedChannelGroup extends DefaultChannelGroup {
         return channelMap.size();
     }
 
+    /**
+     * Returns a corresponding username to a channel in the NamedChannelGroup
+     * 
+     * If the correspoding user is not found, either because the channel was not
+     * in the NamedChannelGroup or there was no username corresponding to that
+     * channel, returns null.
+     * 
+     * @param channel    A channel in the NamedChannelGroup
+     * @return           Username corresponding to that channel if the channel
+     *                   is in the NamedChannelGroup and has a corresponding 
+     *                   username, null otherwise.
+     */
     public String getUser(Channel channel) {
         return channelMap.inverse().get(channel);
     }
+    
+    /**
+     * Get the corresponding channel of a username in the NamedChannelGroup
+     * 
+     * If the username is not present in the group or there is no channel 
+     * corresponding to the username or both, returns null. Otherwise gets
+     * the corresponding channel of username in the NamedChannelGroup.
+     * 
+     * @param username     A username
+     * @return             Channel corresponding to the username in this
+     *                     if the username is in the group. Null otherwise.
+     */
     public Channel getChannel(String username) {
         return channelMap.get(username);
     }
@@ -95,6 +140,11 @@ public class NamedChannelGroup extends DefaultChannelGroup {
         channelMap.clear();
     }
     
+    /**
+     * @param username   a username
+     * @return           true if username is an element in the NamedChannelGroup,
+     *                   false otherwise.
+     */
     public boolean contains (String username) {
         return channelMap.containsKey(username);
     }
