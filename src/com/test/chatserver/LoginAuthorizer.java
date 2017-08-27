@@ -19,6 +19,13 @@ import de.mkammerer.argon2.Argon2Factory;
  * login and password verification as well as password hashing using 
  * Argon2. 
  * 
+ * Requires a Postgres table named credentialsTableName that
+ * has a column of usernames called usernameColumn and
+ * a column of password hashes called passwordHashColumn.
+ * 
+ * For proper implementation, usernameColumn should have unique
+ * String entries that are not case sensitive.
+ * 
  * @author jalbatross (Joey Albano)
  *
  */
@@ -34,6 +41,10 @@ public class LoginAuthorizer {
     private final String dbUrl = "jdbc:postgresql://localhost/mytestdb";
     private final String user = "postgres";
     private final String password = "postgres";
+    
+    private final String credentialsTableName = "auth";
+    private final String usernameColumn = "name";
+    private final String passwordHashColumn = "hash";
     
     public LoginAuthorizer() { }
     
@@ -86,7 +97,10 @@ public class LoginAuthorizer {
             dbConn = this.connect();
         
             //Query DB for password
-            String query = "SELECT hash FROM auth WHERE name = ?";
+            String query = "SELECT "+ passwordHashColumn + " "
+                    + "FROM " + credentialsTableName + " "
+                    + "WHERE " + usernameColumn + " = ?";
+
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
             preparedQuery.setString(1, name);
@@ -146,7 +160,9 @@ public class LoginAuthorizer {
             dbConn = this.connect();
 
             // Query DB for password
-            String query = "SELECT hash FROM auth WHERE name = ?";
+            String query = "SELECT "+ passwordHashColumn + " "
+                    + "FROM " + credentialsTableName + " "
+                    + "WHERE " + usernameColumn + " = ?";
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             preparedQuery.setString(1, name);
@@ -196,7 +212,10 @@ public class LoginAuthorizer {
             dbConn = this.connect();
 
             // Query DB for existence of username
-            String query = "SELECT * FROM auth WHERE name = ? LIMIT 1";
+            String query = "SELECT "+ passwordHashColumn + " "
+                    + "FROM " + credentialsTableName + " "
+                    + "WHERE " + usernameColumn + " = ? LIMIT 1";
+
             PreparedStatement preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
             preparedQuery.setString(1, name);
@@ -205,7 +224,9 @@ public class LoginAuthorizer {
 
             // Empty result set means user not in DB
             if (!rs.next()) {
-                query = "INSERT INTO auth(name, hash) VALUES(?, ?)";
+                query = "INSERT INTO " + credentialsTableName +
+                        "(" + usernameColumn + ", " + passwordHashColumn+ ") "
+                        + "VALUES(?,?)";
  
                 preparedQuery = dbConn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 preparedQuery.setString(1,  name);
