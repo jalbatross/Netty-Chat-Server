@@ -35,7 +35,10 @@
       </div>
       
       <div class="col myBox" style="text-align:center;">
-        <timer interval="1000" countdown="5" finish-callback="$rps.countdownFinished()"><h1>TIME LEFT:</h1>{{countdown}}</timer>
+        <timer ng-if="!$rps.gameOver" interval="1000" countdown="5" finish-callback="$rps.countdownFinished()"><h1>TIME LEFT:</h1>{{countdown}}</timer>
+        <span ng-if="$rps.gameOver && $rps.won">You won!</span>
+        <span ng-if="$rps.gameOver && !$rps.won">You lost!</span>
+        <span></span>
       </div>
       <div class="col">
         <table style="float:right;">

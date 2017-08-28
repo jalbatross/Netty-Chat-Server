@@ -17,6 +17,8 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     $rps.p1Choice = -1;
     $rps.p2Choice = -1;
 
+    $rps.won = false;
+
 
     $rps.sentChoice = false;
 
@@ -41,8 +43,7 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
         $rps.player2.name = $rps.game.players[1];
         $rps.playerId = 0;
         $rps.opponentId = 1;
-    }
-    else {
+    } else {
         $rps.player1.name = $rps.game.players[1];
         $rps.player2.name = $rps.game.players[0];
         $rps.playerId = 1;
@@ -63,42 +64,43 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
         console.log('[GameRpsController] Winner byte was: ', updateArr[2]);
         if (updateArr[2] === $rps.playerId) {
             $rps.win();
-        }
-        else if (updateArr[2] === $rps.opponentId) {
+        } else if (updateArr[2] === $rps.opponentId) {
             $rps.lose();
-        }
-        else {
+        } else {
             $rps.win();
             $rps.lose();
         }
 
         $scope.$apply();
     });
-    
+
     /** Sends RPS command 
-    *
-    * @param {string} command  Rps command, rock paper or scissors
-    */
+     *
+     * @param {string} command  Rps command, rock paper or scissors
+     */
     $rps.sendCommand = function(command) {
+        if ($rps.gameOver) {
+            return;
+        }
         var byte = -1;
 
-        switch(command) {
+        switch (command) {
             case 'rock':
-              byte = 0;
-              $rps.p1Choice = 0;
-              break;
+                byte = 0;
+                $rps.p1Choice = 0;
+                break;
             case 'paper':
-              byte = 1;
-              $rps.p1Choice = 1;
-              break;
+                byte = 1;
+                $rps.p1Choice = 1;
+                break;
             case 'scissors':
-              byte = 2;
-              $rps.p1Choice = 2;
-              break;
+                byte = 2;
+                $rps.p1Choice = 2;
+                break;
             default:
-              byte = 0;
-              $rps.p1Choice = 0;
-              console.log('[GameRpsController] error with command, set sendbyte to rock');
+                byte = 0;
+                $rps.p1Choice = 0;
+                console.log('[GameRpsController] error with command, set sendbyte to rock');
         }
         var byteArr = [];
         byteArr.push(byte);
@@ -116,16 +118,16 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
             var randomNumber = Math.floor(Math.random() * 1000) % 3;
             switch (randomNumber) {
                 case 0:
-                  $rps.choice = 'rock';
-                  break;
+                    $rps.choice = 'rock';
+                    break;
                 case 1:
-                  $rps.choice = 'paper';
-                  break;
+                    $rps.choice = 'paper';
+                    break;
                 case 2:
-                  $rps.choice = 'scissors'
-                  break;
+                    $rps.choice = 'scissors'
+                    break;
                 default:
-                  alert('error');
+                    alert('error');
             }
 
             $rps.sendCommand($rps.choice);
@@ -150,6 +152,7 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
                 $scope.$apply();
                 if (i === $rps.p1Wins.length - 1) {
                     $rps.gameOver = true;
+                    $rps.won = true;
                     console.log('[RpsController] Game over, we won!');
                 }
                 return;
@@ -183,7 +186,7 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
     function makeGameUpdate(bytes) {
         var builder = new flatbuffers.Builder(1024);
 
-        var updateOffset = Schema.GameUpdate.createUpdateVector(builder, bytes); 
+        var updateOffset = Schema.GameUpdate.createUpdateVector(builder, bytes);
         Schema.GameUpdate.startGameUpdate(builder);
         Schema.GameUpdate.addUpdate(builder, updateOffset);
         let update = Schema.GameUpdate.endGameUpdate(builder);

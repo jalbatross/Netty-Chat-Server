@@ -75,8 +75,9 @@
                         'bestOf ', _currentGame.bestOf, '\n',
                         'completed ', _currentGame.completed, '\n');
 
+                    //Optionally tell client to do something if the game is over
                     if (_currentGame.completed === true) {
-                        $rootScope.$emit('closeGame');
+                        //$rootScope.$emit('closeGame');
                     }
                     else {
                     $rootScope.$emit('initGame');
