@@ -20,6 +20,7 @@ public class RPS extends ServerGame {
     public static final byte ROCK = 0;
     public static final byte PAPER = 1;
     public static final byte SCISSORS = 2;
+    public static final byte CONCEDE = 3;
     
     public static final int MIN_PLAYERS = 2;
     public static final int MAX_PLAYERS = 2;
@@ -90,6 +91,7 @@ public class RPS extends ServerGame {
      * A byte of 0 corresponds to ROCK
      * A byte of 1 corresponds to PAPER
      * A byte of 2 correponds to SCISSORS
+     * A byte of 3 corresponds to CONCEDE
      * 
      * If turnAction contains a byte other than these, the action will be
      * interpreted as ROCK.
@@ -119,7 +121,7 @@ public class RPS extends ServerGame {
         
         System.out.println("[RPS] Processing action : " + action + " for " + player + " and index is " + index); 
         if (action > 3|| action < 0) {
-            action = 0;
+            action = ROCK;
         }
         
         playerChoices[index] = action;

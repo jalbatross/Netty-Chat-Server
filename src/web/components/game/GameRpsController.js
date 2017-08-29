@@ -56,17 +56,30 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
      * @return {[type]}   [description]
      */
     $rps.updateListener = $rootScope.$on('updateGame', function() {
+        //No updates after game over
+        if ($rps.gameOver) {
+            return;
+        }
         let updateArr = game.gameUpdate();
 
         $rps.p1Choice = updateArr[$rps.playerId];
         $rps.p2Choice = updateArr[$rps.opponentId];
 
+        //Opponent conceded
+        if (updateArr[0] === -1) {
+            $rps.gameOver = true;
+            $rps.won = true;
+            return;
+        }
+
         console.log('[GameRpsController] Winner byte was: ', updateArr[2]);
         if (updateArr[2] === $rps.playerId) {
             $rps.win();
-        } else if (updateArr[2] === $rps.opponentId) {
+        } 
+        else if (updateArr[2] === $rps.opponentId) {
             $rps.lose();
-        } else {
+        }
+        else {
             $rps.win();
             $rps.lose();
         }
@@ -96,6 +109,11 @@ angular.module("chatApp").controller("GameRpsController", function($scope, webso
             case 'scissors':
                 byte = 2;
                 $rps.p1Choice = 2;
+                break;
+            case 'concede':
+                byte = 3;
+                $rps.gameOver = true;
+                $rps.won = false;
                 break;
             default:
                 byte = 0;

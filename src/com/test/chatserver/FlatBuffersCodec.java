@@ -229,6 +229,22 @@ public class FlatBuffersCodec {
         return fbb.dataBuffer();
     }
     
+    static public ByteBuffer gameUpdateToByteBuffer(byte[] update) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder(DEFAULT_SIZE);
+        
+        int updateOffset = Schema.GameUpdate.createUpdateVector(fbb, update);
+        int gameUpdate = Schema.GameUpdate.createGameUpdate(fbb, updateOffset);
+        
+        Message.startMessage(fbb);
+        Message.addDataType(fbb, Data.GameUpdate);
+        Message.addData(fbb, gameUpdate);
+        
+        int finishedMsg = Message.endMessage(fbb);
+        fbb.finish(finishedMsg);
+        
+        return fbb.dataBuffer();
+    }
+    
     /**
      * Deserialize FlatBuffers byteBuf into one of Table data types
      * defined in schema.fbs as a new instance of the type T.

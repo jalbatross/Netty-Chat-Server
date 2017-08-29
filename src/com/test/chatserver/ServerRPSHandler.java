@@ -1,6 +1,7 @@
 package com.test.chatserver;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
@@ -84,10 +85,41 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         System.out.println("[ServerRPSHandler] Got game action");
-        //TODO: Process GameUpdate from Channel. Pass the byte[] into RPS processAction
-        //      method, update the RPS game accordingly.
+
         Schema.GameUpdate update = (Schema.GameUpdate) msg;
         
+        //Player concedes
+        if (update.update(0) == 3) {
+            System.out.println("[ServerRPSHandler] Got concession from " + username);
+            //Stop updates immediately
+            t.cancel(false);
+            
+            //Get users from GameLobby
+            ArrayList<String> usersList = lobby.getUsers();
+            
+            //Get opponent
+            String opponent;
+            if (usersList.get(0).contentEquals(username)) {
+                opponent = usersList.get(1);
+            }
+            else {
+                opponent = usersList.get(0);
+            }
+            
+            byte[] concedeByte = {-1};
+            ByteBuffer winUpdateBuf = FlatBuffersCodec.gameUpdateToByteBuffer(concedeByte);
+            ByteBuf buf = Unpooled.copiedBuffer(winUpdateBuf);
+            
+            //Tell opponent they won
+            lobby.getChannel(opponent).writeAndFlush(new BinaryWebSocketFrame(buf));
+            
+            //Destroy this
+            ctx.channel().pipeline().remove(this);
+            lobby.getChannel(opponent).pipeline().remove("rpsGame");
+            
+            return;
+            
+        }
         System.out.println("update bytes len: " + update.updateLength());
         byte[] updateBytes = new byte[update.updateLength()];
         System.out.println("---bytes----");
