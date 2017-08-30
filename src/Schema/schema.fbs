@@ -50,6 +50,7 @@ table GameCreationRequest {
   type:string (required);
   capacity:short;
   password:string;
+  bestOf:short = 3;
 }
 
 table Game {

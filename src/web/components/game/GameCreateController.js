@@ -12,6 +12,8 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
     var socket = websockets.getSocket();
 
     $scope.capacityOptions = [2, 3];
+    $scope.bestOfOptions=[1,3,5,7];
+    $scope.bestOf = 3;
     $scope.gameCapacity = 2;
 
     /**
@@ -78,6 +80,7 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
         //prepare fields
         var nameData = builder.createString($scope.gameName);
         var typeData = builder.createString(typeFormatted);
+        var bestOfData = Number($scope.bestOf);
         var capacityData = Number($scope.gameCapacity);
         var pwData = builder.createString($scope.gamePassword);
 
@@ -85,6 +88,7 @@ angular.module("chatApp").controller("GameCreateController", function($scope, we
         Schema.GameCreationRequest.startGameCreationRequest(builder);
         Schema.GameCreationRequest.addName(builder, nameData);
         Schema.GameCreationRequest.addType(builder, typeData);
+        Schema.GameCreationRequest.addBestOf(builder, bestOfData);
         Schema.GameCreationRequest.addCapacity(builder, capacityData);
         Schema.GameCreationRequest.addPassword(builder, pwData);
 

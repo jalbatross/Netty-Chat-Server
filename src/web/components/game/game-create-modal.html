@@ -54,6 +54,20 @@
             <span>This field is required</span>
         </div>
       </div>
+
+      <div class="form-group row">
+        <label class="col-3 col-form-label">Best Of</label>
+        <div class = "col-2">
+          <select 
+          class="custom-select" 
+          ng-disabled = "gameLobbyForm.gameTypeInput.$invalid"
+          ng-model= "bestOf" 
+          ng-options="option as option for option in bestOfOptions">
+          </select>
+        </div>
+      </div>
+
+
       <div class="form-group row">
         <label class="col-3 col-form-label">Capacity</label>
         <div class = "col-2">

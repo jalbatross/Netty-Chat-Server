@@ -517,10 +517,18 @@ Schema.GameCreationRequest.prototype.password = function(optionalEncoding) {
 };
 
 /**
+ * @returns {number}
+ */
+Schema.GameCreationRequest.prototype.bestOf = function() {
+  var offset = this.bb.__offset(this.bb_pos, 12);
+  return offset ? this.bb.readInt16(this.bb_pos + offset) : 0;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Schema.GameCreationRequest.startGameCreationRequest = function(builder) {
-  builder.startObject(4);
+  builder.startObject(5);
 };
 
 /**
@@ -553,6 +561,14 @@ Schema.GameCreationRequest.addCapacity = function(builder, capacity) {
  */
 Schema.GameCreationRequest.addPassword = function(builder, passwordOffset) {
   builder.addFieldOffset(3, passwordOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} bestOf
+ */
+Schema.GameCreationRequest.addBestOf = function(builder, bestOf) {
+  builder.addFieldInt16(4, bestOf, 0);
 };
 
 /**
