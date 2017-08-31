@@ -245,7 +245,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                                 + " game lobby request data, closed connection.");
                         return;
                     }
-                    GameLobby gameLobby = new GameLobby(request.name(), request.type(), request.capacity());
+                    GameLobby gameLobby = new GameLobby(request.name(), request.type(), request.capacity(), request.bestOf());
                     gameLobby.setPassword(request.password());
 
                     // Add lobby host
@@ -311,7 +311,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                         gameLobbies.remove(currentGameLobby);
                         
                         //Create the game
-                        RPS newGame = new RPS(currentGameLobby.getUsers(), (short) 3);
+                        RPS newGame = new RPS(currentGameLobby.getUsers(), currentGameLobby.bestOf());
                         
                         //Assign each lobby user the game's handler server side
                         for (Channel user : currentGameLobby.channelMap.values()) {

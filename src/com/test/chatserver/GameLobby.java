@@ -22,18 +22,29 @@ public class GameLobby extends NamedChannelGroup {
     protected int capacity;
     protected String password;
     protected String host;
+    protected short bestOf;
     
-    public GameLobby(String name, String type, int capacity) {
+    public GameLobby(String name, String type, int capacity, short bestOf) {
         super(name, GlobalEventExecutor.INSTANCE);
         this.type = GameType.fromString(type);
         this.capacity = capacity;
+        
+        if (!setBestOf(bestOf)) {
+            bestOf = 3;
+        }
+        this.bestOf = bestOf;
     }
     
-    public GameLobby(String name, String type, int capacity, String password) {
+    public GameLobby(String name, String type, int capacity, String password, short bestOf) {
         super(name, GlobalEventExecutor.INSTANCE);
         this.type = GameType.fromString(type);
         this.capacity = capacity;
         this.password = password;
+        
+        if (!setBestOf(bestOf)) {
+            bestOf = 3;
+        }
+        this.bestOf = bestOf;
     }
     
     /**
@@ -50,6 +61,22 @@ public class GameLobby extends NamedChannelGroup {
      */
     public void setHost(String hostUsername) {
         this.host = hostUsername;
+    }
+    
+    /**
+     * Sets best of number for the game
+     * @param bestOfParam    a short between 1-7
+     * 
+     * @return    True if bestOfParam is between 1-7
+     */
+    public boolean setBestOf(short bestOfParam) {
+        if (bestOfParam < 1 || bestOfParam > 7 || bestOfParam % 2 == 0) {
+            return false;
+        }
+        
+        bestOf = bestOfParam;
+        
+        return true;
     }
     
     /**
@@ -97,6 +124,13 @@ public class GameLobby extends NamedChannelGroup {
      */
     public int capacity() {
         return capacity;
+    }
+    
+    /**
+     * @return Number of matches the game will be played best of to
+     */
+    public short bestOf() {
+        return bestOf;
     }
     
     

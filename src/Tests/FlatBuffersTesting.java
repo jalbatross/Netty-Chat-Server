@@ -163,6 +163,7 @@ public class FlatBuffersTesting {
         String gameCreateName = "TestName";
         String gameTypeName = "rps";
         short gameCapacity = 2;
+        short bestOfGcr = 3;
         String capacityString = Integer.toBinaryString(gameCapacity);
         System.out.println("Capacity (binary): " + capacityString);
         String gameCreatePw = "null";
@@ -171,7 +172,7 @@ public class FlatBuffersTesting {
         int gameTypeOffset = builder.createString(gameTypeName);
         int gamePwOffset = builder.createString(gameCreatePw);
         
-        int req = GameCreationRequest.createGameCreationRequest(builder, gameCreateOffset, gameTypeOffset, gameCapacity, gamePwOffset);
+        int req = GameCreationRequest.createGameCreationRequest(builder, gameCreateOffset, gameTypeOffset, gameCapacity, gamePwOffset, bestOfGcr);
         Message.startMessage(builder);
         Message.addDataType(builder, Data.GameCreationRequest);
         Message.addData(builder, req);
@@ -211,6 +212,8 @@ public class FlatBuffersTesting {
         else {
             System.out.println("GCR password test failed, val: " + gcr.password());
         }
+        
+        System.out.println("Best of: " + gcr.bestOf() + " , expected 3");
         
         //--end tests for GameCreationRequest---
         
