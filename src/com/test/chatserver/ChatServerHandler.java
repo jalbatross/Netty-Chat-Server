@@ -33,6 +33,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -59,6 +60,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
     private final List<NamedChannelGroup> lobbies;
     private final ChannelGroup globalChannelGroup;
     private final String username;
+    
+    private final AttributeKey<Boolean> INGAMEKEY = AttributeKey.valueOf("inGame");
+    
     private Channel ch;
     private boolean init = false;
 
@@ -74,6 +78,8 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
         this.globalChannelGroup = allChannels;
         this.ch = ctx.channel();
         this.gameLobbies = gameLobbies;
+        
+        ctx.channel().attr(INGAMEKEY).set(false);
     }
 
     @Override
@@ -135,7 +141,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
 	        
             ch.writeAndFlush(new BinaryWebSocketFrame(lobbyConnectMessage()));
             currentChatLobby.write(new BinaryWebSocketFrame(lobbyUserList(currentChatLobby)));
-	                
+            
 	        init = true;	        
 	        return;
 		}
@@ -234,7 +240,7 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
             if (fbMsg.dataType() == Data.GameCreationRequest) {
                 // If user is not currently in a Game Lobby, create a new game 
                 // lobby with them as the host
-                if (currentGameLobby == null) {
+                if (ctx.channel().attr(INGAMEKEY).get() == false) {
                     System.out.println("[ChatServerHandler] Got game creation request");
 
                     GameCreationRequest request = (GameCreationRequest) fbMsg.data(new GameCreationRequest());
@@ -263,8 +269,12 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                     // successful
                     ch.write(data);
                     ch.writeAndFlush(new BinaryWebSocketFrame(gameLobbyUserList(currentGameLobby)));
+                              
                     return;
 
+                }
+                else {
+                    System.out.println("[ChatServerHandler] " + username + " was in game and tried making a lobby");
                 }
             }
             else if (fbMsg.dataType() == Data.Request) {
@@ -310,8 +320,11 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter { // (1
                         //Remove this game lobby from the lobby list (prevent joiners)
                         gameLobbies.remove(currentGameLobby);
                         
-                        //Create the game
+                        
+                        
+                        //Create the game and set user as being in game
                         RPS newGame = new RPS(currentGameLobby.getUsers(), currentGameLobby.bestOf());
+                        ctx.channel().attr(INGAMEKEY).set(true);
                         
                         //Assign each lobby user the game's handler server side
                         for (Channel user : currentGameLobby.channelMap.values()) {

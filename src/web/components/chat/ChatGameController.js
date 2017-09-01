@@ -81,7 +81,6 @@ angular.module("chatApp").controller("ChatGameController", function($rootScope, 
 
         //Turn off listeners
         kickedListener();
-        updateGameListener();
         gameLobbyListener();
         startGameListener();
         closeGameListener();

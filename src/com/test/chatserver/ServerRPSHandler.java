@@ -18,6 +18,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.ScheduledFuture;
 
@@ -47,6 +48,8 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final String username;
     
     public static final int UPDATE_INTERVAL = 5000;
+    
+    private static AttributeKey<Boolean> INGAMEKEY = AttributeKey.valueOf("inGame");
     
     private ScheduledFuture<?> t;
     
@@ -139,13 +142,16 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         t.cancel(false);
         super.channelInactive(ctx);
-        
+        System.out.println("[ServerRpsHandler] Channel inactive for: " + username);
+        ctx.channel().attr(INGAMEKEY).set(false);
     }
     
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         t.cancel(false);
         super.handlerRemoved(ctx);
+        System.out.println("[ServerRpsHandler] Handler removed for: " + username);
+        ctx.channel().attr(INGAMEKEY).set(false);
         
     }
     
