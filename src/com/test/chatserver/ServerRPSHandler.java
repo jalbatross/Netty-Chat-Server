@@ -44,7 +44,7 @@ import io.netty.util.concurrent.ScheduledFuture;
 
 public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
     private final RPS game;
-    private final GameLobby lobby;
+    private GameLobby lobby;
     private final String username;
     
     public static final int UPDATE_INTERVAL = 5000;
@@ -144,6 +144,12 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
         System.out.println("[ServerRpsHandler] Channel inactive for: " + username);
         ctx.channel().attr(INGAMEKEY).set(false);
+        
+        lobby.remove(username);
+        
+        if (lobby.isEmpty()) {
+            lobby = null;
+        }
     }
     
     @Override
@@ -152,6 +158,14 @@ public class ServerRPSHandler extends ChannelInboundHandlerAdapter {
         super.handlerRemoved(ctx);
         System.out.println("[ServerRpsHandler] Handler removed for: " + username);
         ctx.channel().attr(INGAMEKEY).set(false);
+        
+        //Peform cleanup
+        lobby.remove(username);
+        
+        if (lobby.isEmpty()) {
+            lobby = null;
+        }
+        
         
     }
     
